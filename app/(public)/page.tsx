@@ -57,7 +57,7 @@ export default async function Home() {
 
   try {
     const allPosts: BlogPost[] = await getBlogPosts();
-    // Filtre les posts publiés et privilégie la catégorie "Événements" (ou prend les plus récents)
+    // Récupération dynamique des posts BDD (blog)
     const publishedPosts = allPosts.filter((p) => p.published);
     const eventCategoryPosts = publishedPosts.filter((p) => p.category?.toLowerCase() === 'événements');
     
@@ -224,20 +224,20 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* ============ ÉVÉNEMENTS & ARTICLES BDD SECTION ============ */}
+      {/* ============ ÉVÉNEMENTS SECTION (DONNÉES BLOG) ============ */}
       <section className="py-20 bg-[#071327] text-white">
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
             <Reveal>
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-12 gap-4">
                 <h2 className="text-3xl sm:text-4xl font-black tracking-wide uppercase text-white">
-                  ÉVÉNEMENTS & ACTUALITÉS
+                  ÉVÉNEMENTS À VENIR
                 </h2>
                 <Link
-                  href="/events"
+                  href="/blog"
                   className="text-pink-400 hover:text-pink-300 font-bold flex items-center gap-1 text-sm sm:text-base transition-colors"
                 >
-                  Voir tous les articles <ArrowRight className="w-4 h-4 ml-1" />
+                  Voir tous les événements <ArrowRight className="w-4 h-4 ml-1" />
                 </Link>
               </div>
             </Reveal>
@@ -270,7 +270,7 @@ export default async function Home() {
                         <div className="p-6 flex-1 flex flex-col justify-between">
                           <div>
                             <p className="text-[#0e5c54] font-bold text-xs uppercase mb-2 tracking-wider">
-                              {evt.location || evt.category || 'LOMÉ, TOGO'}
+                              {evt.location || 'LOMÉ, TOGO'}
                             </p>
                             <h3 className="text-base font-black text-[#001731] mb-3 uppercase leading-snug">
                               {evt.title}
@@ -280,10 +280,10 @@ export default async function Home() {
                             </p>
                           </div>
                           <Link
-                            href={`/events/${evt.slug || evt.id}`}
+                            href={`/blog/${evt.slug || evt.id}`}
                             className="mt-6 text-[#e91e63] hover:text-[#d81b60] font-bold text-xs flex items-center gap-1 transition-colors"
                           >
-                            Lire l'article <ArrowRight className="w-3.5 h-3.5 ml-0.5" />
+                            Détails de l'événement <ArrowRight className="w-3.5 h-3.5 ml-0.5" />
                           </Link>
                         </div>
                       </div>
@@ -293,6 +293,8 @@ export default async function Home() {
               ) : (
                 [
                   {
+                    id: 'event-1',
+                    slug: 'grande-campagne-de-depistage-gratuit',
                     date: '15 Octobre 2026',
                     location: 'LOMÉ, TOGO',
                     title: 'GRANDE CAMPAGNE DE DÉPISTAGE GRATUIT',
@@ -300,6 +302,8 @@ export default async function Home() {
                     img: '/images/events/event1.jpg',
                   },
                   {
+                    id: 'event-2',
+                    slug: 'conference-sante-et-prevention',
                     date: '28 Novembre 2026',
                     location: 'PALAIS DES CONGRÈS, LOMÉ',
                     title: 'CONFÉRENCE SANTÉ & PRÉVENTION',
@@ -307,6 +311,8 @@ export default async function Home() {
                     img: '/images/events/event2.jpg',
                   },
                   {
+                    id: 'event-3',
+                    slug: 'caravane-de-sante-regionale',
                     date: '12 Décembre 2026',
                     location: 'RÉGION MARITIME',
                     title: 'CARAVANE DE SANTÉ RÉGIONALE',
@@ -314,7 +320,7 @@ export default async function Home() {
                     img: '/images/events/event3.jpg',
                   },
                 ].map((evt, i) => (
-                  <Reveal key={i} delay={i * 150} direction="up">
+                  <Reveal key={evt.id} delay={i * 150} direction="up">
                     <div className="bg-white text-slate-900 rounded-3xl overflow-hidden shadow-md h-full flex flex-col">
                       <div className="relative h-52 w-full bg-slate-200">
                         <Image src={evt.img} alt={evt.title} fill className="object-cover" />
@@ -334,6 +340,12 @@ export default async function Home() {
                             {evt.desc}
                           </p>
                         </div>
+                        <Link
+                          href={`/blog/${evt.slug}`}
+                          className="mt-6 text-[#e91e63] hover:text-[#d81b60] font-bold text-xs flex items-center gap-1 transition-colors"
+                        >
+                          Détails de l'événement <ArrowRight className="w-3.5 h-3.5 ml-0.5" />
+                        </Link>
                       </div>
                     </div>
                   </Reveal>
