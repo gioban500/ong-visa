@@ -48,7 +48,7 @@ export default function CancerDetail({ cancer, onBack, onBookAppointment }: Canc
               {cancer.name}
             </h1>
             <p className="text-white/90 text-base sm:text-lg leading-relaxed max-w-2xl">
-              {cancer.shortDescription || cancer.shortdescription}
+              {cancer.shortDescription || cancer.shortDescription}
             </p>
           </div>
 
