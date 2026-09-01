@@ -1,5 +1,5 @@
 import React from 'react';
-import { Cancer } from '@/types'; // Ajuste le chemin selon ton projet
+import { Cancer } from '@/types/cancer'; // Ajuste le chemin selon ton projet
 
 interface CancerDetailProps {
   cancer: Cancer;
