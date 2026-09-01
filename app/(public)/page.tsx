@@ -74,69 +74,75 @@ export default async function Home() {
       <HeroCarousel testimonials={testimonials as any} />
 
       {/* ============ MISSION SECTION ============ */}
-      <section className="py-20 sm:py-24 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="max-w-6xl mx-auto">
-            <Reveal>
-              <div className="text-center mb-16">
-                <span className="inline-block px-4 py-1.5 rounded-full bg-teal-50 text-[#0f766e] font-semibold text-sm mb-4 border border-teal-100">
-                  Notre engagement
-                </span>
-                <h2 className="text-3xl sm:text-5xl font-black text-slate-900 mb-6 tracking-tight">
-                  Notre <span className="text-[#0f766e]">Mission</span>
-                </h2>
-                <p className="text-lg sm:text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
-                  L&apos;ONG VISA se consacre à la prévention et à la sensibilisation des cancers féminins, avec une priorité accordée au cancer du sein et au cancer du col de l&apos;utérus.
-                </p>
-              </div>
-            </Reveal>
-
-            <div className="grid md:grid-cols-3 gap-8">
-              <Reveal delay={0} direction="up">
-                <div className="group bg-white rounded-3xl p-8 shadow-sm hover:shadow-xl transition-all border border-slate-100 h-full flex flex-col justify-between">
-                  <div>
-                    <div className="w-14 h-14 bg-teal-100/80 rounded-2xl flex items-center justify-center mb-6 text-[#0f766e] group-hover:scale-110 transition-transform">
-                      <Target className="w-7 h-7" />
-                    </div>
-                    <h3 className="text-2xl font-bold text-slate-900 mb-3">Prévention</h3>
-                    <p className="text-slate-600 leading-relaxed text-sm sm:text-base">
-                      Sensibiliser les femmes à l&apos;importance du dépistage précoce et promouvoir des habitudes de vie plus saines pour réduire les risques.
-                    </p>
-                  </div>
-                </div>
-              </Reveal>
-
-              <Reveal delay={150} direction="up">
-                <div className="group bg-white rounded-3xl p-8 shadow-sm hover:shadow-xl transition-all border border-slate-100 h-full flex flex-col justify-between">
-                  <div>
-                    <div className="w-14 h-14 bg-pink-100/80 rounded-2xl flex items-center justify-center mb-6 text-pink-600 group-hover:scale-110 transition-transform">
-                      <Stethoscope className="w-7 h-7" />
-                    </div>
-                    <h3 className="text-2xl font-bold text-slate-900 mb-3">Dépistage</h3>
-                    <p className="text-slate-600 leading-relaxed text-sm sm:text-base">
-                      Faciliter l&apos;accès aux examens de dépistage et orienter les femmes vers une prise en charge médicale adaptée et rapide.
-                    </p>
-                  </div>
-                </div>
-              </Reveal>
-
-              <Reveal delay={300} direction="up">
-                <div className="group bg-white rounded-3xl p-8 shadow-sm hover:shadow-xl transition-all border border-slate-100 h-full flex flex-col justify-between">
-                  <div>
-                    <div className="w-14 h-14 bg-amber-100/80 rounded-2xl flex items-center justify-center mb-6 text-amber-700 group-hover:scale-110 transition-transform">
-                      <HandHeart className="w-7 h-7" />
-                    </div>
-                    <h3 className="text-2xl font-bold text-slate-900 mb-3">Soutien</h3>
-                    <p className="text-slate-600 leading-relaxed text-sm sm:text-base">
-                      Apporter un accompagnement humain et psychologique aux patientes et à leurs proches tout au long du traitement.
-                    </p>
-                  </div>
-                </div>
-              </Reveal>
-            </div>
-          </div>
+<section className="py-20 bg-[#faf9f6]">
+  <div className="container mx-auto px-4">
+    <div className="max-w-6xl mx-auto">
+      <Reveal>
+        <div className="text-center mb-14">
+          <h2 className="text-3xl sm:text-4xl font-black text-[#0e5c54] tracking-wide uppercase">
+            NOTRE MISSION
+          </h2>
         </div>
-      </section>
+      </Reveal>
+
+      <div className="grid md:grid-cols-3 gap-8">
+        <Reveal delay={0} direction="up">
+          <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 h-full flex flex-col items-center text-center">
+            <div className="w-32 h-32 mb-6 flex items-center justify-center">
+              <img
+                src="/icons/sensibiliser.png" // Remplace par ton lien d'image
+                alt="Sensibiliser"
+                className="max-w-full max-h-full object-contain"
+              />
+            </div>
+            <h3 className="text-xl font-extrabold text-[#001731] mb-4 tracking-tight">
+              1. SENSIBILISER
+            </h3>
+            <p className="text-slate-600 text-sm sm:text-base leading-relaxed">
+              Informer et éduquer la population afin de briser les tabous autour des cancers féminins.
+            </p>
+          </div>
+        </Reveal>
+
+        <Reveal delay={150} direction="up">
+          <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 h-full flex flex-col items-center text-center">
+            <div className="w-32 h-32 mb-6 flex items-center justify-center">
+              <img
+                src="/icons/prevenir.png" // Remplace par ton lien d'image
+                alt="Prévenir"
+                className="max-w-full max-h-full object-contain"
+              />
+            </div>
+            <h3 className="text-xl font-extrabold text-[#001731] mb-4 tracking-tight">
+              2. PRÉVENIR
+            </h3>
+            <p className="text-slate-600 text-sm sm:text-base leading-relaxed">
+              Organiser des campagnes de dépistage précoce et faciliter l&apos;accès aux examens médicaux.
+            </p>
+          </div>
+        </Reveal>
+
+        <Reveal delay={300} direction="up">
+          <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 h-full flex flex-col items-center text-center">
+            <div className="w-32 h-32 mb-6 flex items-center justify-center">
+              <img
+                src="/icons/accompagner.png" // Remplace par ton lien d'image
+                alt="Accompagner"
+                className="max-w-full max-h-full object-contain"
+              />
+            </div>
+            <h3 className="text-xl font-extrabold text-[#001731] mb-4 tracking-tight">
+              3. ACCOMPAGNER
+            </h3>
+            <p className="text-slate-600 text-sm sm:text-base leading-relaxed">
+              Soutenir moralement, matériellement et médicalement les patientes dans leur combat.
+            </p>
+          </div>
+        </Reveal>
+      </div>
+    </div>
+  </div>
+</section>
 
       {/* ============ CANCERS FÉMININS SECTION ============ */}
       <section className="py-20 sm:py-24 bg-slate-100/60 border-y border-slate-200/60">
