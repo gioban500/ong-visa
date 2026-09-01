@@ -43,88 +43,88 @@ export default function CancersPage() {
   );
 
   return (
-    <div className="w-full bg-slate-50 min-h-screen pb-20">
-      {/* Banner Héro nettoyé des chevauchements négatifs de trop */}
-      <section className="bg-[#0e7490] text-white pt-12 pb-16 px-4 sm:px-6 lg:px-8 text-center">
+    <div className="w-full bg-[#fdfbf7] min-h-screen pb-24">
+      {/* Banner Héro */}
+      <section className="bg-[#0f766e] text-white pt-16 pb-20 px-4 sm:px-6 lg:px-8 text-center shadow-md">
         <div className="max-w-4xl mx-auto space-y-4">
-          <span className="text-[#f472b6] font-bold text-xs uppercase tracking-widest block">
+          <span className="text-pink-300 font-bold text-xs uppercase tracking-widest block">
             PRÉVENTION & INFORMATIONS MÉDICALES
           </span>
-          <h1 className="text-3xl sm:text-5xl font-black uppercase tracking-tight">
+          <h1 className="text-3xl sm:text-5xl font-black uppercase tracking-tight text-emerald-50">
             COMPRENDRE LES CANCERS FÉMININS
           </h1>
-          <p className="text-slate-100 text-sm sm:text-base max-w-2xl mx-auto">
+          <p className="text-emerald-100/90 text-sm sm:text-base max-w-2xl mx-auto font-normal leading-relaxed">
             Une information exacte et un dépistage régulier sont les armes les plus efficaces pour préserver votre santé.
           </p>
 
-          <div className="pt-4 max-w-xl mx-auto">
+          <div className="pt-6 max-w-xl mx-auto">
             <div className="relative flex items-center">
-              <Search className="absolute left-4 w-5 h-5 text-slate-400" />
+              <Search className="absolute left-4 w-5 h-5 text-stone-400" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Rechercher un cancer..."
-                className="w-full pl-12 pr-4 py-3.5 rounded-full bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-pink-400 shadow-sm text-sm"
+                className="w-full pl-12 pr-4 py-4 rounded-2xl bg-white text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-pink-600 shadow-sm text-sm font-medium transition-all"
               />
             </div>
           </div>
         </div>
       </section>
 
-      {/* Grille des cartes avec un espacement propre */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10">
+      {/* Grille des cartes avec un espacement propre et soigné */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12">
         {loading ? (
-          <div className="bg-white rounded-2xl p-12 text-center border border-slate-100 shadow-sm">
-            <p className="text-slate-500 font-medium text-sm">Chargement des données...</p>
+          <div className="bg-white rounded-3xl p-12 text-center border border-stone-200/80 shadow-lg">
+            <p className="text-stone-500 font-medium text-sm">Chargement des données...</p>
           </div>
         ) : filteredCancers.length === 0 ? (
-          <div className="bg-white rounded-2xl p-12 text-center border border-slate-100 shadow-sm space-y-2">
-            <p className="text-slate-800 font-bold">Aucun résultat trouvé</p>
-            <p className="text-slate-500 text-sm">Essayez de modifier votre recherche.</p>
+          <div className="bg-white rounded-3xl p-12 text-center border border-stone-200/80 shadow-lg space-y-2">
+            <p className="text-stone-900 font-bold text-lg">Aucun résultat trouvé</p>
+            <p className="text-stone-500 text-sm">Essayez de modifier votre recherche.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredCancers.map((cancer, index) => (
               <div
                 key={cancer.id || index}
-                className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all overflow-hidden flex flex-col justify-between"
+                className="bg-white rounded-3xl border border-stone-200/80 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col justify-between group"
               >
                 <div>
-                  <div className="relative w-full h-52 bg-slate-100 overflow-hidden">
+                  <div className="relative w-full h-52 bg-stone-100 overflow-hidden">
                     {cancer.image ? (
                       <img
                         src={cancer.image}
                         alt={cancer.name}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
                     ) : (
                       <div
                         className="w-full h-full flex items-center justify-center font-black text-white text-xl p-4 text-center uppercase"
-                        style={{ backgroundColor: cancer.color || '#ec4899' }}
+                        style={{ backgroundColor: cancer.color || '#0f766e' }}
                       >
                         {cancer.name}
                       </div>
                     )}
-                    <span className="absolute top-3 right-3 bg-white/90 backdrop-blur-md px-2.5 py-1 rounded-full text-[10px] font-extrabold text-slate-800 shadow-sm">
+                    <span className="absolute top-4 right-4 bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-full text-xs font-extrabold text-stone-900 shadow-sm">
                       Focus {String(index + 1).padStart(2, '0')}
                     </span>
                   </div>
 
-                  <div className="p-5 space-y-2">
-                    <h2 className="text-lg font-black text-slate-900 uppercase">
+                  <div className="p-6 space-y-3">
+                    <h2 className="text-xl font-bold text-stone-900 uppercase tracking-tight leading-snug">
                       {cancer.name}
                     </h2>
-                    <p className="text-slate-600 text-xs sm:text-sm line-clamp-3">
+                    <p className="text-stone-600 text-xs sm:text-sm line-clamp-3 leading-relaxed">
                       {cancer.shortDescription || cancer.description || 'Consultez la fiche détaillée.'}
                     </p>
                   </div>
                 </div>
 
-                <div className="p-5 pt-0">
+                <div className="p-6 pt-0">
                   <Link
                     href={`/cancers/${cancer.id || slugify(cancer.name)}`}
-                    className="w-full inline-flex items-center justify-center gap-2 bg-[#0f172a] hover:bg-[#ec4899] text-white font-bold py-3 px-4 rounded-xl transition-colors text-xs uppercase"
+                    className="w-full inline-flex items-center justify-center gap-2 bg-[#0f766e] hover:bg-[#115e59] text-white font-bold py-3.5 px-4 rounded-2xl transition-all text-xs uppercase tracking-wider shadow-sm"
                   >
                     <span>En savoir plus</span>
                     <ArrowRight className="w-3.5 h-3.5" />
