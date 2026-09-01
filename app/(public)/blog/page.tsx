@@ -2,23 +2,51 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Search, Clock, Calendar, Tag, Share2 } from 'lucide-react';
+import { Search } from 'lucide-react';
 
-const categories = ['Tous', 'Prévention', 'Actualités', 'Bien-être', 'Témoignages'];
-
-export default function BlogPage() {
+export default function EvenementsPage() {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('Tous');
-  const [blogPosts, setBlogPosts] = useState<any[]>([]);
+  const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchData() {
       try {
-        const data = await fetch('/api/blog').then(res => res.json());
-        setBlogPosts(data);
+        const res = await fetch('/api/events');
+        if (res.ok) {
+          const data = await res.json();
+          setEvents(data);
+        } else {
+          // Fallback avec les données de tes maquettes si l'API n'est pas encore prête
+          setEvents([
+            {
+              id: '1',
+              title: 'GRANDE CAMPAGNE DE DÉPISTAGE GRATUIT',
+              date: '15 Octobre 2026',
+              location: 'LOMÉ, TOGO',
+              description: 'Une journée dédiée à la sensibilisation, au contrôle clinique gratuit du sein et au dépistage du col de l’utérus pour toutes les femmes.',
+              image: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&q=80'
+            },
+            {
+              id: '2',
+              title: 'CONFÉRENCE SANTÉ & PRÉVENTION',
+              date: '28 Novembre 2026',
+              location: 'PALAIS DES CONGRÈS, LOMÉ',
+              description: 'Échanges avec des professionnels de santé sur les avancées de la prise en charge des cancers féminins au Togo.',
+              image: 'https://images.unsplash.com/photo-1475721027785-f74eccf877e2?auto=format&fit=crop&q=80'
+            },
+            {
+              id: '3',
+              title: 'CARAVANE DE SENSIBILISATION RÉGIONALE',
+              date: '12 Décembre 2026',
+              location: 'RÉGION MARITIME',
+              description: 'Ateliers itinérants d’information et séances d’autopalpation guidées dans les zones rurales.',
+              image: 'https://images.unsplash.com/photo-1511632765466-a01725530126?auto=format&fit=crop&q=80'
+            }
+          ]);
+        }
       } catch (error) {
-        console.error('Error fetching blog posts:', error);
+        console.error('Error fetching events:', error);
       } finally {
         setLoading(false);
       }
@@ -26,169 +54,106 @@ export default function BlogPage() {
     fetchData();
   }, []);
 
-  const filteredPosts = blogPosts.filter((post) => {
-    const matchesSearch =
-      post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      post.excerpt.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory =
-      selectedCategory === 'Tous' || post.category === selectedCategory;
-    return matchesSearch && matchesCategory;
+  const filteredEvents = events.filter((event) => {
+    const term = searchTerm.toLowerCase();
+    return (
+      event.title?.toLowerCase().includes(term) ||
+      event.location?.toLowerCase().includes(term) ||
+      event.description?.toLowerCase().includes(term)
+    );
   });
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50">
-        <div className="text-xl text-gray-600">Chargement...</div>
+      <div className="min-h-screen flex items-center justify-center bg-[#0f172a] text-white">
+        <div className="text-xl font-semibold">Chargement des événements...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50">
-      {/* Header Section */}
-      <section className="py-16">
-        <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto text-center">
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-              Notre{' '}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-500">
-                Blog
-              </span>
-            </h1>
-            <p className="text-lg md:text-xl text-gray-700 mb-8">
-              Articles de sensibilisation, actualités sur le cancer, conseils de
-              santé et témoignages inspirants.
-            </p>
+    <div className="w-full bg-slate-50 min-h-screen pb-20">
+      {/* Banner / Header Dark */}
+      <section className="bg-[#0f172a] text-white py-16 px-4 text-center">
+        <div className="max-w-4xl mx-auto space-y-4">
+          <span className="text-[#ec4899] font-bold text-xs uppercase tracking-widest">
+            AGENDA & MOBILISATION
+          </span>
+          <h1 className="text-3xl sm:text-5xl font-black uppercase tracking-tight">
+            TOUS NOS ÉVÉNEMENTS
+          </h1>
+          <p className="text-slate-300 text-sm sm:text-base max-w-2xl mx-auto">
+            Retrouvez l'ensemble de nos campagnes de dépistage, conférences scientifiques, et activités itinérantes partout au Togo.
+          </p>
 
-            {/* Barre de recherche */}
-            <div className="relative max-w-xl mx-auto">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Rechercher un article..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-12 pr-4 py-4 rounded-full border-2 border-gray-200 focus:border-pink-500 focus:outline-none transition-colors text-lg"
-              />
-            </div>
+          {/* Barre de Recherche */}
+          <div className="pt-4 max-w-xl mx-auto relative">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Rechercher un événement ou lieu..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-12 pr-4 py-3.5 rounded-xl bg-slate-800/80 border border-slate-700 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#0e7490] transition-all text-sm"
+            />
           </div>
         </div>
       </section>
 
-      {/* Filtres par Catégorie */}
-      <section className="sticky top-20 z-30 bg-white/80 backdrop-blur-md border-b shadow-sm">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex flex-wrap justify-center gap-3">
-            {categories.map((category) => (
-              <button
-                key={category}
-                onClick={() => setSelectedCategory(category)}
-                className={`px-6 py-2 rounded-full font-medium transition-all ${
-                  selectedCategory === category
-                    ? 'bg-pink-500 text-white shadow-md'
-                    : 'bg-white text-gray-700 hover:bg-pink-50 border border-gray-200'
-                }`}
+      {/* Grid d'Événements */}
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 py-12">
+        {filteredEvents.length === 0 ? (
+          <div className="text-center py-12 text-slate-600">
+            Aucun événement ne correspond à votre recherche.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {filteredEvents.map((event) => (
+              <div
+                key={event.id}
+                className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition-shadow border border-slate-100 flex flex-col justify-between"
               >
-                {category}
-              </button>
+                <div>
+                  {/* Visuel + Badge Date */}
+                  <div className="relative h-52 w-full">
+                    <img
+                      src={event.image || "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&q=80"}
+                      alt={event.title}
+                      className="w-full h-full object-cover"
+                    />
+                    <span className="absolute top-4 right-4 bg-[#ec4899] text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-md">
+                      {event.date}
+                    </span>
+                  </div>
+
+                  {/* Contenu textuel */}
+                  <div className="p-6 space-y-3">
+                    <span className="text-xs font-bold text-[#0e7490] uppercase tracking-wider block">
+                      {event.location}
+                    </span>
+                    <h3 className="text-lg font-black text-slate-900 leading-snug uppercase">
+                      {event.title}
+                    </h3>
+                    <p className="text-slate-600 text-sm leading-relaxed">
+                      {event.description}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Bouton d'action principal */}
+                <div className="p-6 pt-0">
+                  <Link
+                    href={`/evenements/${event.id}`}
+                    className="block w-full text-center bg-[#0e7490] hover:bg-[#0c627a] text-white font-bold py-3.5 px-4 rounded-xl transition-colors text-sm"
+                  >
+                    Voir les détails & Participer
+                  </Link>
+                </div>
+              </div>
             ))}
           </div>
-        </div>
+        )}
       </section>
-
-      {/* Articles */}
-      <section className="py-16">
-        <div className="container mx-auto px-4">
-          {filteredPosts.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-xl text-gray-600">
-                Aucun article trouvé pour votre recherche.
-              </p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {filteredPosts.map((post) => (
-                <article
-                  key={post.id}
-                  className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 group hover:-translate-y-1"
-                >
-                  {/* Image */}
-                  <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 relative overflow-hidden">
-                    {post.image ? (
-                      <img src={post.image} alt={post.title} className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center">
-                        <span className="text-purple-400 text-4xl">📝</span>
-                      </div>
-                    )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-                    <div className="absolute bottom-4 left-4 right-4">
-                      <span className="inline-block px-3 py-1 bg-white/90 backdrop-blur-sm rounded-full text-sm font-semibold text-pink-600">
-                        {post.category}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Contenu */}
-                  <div className="p-6">
-                    <div className="flex items-center gap-4 text-sm text-gray-500 mb-3">
-                      <div className="flex items-center gap-1">
-                        <Calendar className="w-4 h-4" />
-                        <span>
-                          {new Date(post.publishedDate).toLocaleDateString(
-                            'fr-FR',
-                            {
-                              year: 'numeric',
-                              month: 'short',
-                              day: 'numeric',
-                            }
-                          )}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Clock className="w-4 h-4" />
-                        <span>{post.readTime} min</span>
-                      </div>
-                    </div>
-
-                    <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-pink-600 transition-colors">
-                      {post.title}
-                    </h3>
-
-                    <p className="text-gray-600 leading-relaxed mb-4">
-                      {post.excerpt}
-                    </p>
-
-                    {/* Tags */}
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {post.tags.slice(0, 2).map((tag: string) => (
-                        <span
-                          key={tag}
-                          className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full"
-                        >
-                          #{tag}
-                        </span>
-                      ))}
-                    </div>
-
-                    {/* Auteur et Action */}
-                    <div className="flex items-center justify-between pt-4 border-t">
-                      <span className="text-sm text-gray-600">{post.author}</span>
-                      <Link
-                        href={`/blog/${post.slug}`}
-                        className="text-pink-500 font-semibold hover:text-pink-600 transition-colors"
-                      >
-                        Lire →
-                      </Link>
-                    </div>
-                  </div>
-                </article>
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
-
     </div>
   );
 }
