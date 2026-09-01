@@ -60,23 +60,26 @@ export default async function Home() {
     events = [];
   }
 
-  // Fallback si la BDD est vide pour les cancers
-  const defaultCancers = [
+  // Fallback si la BDD est vide pour les cancers (propriétés synchronisées avec la structure)
+  const defaultCancers: CancerItem[] = [
     {
       id: 'sein',
       name: 'CANCER DU SEIN',
+      shortDescription: 'Le cancer le plus fréquent chez la femme. Le dépistage précoce permet de guérir plus de 9 cas sur 10.',
       description: 'Le cancer le plus fréquent chez la femme. Le dépistage précoce permet de guérir plus de 9 cas sur 10.',
       image: '/images/cancers/sein.jpg',
     },
     {
       id: 'col-uterus',
       name: "CANCER DU COL DE L'UTÉRUS",
+      shortDescription: 'Principalement causé par le virus HPV. Un cancer presque totalement évitable grâce à la vaccination et au frottis.',
       description: 'Principalement causé par le virus HPV. Un cancer presque totalement évitable grâce à la vaccination et au frottis.',
       image: '/images/cancers/col.jpg',
     },
     {
       id: 'ovaire',
       name: "CANCER DE L'OVAIRE",
+      shortDescription: 'Souvent silencieux au début. Une attention particulière aux signes persistants permet un diagnostic plus rapide.',
       description: 'Souvent silencieux au début. Une attention particulière aux signes persistants permet un diagnostic plus rapide.',
       image: '/images/cancers/ovaire.jpg',
     },
@@ -197,7 +200,7 @@ export default async function Home() {
                           {cancer.name}
                         </h3>
                         <p className="text-slate-600 text-xs sm:text-sm leading-relaxed mb-6">
-                          {cancer.shortDescription || cancer.description}
+                          {('shortDescription' in cancer && cancer.shortDescription) || cancer.description}
                         </p>
                       </div>
                       <Link
