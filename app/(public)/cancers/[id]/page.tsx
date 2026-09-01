@@ -1,165 +1,193 @@
 'use client';
 
-import React, { use } from 'react';
+import React, { use, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-
-interface CancerData {
-  id?: string;
-  slug?: string;
-  name: string;
-  shortDescription?: string;
-  description: string;
-  symptoms?: string[] | { warningSign?: string[]; early?: string[]; advanced?: string[] };
-  image?: string;
-  color?: string;
-}
-
-// Exemple de données ou appel depuis ta base de données
-const CANCERS_DATA: Record<string, CancerData> = {
-  'cancer-du-col-de-l-uterus': {
-    name: "CANCER DU COL DE L'UTÉRUS",
-    shortDescription: "Infection persistante par le papillomavirus humain (HPV), le cancer du col de l'utérus est l'un des rares cancers que l'on peut éviter presque entièrement grâce à la vaccination et au dépistage régulier.",
-    description: "Le cancer du col de l'utérus se développe sur la muqueuse du col de l'utérus, le plus souvent à la suite d'une infection durable par un virus transmis par voie sexuelle, le Papillomavirus Humain (HPV).\n\nDétecté tôt grâce au frottis de dépistage ou au test HPV, il se soigne très bien. La vaccination des jeunes filles et le suivi régulier chez le gynécologue ou la sage-femme constituent la meilleure protection.",
-    symptoms: [
-      "Saignements vaginaux anormaux (notamment après les rapports sexuels ou entre les règles)",
-      "Pertes vaginales inhabituelles ou malodorantes",
-      "Douleurs lors des rapports sexuels ou douleurs pelviennes persistantes",
-      "Douleurs au bas du dos ou inconfort abdominal"
-    ],
-    image: "https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&q=80",
-    color: "#0e7490"
-  }
-};
+import { ArrowLeft, Shield, AlertTriangle, Activity, HeartHandshake } from 'lucide-react';
+import { Cancer } from '@/types/cancer';
 
 interface PageProps {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ id: string }>;
 }
 
 export default function CancerDetailPage({ params }: PageProps) {
-  const { slug } = use(params);
+  const { id } = use(params);
+  const [cancer, setCancer] = useState<Cancer | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  // Remplace cette ligne par ton fetch DB si tu as une API (ex: await getCancerBySlug(slug))
-  const cancer = CANCERS_DATA[slug];
+  useEffect(() => {
+    async function fetchCancer() {
+      try {
+        // Décoder le paramètre au cas où l'URL contienne des caractères encodés
+        const cleanId = decodeURIComponent(id);
+        const res = await fetch(`/api/cancers/${cleanId}`);
+
+        if (res.ok) {
+          const data = await res.json();
+          setCancer(data);
+        } else {
+          // Deuxième tentative : récupérer la liste complète et chercher par slug/nom
+          const listRes = await fetch('/api/cancers');
+          if (listRes.ok) {
+            const allCancers: Cancer[] = await listRes.json();
+            const found = allCancers.find((c) => {
+              const slugifiedName = c.name
+                .toLowerCase()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .replace(/[^a-z0-9]+/g, '-')
+                .replace(/^-+|-+$/g, '');
+
+              return (
+                String(c.id) === cleanId ||
+                slugifiedName === cleanId.toLowerCase()
+              );
+            });
+
+            if (found) {
+              setCancer(found);
+            } else {
+              setCancer(null);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Erreur lors du chargement du cancer:', error);
+        setCancer(null);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchCancer();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#0f172a] text-white flex items-center justify-center">
+        <p className="text-sm font-medium">Chargement des informations...</p>
+      </div>
+    );
+  }
 
   if (!cancer) {
     notFound();
   }
 
-  // Extraction propre des symptômes
-  const getSymptomsList = (): string[] => {
-    if (!cancer.symptoms) return [];
-    if (Array.isArray(cancer.symptoms)) return cancer.symptoms;
-    
-    const s = cancer.symptoms as any;
-    return [
-      ...(s.warningSign || []),
-      ...(s.early || []),
-      ...(s.advanced || [])
-    ];
-  };
-
-  const symptomsList = getSymptomsList();
-
   return (
-    <div className="w-full bg-slate-50 min-h-screen pb-16">
-      
-      {/* 1. Header Sombre / Retour */}
-      <div className="bg-[#0f172a] text-white py-4 px-6 sm:px-12">
-        <Link 
-          href="/cancers"
-          className="inline-flex items-center text-sm font-medium text-slate-300 hover:text-white transition-colors"
-        >
-          ← Retour à la liste des cancers
-        </Link>
-      </div>
+    <div className="w-full bg-slate-50 min-h-screen pb-20">
+      {/* Header Sombre */}
+      <section className="bg-[#0f172a] text-white pt-8 pb-16 px-4 sm:px-8">
+        <div className="max-w-7xl mx-auto space-y-6">
+          <Link
+            href="/cancers"
+            className="inline-flex items-center gap-2 text-sm text-slate-300 hover:text-white transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Retour à la liste des cancers
+          </Link>
 
-      {/* 2. Hero Section (Couleur Teal) */}
-      <section 
-        className="text-white py-12 px-6 sm:px-12"
-        style={{ backgroundColor: cancer.color || '#0e7490' }}
-      >
-        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
-          
-          <div className="md:col-span-7 space-y-4">
-            <span className="inline-block px-4 py-1.5 bg-[#ec4899] text-white text-xs font-bold rounded-full tracking-wide uppercase">
-              FOCUS CANCER
+          <div className="space-y-3">
+            <span className="text-[#f472b6] font-bold text-xs uppercase tracking-widest block">
+              FICHE D'INFORMATION MÉDICALE
             </span>
-            <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight uppercase">
+            <h1 className="text-3xl sm:text-5xl font-black uppercase tracking-tight">
               {cancer.name}
             </h1>
-            {cancer.shortDescription && (
-              <p className="text-white/90 text-base sm:text-lg leading-relaxed max-w-2xl">
-                {cancer.shortDescription}
-              </p>
-            )}
           </div>
-
-          {cancer.image && (
-            <div className="md:col-span-5 flex justify-center md:justify-end">
-              <div className="relative w-full max-w-md h-64 sm:h-72 rounded-3xl overflow-hidden border-4 border-white/20 shadow-xl">
-                <img 
-                  src={cancer.image} 
-                  alt={cancer.name}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            </div>
-          )}
-
         </div>
       </section>
 
-      {/* 3. Contenu Principal */}
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 -mt-6 space-y-6 relative z-10">
-        
-        {/* Description Longue / Présentation Générale */}
-        <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 space-y-4">
-          <h2 className="text-xl sm:text-2xl font-extrabold text-[#0e7490] tracking-wide uppercase">
-            PRÉSENTATION GÉNÉRALE
-          </h2>
-          <p className="text-slate-600 leading-relaxed text-base whitespace-pre-line">
-            {cancer.description}
-          </p>
-        </div>
+      {/* Contenu Principal */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 relative z-10 space-y-8">
+        <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-sm grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
+          {cancer.image && (
+            <div className="md:col-span-5 h-72 sm:h-80 rounded-2xl overflow-hidden bg-slate-100">
+              <img
+                src={cancer.image}
+                alt={cancer.name}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          )}
 
-        {/* Symptômes */}
-        {symptomsList.length > 0 && (
-          <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 space-y-6">
-            <h2 className="text-xl sm:text-2xl font-extrabold text-[#ec4899] tracking-wide uppercase">
-              SIGNES & SYMPTÔMES À SURVEILLER
-            </h2>
-            <ul className="space-y-4">
-              {symptomsList.map((symptom, idx) => (
-                <li key={idx} className="flex items-start gap-3 text-slate-700 text-base">
-                  <span className="text-[#ec4899] text-lg leading-none mt-0.5">✦</span>
-                  <span>{symptom}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+          <div className={cancer.image ? 'md:col-span-7 space-y-6' : 'md:col-span-12 space-y-6'}>
+            <div className="space-y-3">
+              <h2 className="text-xl font-bold text-slate-900">Vue d'ensemble</h2>
+              <p className="text-slate-600 leading-relaxed text-sm sm:text-base">
+                {cancer.description || cancer.shortDescription || 'Aucune description disponible.'}
+              </p>
+            </div>
 
-        {/* Prévention & Prise de RDV */}
-        <div className="bg-[#e6f4f1] p-8 rounded-3xl border border-teal-100 space-y-6">
-          <h2 className="text-xl sm:text-2xl font-extrabold text-[#0e7490] tracking-wide uppercase">
-            PRÉVENTION & DÉPISTAGE
-          </h2>
-          <p className="text-slate-700 leading-relaxed text-base">
-            Un dépistage précoce permet de diagnostiquer la maladie à un stade initial et augmente considérablement les chances de guérison.
-          </p>
+            {cancer.epidemiology && (
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 space-y-1">
+                <span className="text-xs font-bold uppercase text-[#0e7490]">Épidémiologie</span>
+                <p className="text-sm text-slate-700">{cancer.epidemiology}</p>
+              </div>
+            )}
 
-          <div>
-            <Link
-              href="/evenements"
-              className="inline-block bg-[#0e7490] hover:bg-[#0c627a] text-white font-bold py-3.5 px-6 rounded-2xl shadow-md hover:shadow-lg transition-all text-sm sm:text-base"
-            >
-              Prendre rendez-vous pour un dépistage gratuit
-            </Link>
+            <div className="pt-2">
+              <Link
+                href={`/contact?subject=${encodeURIComponent(`Information - ${cancer.name}`)}`}
+                className="inline-flex items-center gap-2 bg-[#ec4899] hover:bg-[#db2777] text-white font-bold px-8 py-4 rounded-2xl text-sm transition-colors shadow-md"
+              >
+                <HeartHandshake className="w-5 h-5" />
+                <span>Demander un accompagnement</span>
+              </Link>
+            </div>
           </div>
         </div>
 
-      </div>
+        {/* Facteurs de risque et Symptômes */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-sm space-y-4">
+            <div className="flex items-center gap-3 text-amber-600">
+              <AlertTriangle className="w-6 h-6" />
+              <h3 className="text-lg font-extrabold uppercase tracking-wide">
+                Facteurs de risque
+              </h3>
+            </div>
+            {cancer.riskFactors ? (
+              <div className="space-y-3 text-sm text-slate-700">
+                {cancer.riskFactors.modifiable?.length > 0 && (
+                  <div>
+                    <span className="font-bold text-slate-900 block mb-1">Modifiables :</span>
+                    <ul className="list-disc pl-5 space-y-1">
+                      {cancer.riskFactors.modifiable.map((item, idx) => (
+                        <li key={idx}>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {cancer.riskFactors.nonModifiable?.length > 0 && (
+                  <div>
+                    <span className="font-bold text-slate-900 block mb-1">Non modifiables :</span>
+                    <ul className="list-disc pl-5 space-y-1">
+                      {cancer.riskFactors.nonModifiable.map((item, idx) => (
+                        <li key={idx}>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <p className="text-sm text-slate-500">Consultez un professionnel de santé pour plus de détails.</p>
+            )}
+          </div>
+
+          <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-sm space-y-4">
+            <div className="flex items-center gap-3 text-[#0e7490]">
+              <Activity className="w-6 h-6" />
+              <h3 className="text-lg font-extrabold uppercase tracking-wide">
+                Dépistage & Prévention
+              </h3>
+            </div>
+            <p className="text-slate-600 text-sm leading-relaxed">
+              Un dépistage précoce permet d'augmenter considérablement les chances de guérison complète. Prenez rendez-vous régulièrement avec votre gynécologue ou sage-femme.
+            </p>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

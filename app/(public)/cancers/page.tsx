@@ -1,134 +1,176 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
-import { Search } from 'lucide-react';
-import type { Cancer } from '@/types/cancer';
+import { Search, Heart, Shield, ArrowRight } from 'lucide-react';
+
+interface Cancer {
+  id: string;
+  name: string;
+  color?: string;
+  image?: string;
+  shortdescription?: string;
+  description?: string;
+  epidemiology?: string;
+  riskpopulation?: string;
+  riskfactors?: string[];
+  symptoms?: string[];
+  screening?: string[];
+}
 
 export default function CancersPage() {
-  const [searchTerm, setSearchTerm] = useState('');
   const [cancers, setCancers] = useState<Cancer[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchData() {
+    async function fetchCancers() {
       try {
-        const data = await fetch('/api/cancers').then((res) => res.json());
-        setCancers(data);
+        const res = await fetch('/api/cancers');
+        if (res.ok) {
+          const data = await res.json();
+          setCancers(data);
+        }
       } catch (error) {
-        console.error('Error fetching cancers:', error);
+        console.error('Erreur lors de la récupération des cancers:', error);
       } finally {
         setLoading(false);
       }
     }
-    fetchData();
+    fetchCancers();
   }, []);
 
   const filteredCancers = cancers.filter((cancer) =>
-    cancer.name.toLowerCase().includes(searchTerm.toLowerCase())
+    cancer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (cancer.shortdescription && cancer.shortdescription.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#faf9f6]">
-        <div className="text-xl text-[#001731] font-semibold">Chargement...</div>
-      </div>
-    );
-  }
-
   return (
-    <div className="flex flex-col min-h-screen bg-[#faf9f6]">
-      {/* ============ BANNIÈRE VERTE SUPERIEURE ============ */}
-      <section className="bg-[#0e5c54] text-white py-16 text-center px-4">
-        <div className="max-w-4xl mx-auto">
-          <p className="text-pink-400 font-bold text-xs sm:text-sm tracking-widest uppercase mb-3">
+    <div className="w-full bg-slate-50 min-h-screen pb-24">
+      {/* Banner Héro */}
+      <section className="bg-[#0e7490] text-white pt-16 pb-20 px-4 sm:px-6 lg:px-8 text-center relative overflow-hidden">
+        <div className="max-w-4xl mx-auto space-y-4 relative z-10">
+          <span className="text-[#f472b6] font-bold text-xs uppercase tracking-widest block">
             PRÉVENTION & INFORMATIONS MÉDICALES
-          </p>
-          <h1 className="text-3xl sm:text-5xl font-black uppercase tracking-tight mb-4">
+          </span>
+          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black uppercase tracking-tight">
             COMPRENDRE LES CANCERS FÉMININS
           </h1>
-          <p className="text-slate-100 text-sm sm:text-base max-w-2xl mx-auto leading-relaxed mb-8">
+          <p className="text-slate-100 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
             Une information exacte et un dépistage régulier sont les armes les plus efficaces pour préserver votre santé.
           </p>
 
           {/* Barre de recherche */}
-          <div className="relative max-w-xl mx-auto">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Rechercher un cancer..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-12 pr-4 py-3.5 rounded-full bg-white text-slate-800 placeholder-slate-400 border-none shadow-md focus:outline-none focus:ring-2 focus:ring-pink-500 text-sm sm:text-base transition-all"
-            />
+          <div className="pt-6 max-w-xl mx-auto">
+            <div className="relative flex items-center">
+              <Search className="absolute left-4 w-5 h-5 text-slate-400" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Rechercher un cancer..."
+                className="w-full pl-12 pr-4 py-4 rounded-full bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-pink-400/30 shadow-lg text-sm sm:text-base transition-all"
+              />
+            </div>
           </div>
         </div>
       </section>
 
-      {/* ============ GRILLE DES CANCERS ============ */}
-      <section className="py-16">
-        <div className="container mx-auto px-4">
-          {filteredCancers.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-xl text-slate-600">
-                Aucun cancer trouvé pour votre recherche.
-              </p>
-            </div>
-          ) : (
-            <div className="max-w-6xl mx-auto grid md:grid-cols-3 gap-8">
-              {filteredCancers.map((cancer, i) => (
-                <div
-                  key={cancer.id}
-                  className="bg-white rounded-3xl overflow-hidden shadow-sm border border-slate-100 h-full flex flex-col justify-between"
-                >
-                  <div>
-                    {/* Image / Badge */}
-                    <div className="relative h-60 w-full bg-slate-100">
-                      {cancer.image ? (
-                        <Image
-                          src={cancer.image}
-                          alt={cancer.name}
-                          fill
-                          className="object-cover"
-                        />
-                      ) : (
-                        <div
-                          className="w-full h-full flex items-center justify-center text-xl font-bold text-slate-400"
-                          style={{ backgroundColor: cancer.color || '#e2e8f0' }}
-                        >
-                          {cancer.name}
-                        </div>
-                      )}
-                      <span className="absolute top-4 right-4 bg-[#e91e63] text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-md">
-                        Focus 0{i + 1}
-                      </span>
-                    </div>
-
-                    {/* Titre & Description */}
-                    <div className="p-8 text-center">
-                      <h2 className="text-xl font-black text-[#001731] mb-4 uppercase tracking-tight">
+      {/* Grille principale ajustée en max-w-7xl */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 relative z-20">
+        {loading ? (
+          <div className="bg-white rounded-3xl p-12 text-center shadow-sm border border-slate-100">
+            <p className="text-slate-500 font-medium">Chargement des données...</p>
+          </div>
+        ) : filteredCancers.length === 0 ? (
+          <div className="bg-white rounded-3xl p-12 text-center shadow-sm border border-slate-100 space-y-3">
+            <p className="text-slate-700 font-bold text-lg">Aucun résultat trouvé</p>
+            <p className="text-slate-500 text-sm">Essayez de modifier votre recherche.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {filteredCancers.map((cancer, index) => (
+              <div
+                key={cancer.id || index}
+                className="bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col justify-between group"
+              >
+                <div>
+                  {/* Image / Couleur fixe avec ratio respecté */}
+                  <div className="relative w-full h-64 overflow-hidden bg-slate-100">
+                    {cancer.image ? (
+                      <img
+                        src={cancer.image}
+                        alt={cancer.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                    ) : (
+                      <div
+                        className="w-full h-full flex items-center justify-center font-black text-white text-2xl p-6 text-center uppercase tracking-wide"
+                        style={{ backgroundColor: cancer.color || '#ec4899' }}
+                      >
                         {cancer.name}
-                      </h2>
-                      <p className="text-slate-600 text-sm leading-relaxed mb-6">
-                        {cancer.shortDescription || cancer.description}
-                      </p>
-                    </div>
+                      </div>
+                    )}
+                    <span className="absolute top-4 right-4 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-xs font-extrabold text-slate-800 shadow-sm">
+                      Focus {String(index + 1).padStart(2, '0')}
+                    </span>
                   </div>
 
-                  {/* Bouton avec ombre rose décalée */}
-                  <div className="px-8 pb-8">
-                    <Link
-                      href={`/cancers/${cancer.id}`}
-                      className="w-full bg-[#0e5c54] hover:bg-[#0b4741] text-white py-3.5 rounded-2xl font-bold text-sm text-center block transition-all shadow-[0_12px_20px_-4px_rgba(233,30,99,0.5)] active:translate-y-0.5"
-                    >
-                      En savoir plus
-                    </Link>
+                  {/* Contenu textuel de la carte */}
+                  <div className="p-6 space-y-3">
+                    <h2 className="text-xl font-black text-slate-900 tracking-tight uppercase">
+                      {cancer.name}
+                    </h2>
+                    <p className="text-slate-600 text-sm line-clamp-3 leading-relaxed">
+                      {cancer.shortdescription || cancer.description || 'Consultez la fiche détaillée pour en savoir plus sur la prévention et le dépistage.'}
+                    </p>
                   </div>
                 </div>
-              ))}
+
+                {/* Bouton du bas parfaitement aligné */}
+                <div className="px-6 pb-6 pt-2">
+                  <Link
+                    href={`/cancers/${cancer.id}`}
+                    className="w-full inline-flex items-center justify-center gap-2 bg-slate-900 hover:bg-[#ec4899] text-white font-bold py-3.5 px-4 rounded-2xl transition-colors text-sm shadow-sm"
+                  >
+                    <span>En savoir plus</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Section d'accompagnement bas de page */}
+        <div className="mt-16 bg-white rounded-3xl p-8 sm:p-12 border border-slate-100 shadow-sm grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+          <div className="space-y-4">
+            <div className="inline-flex items-center gap-2 text-[#ec4899] font-bold text-xs uppercase tracking-wider">
+              <Heart className="w-4 h-4" />
+              Soutien & Accompagnement
             </div>
-          )}
+            <h3 className="text-2xl sm:text-3xl font-black text-slate-900 uppercase">
+              Besoin d'un conseil ou d'une orientation ?
+            </h3>
+            <p className="text-slate-600 text-sm sm:text-base leading-relaxed">
+              Nos équipes et bénévoles sont à votre disposition pour vous informer sur les campagnes de dépistage à venir.
+            </p>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-4 justify-start md:justify-end">
+            <Link
+              href="/evenements"
+              className="inline-flex items-center justify-center gap-2 bg-[#ec4899] hover:bg-[#db2777] text-white font-bold px-6 py-4 rounded-2xl text-sm transition-colors text-center"
+            >
+              <Shield className="w-4 h-4" />
+              Nos campagnes
+            </Link>
+            <Link
+              href="/contact"
+              className="inline-flex items-center justify-center bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold px-6 py-4 rounded-2xl text-sm transition-colors text-center"
+            >
+              Nous contacter
+            </Link>
+          </div>
         </div>
       </section>
     </div>
