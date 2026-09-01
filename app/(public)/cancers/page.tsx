@@ -45,15 +45,15 @@ export default function CancersPage() {
   return (
     <div className="w-full bg-[#fdfbf7] min-h-screen pb-24">
       {/* Banner Héro */}
-      <section className="bg-[#0f766e] text-white pt-16 pb-20 px-4 sm:px-6 lg:px-8 text-center shadow-md">
+      <section className="bg-[#0f766e] text-white pt-16 pb-20 px-4 sm:px-6 lg:px-8 text-center shadow-lg">
         <div className="max-w-4xl mx-auto space-y-4">
           <span className="text-pink-300 font-bold text-xs uppercase tracking-widest block">
             PRÉVENTION & INFORMATIONS MÉDICALES
           </span>
-          <h1 className="text-3xl sm:text-5xl font-black uppercase tracking-tight text-emerald-50">
+          <h1 className="text-4xl sm:text-6xl font-black uppercase tracking-tight text-emerald-50">
             COMPRENDRE LES CANCERS FÉMININS
           </h1>
-          <p className="text-emerald-100/90 text-sm sm:text-base max-w-2xl mx-auto font-normal leading-relaxed">
+          <p className="text-emerald-100 text-base sm:text-lg max-w-2xl mx-auto font-normal leading-relaxed">
             Une information exacte et un dépistage régulier sont les armes les plus efficaces pour préserver votre santé.
           </p>
 
@@ -65,30 +65,30 @@ export default function CancersPage() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Rechercher un cancer..."
-                className="w-full pl-12 pr-4 py-4 rounded-2xl bg-white text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-pink-600 shadow-sm text-sm font-medium transition-all"
+                className="w-full pl-12 pr-4 py-4 rounded-2xl bg-white text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-pink-600 shadow-md text-sm font-medium transition-all"
               />
             </div>
           </div>
         </div>
       </section>
 
-      {/* Grille des cartes avec un espacement propre et soigné */}
+      {/* Grille des cartes avec ombre renforcée et typographie agrandie */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12">
         {loading ? (
-          <div className="bg-white rounded-3xl p-12 text-center border border-stone-200/80 shadow-lg">
-            <p className="text-stone-500 font-medium text-sm">Chargement des données...</p>
+          <div className="bg-white rounded-3xl p-12 text-center border border-stone-200/85 shadow-xl">
+            <p className="text-stone-500 font-medium text-base">Chargement des données...</p>
           </div>
         ) : filteredCancers.length === 0 ? (
-          <div className="bg-white rounded-3xl p-12 text-center border border-stone-200/80 shadow-lg space-y-2">
-            <p className="text-stone-900 font-bold text-lg">Aucun résultat trouvé</p>
-            <p className="text-stone-500 text-sm">Essayez de modifier votre recherche.</p>
+          <div className="bg-white rounded-3xl p-12 text-center border border-stone-200/85 shadow-xl space-y-2">
+            <p className="text-stone-900 font-bold text-xl">Aucun résultat trouvé</p>
+            <p className="text-stone-500 text-base">Essayez de modifier votre recherche.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredCancers.map((cancer, index) => (
               <div
                 key={cancer.id || index}
-                className="bg-white rounded-3xl border border-stone-200/80 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col justify-between group"
+                className="bg-white rounded-3xl border border-stone-200/85 shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden flex flex-col justify-between group"
               >
                 <div>
                   <div className="relative w-full h-52 bg-stone-100 overflow-hidden">
@@ -100,22 +100,22 @@ export default function CancersPage() {
                       />
                     ) : (
                       <div
-                        className="w-full h-full flex items-center justify-center font-black text-white text-xl p-4 text-center uppercase"
+                        className="w-full h-full flex items-center justify-center font-black text-white text-2xl p-4 text-center uppercase"
                         style={{ backgroundColor: cancer.color || '#0f766e' }}
                       >
                         {cancer.name}
                       </div>
                     )}
-                    <span className="absolute top-4 right-4 bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-full text-xs font-extrabold text-stone-900 shadow-sm">
+                    <span className="absolute top-4 right-4 bg-white/95 backdrop-blur-md px-3.5 py-1.5 rounded-full text-xs font-black text-stone-900 shadow-md">
                       Focus {String(index + 1).padStart(2, '0')}
                     </span>
                   </div>
 
-                  <div className="p-6 space-y-3">
-                    <h2 className="text-xl font-bold text-stone-900 uppercase tracking-tight leading-snug">
+                  <div className="p-6 space-y-3.5">
+                    <h2 className="text-2xl font-black text-stone-900 uppercase tracking-tight leading-snug">
                       {cancer.name}
                     </h2>
-                    <p className="text-stone-600 text-xs sm:text-sm line-clamp-3 leading-relaxed">
+                    <p className="text-stone-600 text-sm sm:text-base line-clamp-3 leading-relaxed">
                       {cancer.shortDescription || cancer.description || 'Consultez la fiche détaillée.'}
                     </p>
                   </div>
@@ -124,10 +124,10 @@ export default function CancersPage() {
                 <div className="p-6 pt-0">
                   <Link
                     href={`/cancers/${cancer.id || slugify(cancer.name)}`}
-                    className="w-full inline-flex items-center justify-center gap-2 bg-[#0f766e] hover:bg-[#115e59] text-white font-bold py-3.5 px-4 rounded-2xl transition-all text-xs uppercase tracking-wider shadow-sm"
+                    className="w-full inline-flex items-center justify-center gap-2 bg-[#0f766e] hover:bg-[#115e59] text-white font-bold py-4 px-4 rounded-2xl transition-all text-xs uppercase tracking-wider shadow-md"
                   >
                     <span>En savoir plus</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
+                    <ArrowRight className="w-4 h-4" />
                   </Link>
                 </div>
               </div>
