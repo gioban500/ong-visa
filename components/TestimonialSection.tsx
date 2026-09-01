@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, Quote } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface Testimonial {
   id: string;
@@ -19,110 +20,85 @@ interface TestimonialSectionProps {
 
 export default function TestimonialSection({ testimonials }: TestimonialSectionProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
+  
+  // Ne garder que les témoignages approuvés s'il y a un flag
+  const displayList = testimonials?.filter(t => t.approved !== false) || [];
 
   useEffect(() => {
-    if (testimonials.length <= 1) return;
+    if (displayList.length <= 1) return;
     const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % testimonials.length);
+      setCurrentIndex((prev) => (prev + 1) % displayList.length);
     }, 6000);
     return () => clearInterval(interval);
-  }, [testimonials.length]);
+  }, [displayList.length]);
 
-  if (!testimonials || testimonials.length === 0) {
-    return null;
-  }
+  if (!displayList || displayList.length === 0) return null;
 
-  const nextSlide = () =>
-    setCurrentIndex((prev) => (prev + 1) % testimonials.length);
-  const prevSlide = () =>
-    setCurrentIndex((prev) => (prev - 1 + testimonials.length) % testimonials.length);
+  const current = displayList[currentIndex];
 
-  const current = testimonials[currentIndex];
+  const nextSlide = () => setCurrentIndex((prev) => (prev + 1) % displayList.length);
+  const prevSlide = () => setCurrentIndex((prev) => (prev - 1 + displayList.length) % displayList.length);
 
   return (
-    <section className="py-20 bg-white">
-      <div className="container mx-auto px-4">
-        <div className="max-w-5xl mx-auto">
-          {/* Titre */}
-          <div className="text-center mb-14">
-            <span className="inline-block px-4 py-1.5 rounded-full bg-pink-100 text-pink-600 font-semibold text-sm mb-4">
-              Témoignages
-            </span>
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900">
-              Elles ont <span className="text-gradient">surmonté</span> l'épreuve
-            </h2>
-            <p className="text-lg text-gray-600 mt-4 max-w-2xl mx-auto">
-              Des femmes courageuses partagent leur parcours pour inspirer et
-              redonner espoir.
-            </p>
-          </div>
+    <section className="w-full bg-white py-12 sm:py-20 px-4 sm:px-8 lg:px-12 border-b border-amber-100/60">
+      <div className="max-w-5xl mx-auto">
+        <h2 className="text-2xl sm:text-4xl font-black text-[#0f766e] mb-8 sm:mb-14 text-center uppercase tracking-wide">
+          TÉMOIGNAGES
+        </h2>
 
-          {/* Carte témoignage */}
-          <div className="relative">
-            <div className="bg-gradient-to-br from-pink-50 to-purple-50 rounded-3xl p-8 md:p-12 shadow-xl border border-pink-100">
-              <Quote className="w-12 h-12 text-pink-300 mb-6" />
-
-              <blockquote className="text-xl md:text-2xl text-gray-800 font-medium leading-relaxed mb-8 min-h-[120px] line-clamp-5">
+        <div className="relative">
+          <AnimatePresence mode="wait">
+            <motion.div 
+              key={current.id || currentIndex}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.4 }}
+              className="bg-[#fdfbf7] p-6 sm:p-10 rounded-3xl border border-stone-200/80 shadow-sm flex flex-col justify-between"
+            >
+              <p className="text-slate-700 italic text-base sm:text-xl mb-8 leading-relaxed font-medium">
                 "{current.story}"
-              </blockquote>
+              </p>
 
               <div className="flex items-center gap-4">
                 {current.image ? (
                   <img
                     src={current.image}
                     alt={current.name}
-                    className="w-16 h-16 rounded-full object-cover border-4 border-white shadow-md"
+                    className="w-14 h-14 rounded-full object-cover border-2 border-[#0f766e] shadow-sm shrink-0"
                   />
                 ) : (
-                  <div className="w-16 h-16 rounded-full gradient-rose-violet flex items-center justify-center text-white text-xl font-bold shadow-md">
+                  <div className="w-14 h-14 rounded-full bg-[#0f766e] text-white flex items-center justify-center text-xl font-bold shadow-sm shrink-0">
                     {current.name.charAt(0)}
                   </div>
                 )}
                 <div>
-                  <p className="text-lg font-bold text-gray-900">{current.name}</p>
-                  <p className="text-sm text-pink-600 font-medium">
-                    Témoignage inspirant
+                  <h4 className="font-bold text-slate-900 text-base sm:text-lg">{current.name}</h4>
+                  <p className="text-xs sm:text-sm text-pink-600 font-semibold">
+                    {current.cancerType || "Bénéficiaire"}
                   </p>
                 </div>
               </div>
-            </div>
+            </motion.div>
+          </AnimatePresence>
 
-            {/* Navigation */}
-            {testimonials.length > 1 && (
-              <>
-                <button
-                  onClick={prevSlide}
-                  className="absolute -left-4 md:-left-6 top-1/2 -translate-y-1/2 bg-white shadow-lg hover:shadow-xl text-pink-500 p-3 rounded-full transition-all hover:scale-110"
-                  aria-label="Témoignage précédent"
-                >
-                  <ChevronLeft className="w-6 h-6" />
-                </button>
-                <button
-                  onClick={nextSlide}
-                  className="absolute -right-4 md:-right-6 top-1/2 -translate-y-1/2 bg-white shadow-lg hover:shadow-xl text-pink-500 p-3 rounded-full transition-all hover:scale-110"
-                  aria-label="Témoignage suivant"
-                >
-                  <ChevronRight className="w-6 h-6" />
-                </button>
-              </>
-            )}
-          </div>
-
-          {/* Dots */}
-          {testimonials.length > 1 && (
-            <div className="flex justify-center gap-2 mt-8">
-              {testimonials.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setCurrentIndex(index)}
-                  className={`h-2 rounded-full transition-all duration-300 ${
-                    index === currentIndex
-                      ? 'w-10 gradient-rose-violet'
-                      : 'w-2 bg-gray-300 hover:bg-gray-400'
-                  }`}
-                  aria-label={`Témoignage ${index + 1}`}
-                />
-              ))}
+          {/* Navigation Flèches */}
+          {displayList.length > 1 && (
+            <div className="flex justify-end items-center gap-3 mt-6">
+              <button
+                onClick={prevSlide}
+                className="p-3 bg-white hover:bg-stone-100 text-slate-800 rounded-full border border-stone-200 transition shadow-sm"
+                aria-label="Témoignage précédent"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+              <button
+                onClick={nextSlide}
+                className="p-3 bg-white hover:bg-stone-100 text-slate-800 rounded-full border border-stone-200 transition shadow-sm"
+                aria-label="Témoignage suivant"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
             </div>
           )}
         </div>

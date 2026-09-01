@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { ChevronLeft, ChevronRight, Heart, ArrowRight, Ribbon } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface Testimonial {
   id: string;
@@ -17,175 +17,74 @@ interface HeroCarouselProps {
 }
 
 export default function HeroCarousel({ testimonials }: HeroCarouselProps) {
+  const slides = testimonials?.filter((t) => t.image) || [];
   const [current, setCurrent] = useState(0);
-  const [fade, setFade] = useState(true);
 
-  // Ne garder que les témoignages avec photo pour le fond
-  const slides = testimonials.filter((t) => t.image);
+  const defaultBgImage = "https://firebasestorage.googleapis.com/v0/b/newafrique-b466a.appspot.com/o/292horjq9s7?alt=media&token=5ebc90cd-98ae-4ff4-a4fd-9bf540ad527a";
 
   useEffect(() => {
     if (slides.length <= 1) return;
     const interval = setInterval(() => {
-      setFade(false);
-      setTimeout(() => {
-        setCurrent((prev) => (prev + 1) % slides.length);
-        setFade(true);
-      }, 400);
-    }, 5500);
+      setCurrent((prev) => (prev + 1) % slides.length);
+    }, 6000);
     return () => clearInterval(interval);
   }, [slides.length]);
 
-  const go = (dir: number) => {
-    setFade(false);
-    setTimeout(() => {
-      setCurrent((prev) => (prev + dir + slides.length) % slides.length);
-      setFade(true);
-    }, 300);
-  };
+  const activeSlide = slides[current];
 
-  // ====== Cas sans photo : hero dégradé animé ======
-  if (slides.length === 0) {
-    return (
-      <section className="mx-3 md:mx-4 rounded-[2rem] relative overflow-hidden gradient-rose-violet min-h-[75vh] flex items-center">
-        <div className="absolute top-10 right-10 w-96 h-96 bg-white/10 rounded-full blur-3xl animate-float" />
-        <div className="absolute bottom-10 left-10 w-80 h-80 bg-purple-300/20 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }} />
-        <div className="container mx-auto px-4 relative z-10 text-center">
-          <span className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-white/20 backdrop-blur-sm text-white font-semibold mb-6 border border-white/30 animate-fade-up">
-            <Ribbon className="w-4 h-4" /> ONG VISA
-          </span>
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold text-white leading-tight mb-6 drop-shadow-lg animate-fade-up" style={{ animationDelay: '0.1s' }}>
-            Ensemble contre les
-            <br /> cancers féminins
-          </h1>
-          <p className="text-lg md:text-2xl text-white/90 max-w-2xl mx-auto mb-10 animate-fade-up" style={{ animationDelay: '0.2s' }}>
-            Prévention, dépistage et accompagnement face au cancer du sein et du
-            col de l'utérus.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-up" style={{ animationDelay: '0.3s' }}>
-            <Link href="/cancers" className="inline-flex items-center justify-center gap-2 bg-white text-pink-600 px-8 py-4 rounded-full font-bold shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1">
-              Découvrir les cancers <ArrowRight className="w-5 h-5" />
-            </Link>
-            <Link href="/donation" className="inline-flex items-center justify-center gap-2 bg-white/10 backdrop-blur-sm text-white border-2 border-white px-8 py-4 rounded-full font-bold hover:bg-white/20 transition-all">
-              <Heart className="w-5 h-5" /> Faire un don
-            </Link>
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  const slide = slides[current];
-
-  // ====== Cas avec photos : carousel avec image entière visible ======
   return (
-    <section className="mx-3 md:mx-4 rounded-[2rem] relative min-h-[75vh] w-full overflow-hidden bg-gray-900">
-      {slides.map((s, i) => (
-        <div
-          key={s.id}
-          className="absolute inset-0 transition-opacity duration-700 ease-in-out"
-          style={{ opacity: i === current ? 1 : 0 }}
-        >
-          {/* Fond flou (remplit tout l'espace sans bandes vides) */}
-          <img
-            src={s.image}
-            alt=""
-            aria-hidden="true"
-            className="absolute inset-0 w-full h-full object-cover blur-2xl scale-110 opacity-60"
+    <section className="relative w-full py-12 sm:py-20 min-h-[480px] sm:min-h-[550px] flex items-center bg-slate-900 lg:bg-white overflow-hidden">
+      {/* Image de fond dynamique (BDD si dispo, sinon image par défaut) */}
+      <div className="absolute top-0 right-0 w-full lg:w-[55%] h-full z-0 opacity-40 lg:opacity-100">
+        <AnimatePresence mode="wait">
+          <motion.img 
+            key={activeSlide ? activeSlide.id : 'default-hero'}
+            src={activeSlide?.image || defaultBgImage} 
+            alt="Hero VISA ONG"
+            initial={{ opacity: 0.3, scale: 1.03 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0.3 }}
+            transition={{ duration: 0.8 }}
+            className="w-full h-full object-cover object-center"
           />
-          {/* Image entière visible (non rognée) */}
-          <img
-            src={s.image}
-            alt={s.name}
-            className="absolute inset-0 w-full h-full object-contain"
-          />
-        </div>
-      ))}
-
-      {/* Voile léger uniquement en bas pour lisibilité du texte */}
-      <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/85 via-black/40 to-transparent" />
-
-      {/* Contenu ancré en bas */}
-      <div className="relative z-10 min-h-[75vh] flex flex-col justify-end px-6 md:px-12 pb-14 md:pb-16">
-        <div
-          className={`max-w-3xl transition-all duration-500 ${
-            fade ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-          }`}
-        >
-          <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-white/15 backdrop-blur-md rounded-full text-white font-semibold text-sm border border-white/25 mb-5">
-            <Ribbon className="w-4 h-4" /> Témoignage
-          </span>
-
-          <blockquote className="mb-5">
-            <p className="text-xl md:text-3xl lg:text-4xl font-bold text-white leading-snug drop-shadow-xl line-clamp-4">
-              "{slide.story}"
-            </p>
-          </blockquote>
-
-          <div className="flex items-center gap-3 mb-8">
-            <span className="h-1 w-10 rounded-full gradient-rose-violet" />
-            <p className="text-lg md:text-xl text-white font-semibold drop-shadow">
-              {slide.name}
-            </p>
-          </div>
-
-          <div className="flex flex-col sm:flex-row gap-4">
-            <Link
-              href="/cancers"
-              className="inline-flex items-center justify-center gap-2 gradient-rose-violet text-white px-8 py-4 rounded-full font-bold shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1"
-            >
-              Découvrir les cancers <ArrowRight className="w-5 h-5" />
-            </Link>
-            <Link
-              href="/contact"
-              className="inline-flex items-center justify-center gap-2 bg-white/10 backdrop-blur-md text-white border-2 border-white/40 px-8 py-4 rounded-full font-bold hover:bg-white/20 transition-all"
-            >
-              Partager votre histoire
-            </Link>
-          </div>
-        </div>
+        </AnimatePresence>
+        <div className="hidden lg:block absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-white via-white/70 to-transparent z-10" />
+        <div className="lg:hidden absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/60 to-transparent z-10" />
       </div>
 
-      {/* Flèches */}
-      {slides.length > 1 && (
-        <>
-          <button
-            onClick={() => go(-1)}
-            className="absolute left-4 md:left-6 top-1/2 -translate-y-1/2 z-20 bg-white/20 backdrop-blur-sm hover:bg-white/40 text-white p-3 rounded-full transition-all border border-white/30"
-            aria-label="Précédent"
-          >
-            <ChevronLeft className="w-6 h-6" />
-          </button>
-          <button
-            onClick={() => go(1)}
-            className="absolute right-4 md:right-6 top-1/2 -translate-y-1/2 z-20 bg-white/20 backdrop-blur-sm hover:bg-white/40 text-white p-3 rounded-full transition-all border border-white/30"
-            aria-label="Suivant"
-          >
-            <ChevronRight className="w-6 h-6" />
-          </button>
-        </>
-      )}
+      <div className="max-w-7xl w-full mx-auto px-4 sm:px-8 lg:px-12 relative z-20">
+        <motion.div 
+          initial={{ opacity: 0, x: -30 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.8 }}
+          className="max-w-xl text-white lg:text-slate-900"
+        >
+          <h1 className="text-3xl sm:text-5xl font-extrabold leading-tight mb-4 tracking-tight">
+            VISA ONG : Votre Partenaire pour la Santé et l'Espoir au Togo
+          </h1>
+          
+          <p className="text-pink-400 lg:text-pink-600 font-semibold text-base sm:text-xl mb-6 sm:mb-8">
+            {activeSlide 
+              ? `"${activeSlide.story.slice(0, 110)}..." — ${activeSlide.name}`
+              : "Dédiés à la sensibilisation et au dépistage des cancers féminins."}
+          </p>
 
-      {/* Points */}
-      {slides.length > 1 && (
-        <div className="absolute top-6 right-6 z-20 flex gap-2">
-          {slides.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => {
-                setFade(false);
-                setTimeout(() => {
-                  setCurrent(i);
-                  setFade(true);
-                }, 300);
-              }}
-              className={`h-2 rounded-full transition-all duration-300 ${
-                i === current ? 'w-10 gradient-rose-violet' : 'w-2 bg-white/60 hover:bg-white/80'
-              }`}
-              aria-label={`Slide ${i + 1}`}
-            />
-          ))}
-        </div>
-      )}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
+            <Link 
+              href="/cancers"
+              className="w-full sm:w-auto bg-[#0f766e] hover:bg-[#115e59] text-white px-6 py-3.5 rounded-xl font-bold text-sm sm:text-base transition shadow-lg shadow-teal-700/30 flex items-center justify-center"
+            >
+              Planifier un Dépistage
+            </Link>
+            <Link 
+              href="/donation"
+              className="w-full sm:w-auto bg-pink-600 hover:bg-pink-700 text-white px-6 py-3.5 rounded-xl font-bold text-sm sm:text-base transition shadow-lg shadow-pink-500/35 flex items-center justify-center"
+            >
+              Faire un Don
+            </Link>
+          </div>
+        </motion.div>
+      </div>
     </section>
   );
 }

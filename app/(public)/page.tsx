@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   Heart,
   Users,
@@ -13,112 +14,123 @@ import HeroCarousel from '@/components/HeroCarousel';
 import TestimonialSection from '@/components/TestimonialSection';
 import Newsletter from '@/components/Newsletter';
 import Reveal from '@/components/Reveal';
-import { getApprovedTestimonials, getCancers, getBlogPosts } from '@/lib/db';
-import { initDatabase, seedDatabase } from '@/lib/db';
+import { getApprovedTestimonials, getCancers, getBlogPosts, initDatabase, seedDatabase } from '@/lib/db';
 
-// Toujours rendre à la demande pour afficher les données ajoutées sans rebuild
 export const dynamic = 'force-dynamic';
 
-async function initializeDB() {
+interface CancerItem {
+  id: string;
+  name: string;
+  color?: string;
+  description?: string;
+  shortDescription?: string;
+}
+
+interface BlogPost {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  image?: string;
+  category: string;
+  published: boolean;
+  publishedDate: string;
+}
+
+export default async function Home() {
   try {
     await initDatabase();
     await seedDatabase();
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error initializing database:', error);
   }
-}
 
-initializeDB();
-
-export default async function Home() {
-  let testimonials: any[] = [];
-  let cancers: any[] = [];
+  let testimonials: unknown[] = [];
+  let cancers: CancerItem[] = [];
+  let events: BlogPost[] = [];
 
   try {
     testimonials = await getApprovedTestimonials();
-  } catch (e) {
+  } catch (_e: unknown) {
     testimonials = [];
   }
+
   try {
     cancers = await getCancers();
-  } catch (e) {
+  } catch (_e: unknown) {
     cancers = [];
   }
-  
-  let events: any[] = [];
+
   try {
-    const allPosts = await getBlogPosts();
-    events = allPosts.filter((p: any) => p.category === 'Événements' && p.published).slice(0, 3);
-  } catch (e) {
+    const allPosts: BlogPost[] = await getBlogPosts();
+    events = allPosts.filter((p) => p.category === 'Événements' && p.published).slice(0, 3);
+  } catch (_e: unknown) {
     events = [];
   }
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col min-h-screen bg-slate-50">
       {/* ============ HERO CAROUSEL ============ */}
-      <HeroCarousel testimonials={testimonials} />
+      <HeroCarousel testimonials={testimonials as any} />
 
       {/* ============ MISSION SECTION ============ */}
-      <section className="py-24 bg-white">
+      <section className="py-20 sm:py-24 bg-white">
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
             <Reveal>
               <div className="text-center mb-16">
-                <span className="inline-block px-4 py-1.5 rounded-full bg-purple-100 text-purple-600 font-semibold text-sm mb-4">
+                <span className="inline-block px-4 py-1.5 rounded-full bg-teal-50 text-[#0f766e] font-semibold text-sm mb-4 border border-teal-100">
                   Notre engagement
                 </span>
-                <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-                  Notre <span className="text-gradient">Mission</span>
+                <h2 className="text-3xl sm:text-5xl font-black text-slate-900 mb-6 tracking-tight">
+                  Notre <span className="text-[#0f766e]">Mission</span>
                 </h2>
-                <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-                  L'ONG VISA se consacre à la prévention et à la
-                  sensibilisation des cancers féminins, avec un focus sur le
-                  cancer du sein et le cancer du col de l'utérus.
+                <p className="text-lg sm:text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
+                  L&apos;ONG VISA se consacre à la prévention et à la sensibilisation des cancers féminins, avec une priorité accordée au cancer du sein et au cancer du col de l&apos;utérus.
                 </p>
               </div>
             </Reveal>
 
             <div className="grid md:grid-cols-3 gap-8">
               <Reveal delay={0} direction="up">
-                <div className="group bg-white rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-all hover:-translate-y-2 border border-pink-100 h-full">
-                  <div className="w-16 h-16 gradient-rose-violet rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-3 transition-transform">
-                    <Target className="w-8 h-8 text-white" />
+                <div className="group bg-white rounded-3xl p-8 shadow-sm hover:shadow-xl transition-all border border-slate-100 h-full flex flex-col justify-between">
+                  <div>
+                    <div className="w-14 h-14 bg-teal-100/80 rounded-2xl flex items-center justify-center mb-6 text-[#0f766e] group-hover:scale-110 transition-transform">
+                      <Target className="w-7 h-7" />
+                    </div>
+                    <h3 className="text-2xl font-bold text-slate-900 mb-3">Prévention</h3>
+                    <p className="text-slate-600 leading-relaxed text-sm sm:text-base">
+                      Sensibiliser les femmes à l&apos;importance du dépistage précoce et promouvoir des habitudes de vie plus saines pour réduire les risques.
+                    </p>
                   </div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                    Prévention
-                  </h3>
-                  <p className="text-gray-600 leading-relaxed">
-                    Sensibiliser les femmes à l'importance du dépistage précoce et
-                    promouvoir des modes de vie sains pour réduire les risques.
-                  </p>
                 </div>
               </Reveal>
 
               <Reveal delay={150} direction="up">
-                <div className="group bg-white rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-all hover:-translate-y-2 border border-purple-100 h-full">
-                  <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-3 transition-transform">
-                    <Stethoscope className="w-8 h-8 text-white" />
+                <div className="group bg-white rounded-3xl p-8 shadow-sm hover:shadow-xl transition-all border border-slate-100 h-full flex flex-col justify-between">
+                  <div>
+                    <div className="w-14 h-14 bg-pink-100/80 rounded-2xl flex items-center justify-center mb-6 text-pink-600 group-hover:scale-110 transition-transform">
+                      <Stethoscope className="w-7 h-7" />
+                    </div>
+                    <h3 className="text-2xl font-bold text-slate-900 mb-3">Dépistage</h3>
+                    <p className="text-slate-600 leading-relaxed text-sm sm:text-base">
+                      Faciliter l&apos;accès aux examens de dépistage et orienter les femmes vers une prise en charge médicale adaptée et rapide.
+                    </p>
                   </div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                    Dépistage
-                  </h3>
-                  <p className="text-gray-600 leading-relaxed">
-                    Faciliter l'accès au dépistage gratuit et accompagner les
-                    femmes dans leur parcours de santé reproductive.
-                  </p>
                 </div>
               </Reveal>
 
               <Reveal delay={300} direction="up">
-                <div className="group bg-white rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-all hover:-translate-y-2 border border-pink-100 h-full">
-                  <div className="w-16 h-16 gradient-rose-violet rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-3 transition-transform">
-                    <HandHeart className="w-8 h-8 text-white" />
+                <div className="group bg-white rounded-3xl p-8 shadow-sm hover:shadow-xl transition-all border border-slate-100 h-full flex flex-col justify-between">
+                  <div>
+                    <div className="w-14 h-14 bg-amber-100/80 rounded-2xl flex items-center justify-center mb-6 text-amber-700 group-hover:scale-110 transition-transform">
+                      <HandHeart className="w-7 h-7" />
+                    </div>
+                    <h3 className="text-2xl font-bold text-slate-900 mb-3">Soutien</h3>
+                    <p className="text-slate-600 leading-relaxed text-sm sm:text-base">
+                      Apporter un accompagnement humain et psychologique aux patientes et à leurs proches tout au long du traitement.
+                    </p>
                   </div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-4">Soutien</h3>
-                  <p className="text-gray-600 leading-relaxed">
-                    Offrir un soutien moral et psychologique aux femmes touchées et
-                    à leurs familles tout au long de leur combat.
-                  </p>
                 </div>
               </Reveal>
             </div>
@@ -127,54 +139,53 @@ export default async function Home() {
       </section>
 
       {/* ============ CANCERS FÉMININS SECTION ============ */}
-      <section className="py-24 gradient-rose-violet-soft">
+      <section className="py-20 sm:py-24 bg-slate-100/60 border-y border-slate-200/60">
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
             <Reveal>
               <div className="text-center mb-16">
                 <span className="inline-block px-4 py-1.5 rounded-full bg-white text-pink-600 font-semibold text-sm mb-4 shadow-sm">
-                  S'informer
+                  Informations Sanitaires
                 </span>
-                <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-                  Cancers <span className="text-gradient">Féminins</span>
+                <h2 className="text-3xl sm:text-5xl font-black text-slate-900 mb-6 tracking-tight">
+                  Cancers <span className="text-pink-600">Féminins</span>
                 </h2>
-                <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                  Informez-vous sur les principaux cancers féminins, leurs
-                  symptômes et l'importance du dépistage précoce.
+                <p className="text-lg sm:text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
+                  Comprendre les symptômes et l&apos;importance d&apos;un diagnostic précoce pour agir à temps.
                 </p>
               </div>
             </Reveal>
 
             {cancers.length > 0 ? (
               <div className="grid md:grid-cols-2 gap-8 mb-12">
-                {cancers.slice(0, 2).map((cancer: any, i: number) => (
+                {cancers.slice(0, 2).map((cancer, i) => (
                   <Reveal key={cancer.id} delay={i * 150} direction={i % 2 === 0 ? 'left' : 'right'}>
                     <Link
                       href={`/cancers/${cancer.id}`}
-                      className="block bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all hover:-translate-y-2 group h-full"
+                      className="block bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all group h-full border border-slate-200/80 flex flex-col"
                     >
                       <div
-                        className="h-52 flex items-center justify-center relative overflow-hidden"
+                        className="h-48 flex items-center justify-center relative p-6"
                         style={{
-                          background: `linear-gradient(135deg, ${cancer.color || '#EC4899'}25 0%, ${cancer.color || '#A78BFA'}45 100%)`,
+                          background: `linear-gradient(135deg, ${cancer.color || '#0f766e'}15 0%, ${cancer.color || '#0f766e'}30 100%)`,
                         }}
                       >
                         <Ribbon
-                          className="w-16 h-16 opacity-40 absolute top-4 right-4 group-hover:scale-125 transition-transform"
-                          style={{ color: cancer.color || '#EC4899' }}
+                          className="w-16 h-16 opacity-30 absolute top-4 right-4 group-hover:scale-110 transition-transform"
+                          style={{ color: cancer.color || '#0f766e' }}
                         />
                         <h3
-                          className="text-3xl font-bold px-6 text-center relative z-10"
-                          style={{ color: cancer.color || '#DB2777' }}
+                          className="text-2xl sm:text-3xl font-extrabold text-center relative z-10"
+                          style={{ color: cancer.color || '#0f766e' }}
                         >
                           {cancer.name}
                         </h3>
                       </div>
-                      <div className="p-8">
-                        <p className="text-gray-600 leading-relaxed mb-6 line-clamp-3">
+                      <div className="p-8 flex-1 flex flex-col justify-between">
+                        <p className="text-slate-600 leading-relaxed mb-6 line-clamp-3 text-sm sm:text-base">
                           {cancer.shortDescription || cancer.description}
                         </p>
-                        <div className="inline-flex items-center text-pink-600 font-bold group-hover:gap-3 gap-2 transition-all">
+                        <div className="inline-flex items-center text-[#0f766e] font-bold group-hover:gap-3 gap-2 transition-all">
                           En savoir plus
                           <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                         </div>
@@ -186,35 +197,19 @@ export default async function Home() {
             ) : (
               <div className="grid md:grid-cols-2 gap-8 mb-12">
                 <Reveal direction="left">
-                  <div className="bg-white rounded-3xl overflow-hidden shadow-lg h-full">
-                    <div className="h-52 flex items-center justify-center bg-gradient-to-br from-pink-100 to-pink-200">
-                      <h3 className="text-3xl font-bold text-pink-600 px-6 text-center">
-                        Cancer du Sein
-                      </h3>
-                    </div>
-                    <div className="p-8">
-                      <p className="text-gray-600 leading-relaxed">
-                        Le cancer le plus fréquent chez la femme. Le dépistage
-                        précoce par auto-palpation et mammographie augmente
-                        considérablement les chances de guérison.
-                      </p>
-                    </div>
+                  <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-slate-200 p-8">
+                    <h3 className="text-2xl font-bold text-pink-600 mb-4">Cancer du Sein</h3>
+                    <p className="text-slate-600 leading-relaxed text-sm sm:text-base">
+                      Le cancer le plus fréquent chez la femme. Le dépistage précoce par auto-palpation et mammographie augmente considérablement les chances de guérison.
+                    </p>
                   </div>
                 </Reveal>
                 <Reveal direction="right" delay={150}>
-                  <div className="bg-white rounded-3xl overflow-hidden shadow-lg h-full">
-                    <div className="h-52 flex items-center justify-center bg-gradient-to-br from-purple-100 to-purple-200">
-                      <h3 className="text-3xl font-bold text-purple-600 px-6 text-center">
-                        Cancer du Col de l'Utérus
-                      </h3>
-                    </div>
-                    <div className="p-8">
-                      <p className="text-gray-600 leading-relaxed">
-                        Évitable grâce à la vaccination contre le HPV et le frottis
-                        de dépistage régulier. Un suivi gynécologique permet de le
-                        prévenir efficacement.
-                      </p>
-                    </div>
+                  <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-slate-200 p-8">
+                    <h3 className="text-2xl font-bold text-[#0f766e] mb-4">Cancer du Col de l&apos;Utérus</h3>
+                    <p className="text-slate-600 leading-relaxed text-sm sm:text-base">
+                      Prévenable grâce au dépistage régulier par frottis ou test HPV. Une détection précoce permet un traitement efficace avant tout stade avancé.
+                    </p>
                   </div>
                 </Reveal>
               </div>
@@ -224,7 +219,7 @@ export default async function Home() {
               <div className="text-center">
                 <Link
                   href="/cancers"
-                  className="inline-flex items-center gap-2 gradient-rose-violet text-white px-8 py-4 rounded-full font-bold shadow-lg hover:shadow-2xl transition-all hover:-translate-y-1"
+                  className="inline-flex items-center gap-2 bg-[#0f766e] hover:bg-[#115e59] text-white px-8 py-4 rounded-xl font-bold shadow-md hover:shadow-lg transition-all"
                 >
                   Voir tous les cancers féminins
                   <ArrowRight className="w-5 h-5" />
@@ -237,16 +232,16 @@ export default async function Home() {
 
       {/* ============ ÉVÉNEMENTS SECTION ============ */}
       {events.length > 0 && (
-        <section className="py-24 bg-gray-50">
+        <section className="py-20 sm:py-24 bg-white">
           <div className="container mx-auto px-4">
             <div className="max-w-6xl mx-auto">
               <Reveal>
                 <div className="text-center mb-16">
-                  <span className="inline-block px-4 py-1.5 rounded-full bg-pink-100 text-pink-600 font-semibold text-sm mb-4">
-                    À venir & Passés
+                  <span className="inline-block px-4 py-1.5 rounded-full bg-slate-100 text-slate-700 font-semibold text-sm mb-4">
+                    Actualités & Actions
                   </span>
-                  <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-                    Nos <span className="text-gradient">Événements</span>
+                  <h2 className="text-3xl sm:text-5xl font-black text-slate-900 mb-6 tracking-tight">
+                    Nos <span className="text-[#0f766e]">Événements</span>
                   </h2>
                 </div>
               </Reveal>
@@ -256,32 +251,38 @@ export default async function Home() {
                   <Reveal key={evt.id} delay={i * 150} direction="up">
                     <Link
                       href={`/blog/${evt.slug}`}
-                      className="block bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all hover:-translate-y-2 h-full group"
+                      className="block bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-lg border border-slate-200 transition-all h-full group"
                     >
-                      <div className="aspect-video relative overflow-hidden bg-gray-100">
+                      <div className="aspect-video relative overflow-hidden bg-slate-100">
                         {evt.image ? (
-                          <img src={evt.image} alt={evt.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                          <Image
+                            src={evt.image}
+                            alt={evt.title}
+                            fill
+                            sizes="(max-width: 768px) 100vw, 33vw"
+                            className="object-cover group-hover:scale-105 transition-transform duration-500"
+                          />
                         ) : (
-                          <div className="w-full h-full bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center">
-                            <span className="text-purple-400 text-4xl">🗓️</span>
+                          <div className="w-full h-full bg-slate-200 flex items-center justify-center">
+                            <span className="text-[#0f766e] text-3xl">🗓️</span>
                           </div>
                         )}
-                        <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-pink-600 shadow-sm">
+                        <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-[#0f766e] shadow-sm z-10">
                           {new Date(evt.publishedDate).toLocaleDateString('fr-FR', {
                             day: 'numeric',
                             month: 'short',
-                            year: 'numeric'
+                            year: 'numeric',
                           })}
                         </div>
                       </div>
                       <div className="p-6">
-                        <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-pink-600 transition-colors line-clamp-2">
+                        <h3 className="text-lg font-bold text-slate-900 mb-2 group-hover:text-[#0f766e] transition-colors line-clamp-2">
                           {evt.title}
                         </h3>
-                        <p className="text-gray-600 leading-relaxed mb-4 line-clamp-3 text-sm">
+                        <p className="text-slate-600 leading-relaxed mb-4 line-clamp-3 text-sm">
                           {evt.excerpt}
                         </p>
-                        <div className="inline-flex items-center text-pink-600 font-bold gap-2 group-hover:gap-3 transition-all text-sm">
+                        <div className="inline-flex items-center text-[#0f766e] font-bold gap-2 text-sm">
                           Détails
                           <ArrowRight className="w-4 h-4" />
                         </div>
@@ -290,12 +291,12 @@ export default async function Home() {
                   </Reveal>
                 ))}
               </div>
-              
+
               <Reveal>
                 <div className="text-center">
                   <Link
                     href="/blog"
-                    className="inline-flex items-center gap-2 gradient-rose-violet text-white px-8 py-4 rounded-full font-bold shadow-lg hover:shadow-2xl transition-all hover:-translate-y-1"
+                    className="inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white px-8 py-4 rounded-xl font-bold transition-all"
                   >
                     Voir tous les articles
                     <ArrowRight className="w-5 h-5" />
@@ -308,13 +309,12 @@ export default async function Home() {
       )}
 
       {/* ============ STATISTIQUES SECTION ============ */}
-      <section className="py-24 gradient-rose-violet relative overflow-hidden">
-        <div className="absolute top-0 left-1/4 w-72 h-72 bg-white/10 rounded-full blur-3xl animate-float" />
-        <div className="container mx-auto px-4 relative z-10">
+      <section className="py-20 sm:py-24 bg-[#0f766e] text-white">
+        <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
             <Reveal>
               <div className="text-center mb-14">
-                <h2 className="text-3xl md:text-4xl font-bold text-white">
+                <h2 className="text-3xl sm:text-4xl font-extrabold">
                   Notre impact en chiffres
                 </h2>
               </div>
@@ -323,17 +323,17 @@ export default async function Home() {
               {[
                 { icon: Users, value: '1000+', label: 'Femmes sensibilisées' },
                 { icon: Heart, value: '500+', label: 'Dépistages réalisés' },
-                { icon: Award, value: '50+', label: 'Vies sauvées' },
+                { icon: Award, value: '50+', label: 'Vies accompagnées' },
               ].map((stat, i) => (
                 <Reveal key={i} delay={i * 150} direction="zoom">
-                  <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-8 border border-white/20 hover:bg-white/20 transition-all">
-                    <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                      <stat.icon className="w-8 h-8 text-white" />
+                  <div className="bg-white/10 rounded-2xl p-8 border border-white/15">
+                    <div className="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center mx-auto mb-4">
+                      <stat.icon className="w-7 h-7 text-white" />
                     </div>
-                    <div className="text-5xl font-extrabold text-white mb-2">
+                    <div className="text-4xl sm:text-5xl font-black mb-2">
                       {stat.value}
                     </div>
-                    <div className="text-lg text-white/90">{stat.label}</div>
+                    <div className="text-base text-teal-100">{stat.label}</div>
                   </div>
                 </Reveal>
               ))}
@@ -343,38 +343,37 @@ export default async function Home() {
       </section>
 
       {/* ============ TÉMOIGNAGES SECTION ============ */}
-      <TestimonialSection testimonials={testimonials} />
+      <TestimonialSection testimonials={testimonials as any} />
 
       {/* ============ NEWSLETTER SECTION ============ */}
       <Newsletter />
 
       {/* ============ CTA SECTION ============ */}
-      <section className="py-24 bg-white">
+      <section className="py-20 bg-slate-50 border-t border-slate-200/60">
         <div className="container mx-auto px-4">
-          <div className="max-w-5xl mx-auto">
+          <div className="max-w-4xl mx-auto">
             <Reveal direction="zoom">
-              <div className="gradient-rose-violet-soft rounded-3xl p-10 md:p-16 text-center shadow-lg border border-pink-100">
-                <div className="w-20 h-20 gradient-rose-violet rounded-full flex items-center justify-center mx-auto mb-8 animate-float">
-                  <HandHeart className="w-10 h-10 text-white" />
+              <div className="bg-white rounded-3xl p-8 sm:p-14 text-center shadow-sm border border-slate-200">
+                <div className="w-16 h-16 bg-pink-100 text-pink-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <HandHeart className="w-8 h-8" />
                 </div>
-                <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
+                <h2 className="text-2xl sm:text-4xl font-extrabold text-slate-900 mb-4">
                   Ensemble, luttons contre les cancers féminins
                 </h2>
-                <p className="text-lg md:text-xl text-gray-600 mb-10 leading-relaxed max-w-2xl mx-auto">
-                  Votre soutien nous permet de continuer nos actions de
-                  prévention, de dépistage et d'accompagnement des femmes.
+                <p className="text-slate-600 mb-8 leading-relaxed max-w-xl mx-auto text-sm sm:text-base">
+                  Votre engagement nous permet d&apos;intensifier les campagnes de sensibilisation et les consultations de dépistage sur le terrain au Togo.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   <Link
                     href="/donation"
-                    className="inline-flex items-center justify-center gap-2 gradient-rose-violet text-white px-8 py-4 rounded-full font-bold shadow-lg hover:shadow-2xl transition-all hover:-translate-y-1"
+                    className="inline-flex items-center justify-center gap-2 bg-pink-600 hover:bg-pink-700 text-white px-8 py-3.5 rounded-xl font-bold transition shadow-md shadow-pink-500/20"
                   >
                     <Heart className="w-5 h-5" />
                     Faire un don
                   </Link>
                   <Link
                     href="/contact"
-                    className="inline-flex items-center justify-center gap-2 bg-white text-pink-600 border-2 border-pink-500 px-8 py-4 rounded-full font-bold hover:bg-pink-50 transition-all"
+                    className="inline-flex items-center justify-center gap-2 bg-white text-slate-800 border border-slate-300 hover:bg-slate-50 px-8 py-3.5 rounded-xl font-bold transition"
                   >
                     Nous contacter
                   </Link>
