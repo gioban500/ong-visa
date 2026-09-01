@@ -2,35 +2,30 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Search, MapPin, ArrowRight, Heart, Shield } from 'lucide-react';
-import { BlogPost } from '@/types/cancer'; // Ajuste le chemin vers tes types si nécessaire
+import { Search, Calendar, MapPin, ArrowRight } from 'lucide-react';
 
-export default function EventsBlogPage() {
-  const [posts, setPosts] = useState<BlogPost[]>([]);
+interface EventItem {
+  id: string | number;
+  title: string;
+  date?: string;
+  location?: string;
+  description?: string;
+  image?: string;
+}
+
+export default function BlogEventsPage() {
+  const [events, setEvents] = useState<EventItem[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchPosts() {
+    async function fetchEvents() {
       try {
-        const res = await fetch('/api/blog_posts');
+        const res = await fetch('/api/events'); // ajuste la route si ton endpoint s'appelle /api/blog ou /api/articles
         if (res.ok) {
-          const rawData = await res.json();
-          // Normalisation pour correspondre à l'interface BlogPost
-          const formattedData: BlogPost[] = rawData.map((item: any) => ({
-            id: String(item.id),
-            title: item.title || '',
-            slug: item.slug || String(item.id),
-            excerpt: item.excerpt || item.shortdescription || item.description || '',
-            content: item.content || item.description || '',
-            image: item.image || '',
-            author: item.author || 'ONG VISA',
-            publishedDate: item.publishedDate || item.published_date || item.created_at || item.date || '',
-            readTime: item.readTime || item.read_time || 5,
-            category: item.category || 'Événement',
-            tags: Array.isArray(item.tags) ? item.tags : [],
-          }));
-          setPosts(formattedData);
+          const data = await res.json();
+          // S'assure de récupérer le tableau même s'il est empaqueté dans une clé { events: [...] }
+          setEvents(Array.isArray(data) ? data : data.events || []);
         }
       } catch (error) {
         console.error('Erreur lors du chargement des événements:', error);
@@ -38,31 +33,35 @@ export default function EventsBlogPage() {
         setLoading(false);
       }
     }
-    fetchPosts();
+    fetchEvents();
   }, []);
 
-  const filteredPosts = posts.filter((post) =>
-    post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    post.excerpt.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredEvents = events.filter((evt) => {
+    const query = searchQuery.toLowerCase().trim();
+    if (!query) return true;
+    return (
+      evt.title?.toLowerCase().includes(query) ||
+      evt.location?.toLowerCase().includes(query) ||
+      evt.description?.toLowerCase().includes(query)
+    );
+  });
 
   return (
-    <div className="w-full bg-slate-50 min-h-screen pb-24">
-      {/* Banner Héro */}
-      <section className="bg-[#0f172a] text-white pt-16 pb-20 px-4 sm:px-6 lg:px-8 text-center relative overflow-hidden">
-        <div className="max-w-4xl mx-auto space-y-4 relative z-10">
+    <div className="w-full bg-slate-50 min-h-screen pb-20">
+      {/* Banner Événements */}
+      <section className="bg-[#0b1329] text-white pt-12 pb-16 px-4 sm:px-6 lg:px-8 text-center">
+        <div className="max-w-4xl mx-auto space-y-4">
           <span className="text-[#ec4899] font-bold text-xs uppercase tracking-widest block">
             AGENDA & MOBILISATION
           </span>
-          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black uppercase tracking-tight">
+          <h1 className="text-3xl sm:text-5xl font-black uppercase tracking-tight">
             TOUS NOS ÉVÉNEMENTS
           </h1>
-          <p className="text-slate-300 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
+          <p className="text-slate-300 text-sm sm:text-base max-w-2xl mx-auto">
             Retrouvez l'ensemble de nos campagnes de dépistage, conférences scientifiques et activités itinérantes partout au Togo.
           </p>
 
-          {/* Recherche */}
-          <div className="pt-6 max-w-xl mx-auto">
+          <div className="pt-4 max-w-xl mx-auto">
             <div className="relative flex items-center">
               <Search className="absolute left-4 w-5 h-5 text-slate-400" />
               <input
@@ -70,106 +69,70 @@ export default function EventsBlogPage() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Rechercher un événement ou un lieu..."
-                className="w-full pl-12 pr-4 py-4 rounded-full bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-pink-400/30 shadow-lg text-sm sm:text-base transition-all"
+                className="w-full pl-12 pr-4 py-3.5 rounded-full bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-pink-400 shadow-sm text-sm"
               />
             </div>
           </div>
         </div>
       </section>
 
-      {/* Grille principale max-w-7xl */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 relative z-20">
+      {/* Conteneur principal (sans chevauchement cassé) */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10">
         {loading ? (
-          <div className="bg-white rounded-3xl p-12 text-center shadow-sm border border-slate-100">
-            <p className="text-slate-500 font-medium">Chargement des événements...</p>
+          <div className="bg-white rounded-2xl p-12 text-center border border-slate-100 shadow-sm">
+            <p className="text-slate-500 font-medium text-sm">Chargement des événements...</p>
           </div>
-        ) : filteredPosts.length === 0 ? (
-          <div className="bg-white rounded-3xl p-12 text-center shadow-sm border border-slate-100 space-y-3">
-            <p className="text-slate-700 font-bold text-lg">Aucun événement trouvé</p>
+        ) : filteredEvents.length === 0 ? (
+          <div className="bg-white rounded-2xl p-12 text-center border border-slate-100 shadow-sm space-y-2">
+            <p className="text-slate-800 font-bold text-lg">Aucun événement trouvé</p>
             <p className="text-slate-500 text-sm">Essayez de modifier votre recherche.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredPosts.map((post) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredEvents.map((evt) => (
               <div
-                key={post.id}
-                className="bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col justify-between group"
+                key={evt.id}
+                className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden flex flex-col justify-between"
               >
                 <div>
-                  {/* Image fixe verrouillée */}
-                  <div className="relative w-full h-64 overflow-hidden bg-slate-100">
-                    {post.image ? (
-                      <img
-                        src={post.image}
-                        alt={post.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-slate-800 flex items-center justify-center font-bold text-white text-lg p-4 text-center">
-                        {post.title}
+                  {evt.image && (
+                    <div className="h-48 w-full bg-slate-100">
+                      <img src={evt.image} alt={evt.title} className="w-full h-full object-cover" />
+                    </div>
+                  )}
+                  <div className="p-5 space-y-3">
+                    <h3 className="text-lg font-bold text-slate-900">{evt.title}</h3>
+                    {evt.date && (
+                      <div className="flex items-center gap-2 text-xs text-pink-600 font-semibold">
+                        <Calendar className="w-4 h-4" />
+                        <span>{evt.date}</span>
                       </div>
                     )}
-
-                    {post.publishedDate && (
-                      <span className="absolute top-4 right-4 bg-[#ec4899] text-white px-3.5 py-1.5 rounded-full text-xs font-extrabold shadow-sm">
-                        {post.publishedDate}
-                      </span>
+                    {evt.location && (
+                      <div className="flex items-center gap-2 text-xs text-slate-500">
+                        <MapPin className="w-4 h-4" />
+                        <span>{evt.location}</span>
+                      </div>
                     )}
-                  </div>
-
-                  {/* Contenu */}
-                  <div className="p-6 space-y-3">
-                    <h2 className="text-xl font-black text-slate-900 tracking-tight uppercase line-clamp-2">
-                      {post.title}
-                    </h2>
-
-                    {post.excerpt && (
-                      <p className="text-slate-600 text-sm line-clamp-3 leading-relaxed">
-                        {post.excerpt}
-                      </p>
-                    )}
+                    <p className="text-xs sm:text-sm text-slate-600 line-clamp-3">
+                      {evt.description}
+                    </p>
                   </div>
                 </div>
 
-                {/* Lien vers la route /blog/[id] */}
-                <div className="px-6 pb-6 pt-2">
+                <div className="p-5 pt-0">
                   <Link
-                    href={`/blog/${post.id}`}
-                    className="w-full inline-flex items-center justify-center gap-2 bg-slate-900 hover:bg-[#ec4899] text-white font-bold py-3.5 px-4 rounded-2xl transition-colors text-sm shadow-sm"
+                    href={`/blog/${evt.id}`}
+                    className="w-full inline-flex items-center justify-center gap-2 bg-[#0f172a] hover:bg-[#ec4899] text-white font-bold py-3 px-4 rounded-xl transition-colors text-xs uppercase"
                   >
-                    <span>Voir l'événement</span>
-                    <ArrowRight className="w-4 h-4" />
+                    <span>Détails de l'événement</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
                   </Link>
                 </div>
               </div>
             ))}
           </div>
         )}
-
-        {/* Footer section */}
-        <div className="mt-16 bg-white rounded-3xl p-8 sm:p-12 border border-slate-100 shadow-sm grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-          <div className="space-y-4">
-            <div className="inline-flex items-center gap-2 text-[#ec4899] font-bold text-xs uppercase tracking-wider">
-              <Heart className="w-4 h-4" />
-              Rejoignez l'initiative
-            </div>
-            <h3 className="text-2xl sm:text-3xl font-black text-slate-900 uppercase">
-              Vous souhaitez participer ou être partenaire ?
-            </h3>
-            <p className="text-slate-600 text-sm sm:text-base leading-relaxed">
-              Nous sommes à votre disposition pour toute information sur nos prochaines campagnes.
-            </p>
-          </div>
-          <div className="flex flex-col sm:flex-row gap-4 justify-start md:justify-end">
-            <Link
-              href="/contact"
-              className="inline-flex items-center justify-center gap-2 bg-[#ec4899] hover:bg-[#db2777] text-white font-bold px-6 py-4 rounded-2xl text-sm transition-colors text-center"
-            >
-              <Shield className="w-4 h-4" />
-              Nous contacter
-            </Link>
-          </div>
-        </div>
       </section>
     </div>
   );
