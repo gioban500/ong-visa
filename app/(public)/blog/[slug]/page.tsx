@@ -4,15 +4,15 @@ import React, { use, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowLeft, Calendar, HeartHandshake, CheckCircle2, Users, User, Clock } from 'lucide-react';
-import { BlogPost } from '@/types/cancer'; // Import centralisé depuis ton fichier d'interfaces
+import { BlogPost } from '@/types/cancer';
 
 interface PageProps {
-  params: Promise<{ id: string }>;
+  params: Promise<{ slug: string }>;
 }
 
-// Données de secours si l'API est hors-ligne ou vide
+// MOCK_POSTS indexé par slug pour servir de fallback exact
 const MOCK_POSTS: Record<string, BlogPost> = {
-  '1': {
+  'campagne-depistage-sein': {
     id: '1',
     title: 'Campagne Nationale de Dépistage du Cancer du Sein',
     slug: 'campagne-depistage-sein',
@@ -29,7 +29,7 @@ const MOCK_POSTS: Record<string, BlogPost> = {
     category: 'Événement',
     tags: ['Dépistage', 'Lomé']
   },
-  '2': {
+  'conference-prevention-col-uterus': {
     id: '2',
     title: 'Conférence Scientifique & Prévention du Col de l\'Utérus',
     slug: 'conference-prevention-col-uterus',
@@ -45,20 +45,21 @@ const MOCK_POSTS: Record<string, BlogPost> = {
 };
 
 export default function EventDetailPage({ params }: PageProps) {
-  const { id } = use(params);
+  const { slug } = use(params);
   const [post, setPost] = useState<BlogPost | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchPost() {
       try {
-        const res = await fetch(`/api/blog_posts/${id}`);
+        // Appelle la route API basée sur le slug (/api/blog/[slug])
+        const res = await fetch(`/api/blog/${slug}`);
         if (res.ok) {
           const item = await res.json();
           setPost({
             id: String(item.id),
             title: item.title || '',
-            slug: item.slug || String(item.id),
+            slug: item.slug || slug,
             excerpt: item.excerpt || item.shortdescription || item.description || '',
             content: item.content || item.description || '',
             image: item.image || '',
@@ -69,18 +70,20 @@ export default function EventDetailPage({ params }: PageProps) {
             tags: Array.isArray(item.tags) ? item.tags : [],
           });
         } else {
-          // Fallback sur le mock correspondant si l'API renvoie 404/500
-          setPost(MOCK_POSTS[id] || MOCK_POSTS['1'] || null);
+          setPost(MOCK_POSTS[slug] || null);
         }
       } catch (error) {
         console.error('Erreur lors du chargement de l’événement:', error);
-        setPost(MOCK_POSTS[id] || MOCK_POSTS['1'] || null);
+        setPost(MOCK_POSTS[slug] || null);
       } finally {
         setLoading(false);
       }
     }
-    fetchPost();
-  }, [id]);
+
+    if (slug) {
+      fetchPost();
+    }
+  }, [slug]);
 
   if (loading) {
     return (
@@ -170,7 +173,7 @@ export default function EventDetailPage({ params }: PageProps) {
             {/* Redirection vers Contact */}
             <div className="pt-4">
               <Link
-                href={`/contact?event=${encodeURIComponent(post.id)}`}
+                href={`/contact?event=${encodeURIComponent(post.id || post.slug)}`}
                 className="inline-flex items-center gap-2 bg-pink-600 hover:bg-pink-700 text-white font-bold px-8 py-4 rounded-2xl text-xs uppercase tracking-wider transition-all shadow-md hover:shadow-lg"
               >
                 <HeartHandshake className="w-5 h-5" />

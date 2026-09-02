@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Search, Calendar, User, ArrowRight } from 'lucide-react';
-import { BlogPost } from '@/types/cancer'; // Ajuste le chemin selon la structure de tes dossiers
+import { BlogPost } from '@/types/cancer';
 
 const MOCK_POSTS: BlogPost[] = [
   {
@@ -115,7 +115,7 @@ export default function BlogEventsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredPosts.map((post) => (
               <div
-                key={post.id}
+                key={post.id || post.slug}
                 className="bg-white rounded-3xl border border-stone-200/85 shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden flex flex-col justify-between group"
               >
                 <div>
