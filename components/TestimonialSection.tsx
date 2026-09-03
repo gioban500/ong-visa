@@ -20,21 +20,21 @@ interface TestimonialSectionProps {
 const fallbackTestimonials: Testimonial[] = [
   {
     id: '1',
-    name: 'AMINA',
-    story: "Le dépistage précoce m'a sauvé la vie. L'ONG VISA m'a soutenue tout au long du parcours.",
-    image: '/images/testimonials/amina.jpg',
+    name: 'MARIE K.',
+    story: "Un dépistage précoce m'a permis de déceler mon cancer à un stade très précoce. Grâce au soutien de l'ONG, j'ai pu suivre mon traitement sereinement.",
+    image: '/images/testimonials/marie.jpg',
   },
   {
     id: '2',
-    name: 'CHANTAL',
-    story: "J'ai pu combattre mon cancer grâce à leur accompagnement et leurs conseils.",
-    image: '/images/testimonials/chantal.jpg',
+    name: 'AKAKPO',
+    story: "Le dépistage m'a sauvé la vie. L'accompagnement et la prise en charge m'ont redonné espoir.",
+    image: '/images/testimonials/akakpo.jpg',
   },
   {
     id: '3',
-    name: 'FATOU',
-    story: "Aujourd'hui je suis une survivante. Sensibiliser les autres est devenu mon combat.",
-    image: '/images/testimonials/fatou.jpg',
+    name: 'SENONO',
+    story: "Grâce aux conseils et à la bienveillance de l'équipe, j'ai surmonté cette épreuve la tête haute.",
+    image: '/images/testimonials/senono.jpg',
   },
 ];
 
@@ -62,9 +62,9 @@ export default function TestimonialSection({ testimonials = [] }: TestimonialSec
   const showArrows = displayList.length > 3;
 
   return (
-    <section className="py-16 sm:py-24 bg-[#faf9f6]">
-      <div className="container mx-auto px-4 max-w-6xl">
-        <h2 className="text-3xl sm:text-4xl font-black text-[#001731] text-center mb-12 sm:mb-16 tracking-wide uppercase">
+    <section className="py-20 sm:py-28 bg-[#faf9f6]">
+      <div className="container mx-auto px-6 sm:px-10 max-w-7xl">
+        <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#001731] text-center mb-16 sm:mb-20 tracking-wide uppercase">
           TÉMOIGNAGES
         </h2>
 
@@ -73,14 +73,14 @@ export default function TestimonialSection({ testimonials = [] }: TestimonialSec
             <>
               <button
                 onClick={() => scroll('left')}
-                className="hidden md:flex absolute -left-5 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white text-[#001731] p-3 rounded-full shadow-lg border border-slate-200 transition-all hover:scale-110"
+                className="hidden md:flex absolute -left-6 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white text-[#001731] p-3.5 rounded-full shadow-xl border border-slate-200 transition-all hover:scale-110"
                 aria-label="Précédent"
               >
                 <ChevronLeft className="w-6 h-6" />
               </button>
               <button
                 onClick={() => scroll('right')}
-                className="hidden md:flex absolute -right-5 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white text-[#001731] p-3 rounded-full shadow-lg border border-slate-200 transition-all hover:scale-110"
+                className="hidden md:flex absolute -right-6 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white text-[#001731] p-3.5 rounded-full shadow-xl border border-slate-200 transition-all hover:scale-110"
                 aria-label="Suivant"
               >
                 <ChevronRight className="w-6 h-6" />
@@ -90,7 +90,7 @@ export default function TestimonialSection({ testimonials = [] }: TestimonialSec
 
           <div
             ref={scrollRef}
-            className={`flex gap-6 overflow-x-auto pb-6 snap-x snap-mandatory ${
+            className={`flex gap-8 lg:gap-12 overflow-x-auto pb-8 snap-x snap-mandatory ${
               displayList.length <= 3 ? 'md:grid md:grid-cols-3 md:overflow-visible' : ''
             }`}
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
@@ -98,9 +98,10 @@ export default function TestimonialSection({ testimonials = [] }: TestimonialSec
             {displayList.map((item, index) => (
               <div
                 key={item.id || index}
-                className="snap-center flex-shrink-0 w-[290px] sm:w-[340px] md:w-auto bg-white rounded-3xl overflow-hidden shadow-sm border border-slate-100 flex flex-col justify-between"
+                className="snap-center flex-shrink-0 w-[320px] sm:w-[380px] md:w-auto bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition-shadow border border-slate-100 flex flex-col justify-between"
               >
-                <div className="relative h-56 w-full bg-slate-200">
+                {/* Zone image agrandie */}
+                <div className="relative h-64 sm:h-72 w-full bg-slate-100">
                   {item.image ? (
                     <Image
                       src={item.image}
@@ -109,17 +110,18 @@ export default function TestimonialSection({ testimonials = [] }: TestimonialSec
                       className="object-cover"
                     />
                   ) : (
-                    <div className="w-full h-full bg-slate-200 flex items-center justify-center text-slate-400 font-medium">
+                    <div className="w-full h-full bg-slate-100 flex items-center justify-center text-slate-400 font-medium text-lg">
                       {item.name}
                     </div>
                   )}
                 </div>
 
-                <div className="p-6 sm:p-8 flex-1 flex flex-col justify-between">
-                  <p className="text-slate-700 text-sm sm:text-base leading-relaxed mb-6 font-normal">
+                {/* Contenu textuel avec padding aéré */}
+                <div className="p-8 sm:p-10 flex-1 flex flex-col justify-between">
+                  <p className="text-slate-700 text-base sm:text-lg leading-relaxed mb-8 font-normal italic">
                     &quot;{item.story}&quot;
                   </p>
-                  <p className="font-black text-[#001731] text-sm uppercase tracking-wider">
+                  <p className="font-black text-[#001731] text-base uppercase tracking-wider">
                     — {item.name}
                   </p>
                 </div>
