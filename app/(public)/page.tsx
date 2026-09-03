@@ -6,8 +6,7 @@ import TestimonialSection from '@/components/TestimonialSection';
 import Reveal from '@/components/Reveal';
 import { getApprovedTestimonials, getCancers, getBlogPosts } from '@/lib/db';
 
-// Active le cache Next.js et revalide toutes les 60 secondes
-export const revalidate = 180;
+export const revalidate = 60;
 
 interface CancerItem {
   id: string;
@@ -33,7 +32,6 @@ interface BlogPost {
 }
 
 export default async function Home() {
-  // Exécution parallèle de toutes les requêtes BDD
   const [testimonialsRes, cancersRes, postsRes] = await Promise.allSettled([
     getApprovedTestimonials(),
     getCancers(),
@@ -44,12 +42,10 @@ export default async function Home() {
   const cancers: CancerItem[] = cancersRes.status === 'fulfilled' ? (cancersRes.value as CancerItem[]) : [];
   const allPosts: BlogPost[] = postsRes.status === 'fulfilled' ? (postsRes.value as BlogPost[]) : [];
 
-  // Traitement des évènements
   const publishedPosts = allPosts.filter((p) => p.published);
   const eventCategoryPosts = publishedPosts.filter((p) => p.category?.toLowerCase() === 'événements');
   const events = (eventCategoryPosts.length > 0 ? eventCategoryPosts : publishedPosts).slice(0, 3);
 
-  // Fallback si la BDD est vide pour les cancers
   const defaultCancers: CancerItem[] = [
     {
       id: 'sein',
@@ -194,7 +190,7 @@ export default async function Home() {
                       </div>
                       <Link
                         href={`/cancers/${cancer.id}`}
-                        className="w-full bg-[#0e5c54] hover:bg-[#0b4741] text-white py-3 rounded-2xl font-bold text-sm transition-all text-center block shadow-[0_6px_16px_rgba(14,92,84,0.25)] hover:shadow-[0_8px_20px_rgba(233,30,99,0.3)]"
+                        className="w-full bg-[#0e5c54] hover:bg-[#0b4741] text-white py-3 rounded-2xl font-bold text-sm transition-all text-center block shadow-md shadow-pink-500/25 hover:shadow-lg hover:shadow-pink-500/40 hover:scale-[1.02] active:scale-[0.98]"
                       >
                         En savoir plus
                       </Link>
@@ -264,9 +260,10 @@ export default async function Home() {
                           </div>
                           <Link
                             href={`/blog/${evt.slug || evt.id}`}
-                            className="mt-6 text-[#e91e63] hover:text-[#d81b60] font-bold text-xs flex items-center gap-1 transition-colors"
+                            className="mt-6 w-full bg-[#e91e63] hover:bg-[#d81b60] text-white py-3 rounded-2xl font-bold text-sm transition-all text-center flex items-center justify-center gap-2 shadow-md shadow-pink-500/25 hover:shadow-lg hover:shadow-pink-500/40 hover:scale-[1.02] active:scale-[0.98]"
                           >
-                            Détails de l'événement <ArrowRight className="w-3.5 h-3.5 ml-0.5" />
+                            <span>Détails de l'événement</span>
+                            <ArrowRight className="w-4 h-4" />
                           </Link>
                         </div>
                       </div>
@@ -325,9 +322,10 @@ export default async function Home() {
                         </div>
                         <Link
                           href={`/blog/${evt.slug}`}
-                          className="mt-6 text-[#e91e63] hover:text-[#d81b60] font-bold text-xs flex items-center gap-1 transition-colors"
+                          className="mt-6 w-full bg-[#e91e63] hover:bg-[#d81b60] text-white py-3 rounded-2xl font-bold text-sm transition-all text-center flex items-center justify-center gap-2 shadow-md shadow-pink-500/25 hover:shadow-lg hover:shadow-pink-500/40 hover:scale-[1.02] active:scale-[0.98]"
                         >
-                          Détails de l'événement <ArrowRight className="w-3.5 h-3.5 ml-0.5" />
+                          <span>Détails de l'événement</span>
+                          <ArrowRight className="w-4 h-4" />
                         </Link>
                       </div>
                     </div>
