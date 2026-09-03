@@ -92,7 +92,7 @@ export default async function Home() {
                 <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 h-full flex flex-col items-center text-center">
                   <div className="w-32 h-32 mb-6 flex items-center justify-center">
                     <img
-                      src="/icons/sensibiliser.png"
+                      src="https://cdn-icons-png.flaticon.com/512/3050/3050525.png"
                       alt="Sensibiliser"
                       className="max-w-full max-h-full object-contain"
                     />
@@ -110,7 +110,7 @@ export default async function Home() {
                 <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 h-full flex flex-col items-center text-center">
                   <div className="w-32 h-32 mb-6 flex items-center justify-center">
                     <img
-                      src="/icons/prevenir.png"
+                      src="https://static.vecteezy.com/ti/vecteur-libre/t1/34611704-protection-vecteur-icone-conception-illustration-vectoriel.jpg"
                       alt="Prévenir"
                       className="max-w-full max-h-full object-contain"
                     />
@@ -128,7 +128,7 @@ export default async function Home() {
                 <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 h-full flex flex-col items-center text-center">
                   <div className="w-32 h-32 mb-6 flex items-center justify-center">
                     <img
-                      src="/icons/accompagner.png"
+                      src="https://static.vecteezy.com/ti/vecteur-libre/t1/75893034-travail-en-equipe-ou-mains-copains-vectoriel.jpg"
                       alt="Accompagner"
                       className="max-w-full max-h-full object-contain"
                     />
