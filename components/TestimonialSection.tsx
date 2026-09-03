@@ -63,7 +63,7 @@ export default function TestimonialSection({ testimonials = [] }: TestimonialSec
 
   return (
     <section className="py-20 sm:py-28 bg-[#faf9f6]">
-      <div className="container mx-auto px-6 sm:px-10 max-w-7xl">
+      <div className="w-full px-6 sm:px-12 lg:px-16 max-w-[1500px] mx-auto">
         <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#001731] text-center mb-16 sm:mb-20 tracking-wide uppercase">
           TÉMOIGNAGES
         </h2>
@@ -73,24 +73,24 @@ export default function TestimonialSection({ testimonials = [] }: TestimonialSec
             <>
               <button
                 onClick={() => scroll('left')}
-                className="hidden md:flex absolute -left-6 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white text-[#001731] p-3.5 rounded-full shadow-xl border border-slate-200 transition-all hover:scale-110"
+                className="hidden md:flex absolute -left-8 top-1/2 -translate-y-1/2 z-10 bg-white hover:bg-slate-50 text-[#001731] p-4 rounded-full shadow-2xl border border-slate-200 transition-all hover:scale-110"
                 aria-label="Précédent"
               >
-                <ChevronLeft className="w-6 h-6" />
+                <ChevronLeft className="w-7 h-7" />
               </button>
               <button
                 onClick={() => scroll('right')}
-                className="hidden md:flex absolute -right-6 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white text-[#001731] p-3.5 rounded-full shadow-xl border border-slate-200 transition-all hover:scale-110"
+                className="hidden md:flex absolute -right-8 top-1/2 -translate-y-1/2 z-10 bg-white hover:bg-slate-50 text-[#001731] p-4 rounded-full shadow-2xl border border-slate-200 transition-all hover:scale-110"
                 aria-label="Suivant"
               >
-                <ChevronRight className="w-6 h-6" />
+                <ChevronRight className="w-7 h-7" />
               </button>
             </>
           )}
 
           <div
             ref={scrollRef}
-            className={`flex gap-8 lg:gap-12 overflow-x-auto pb-8 snap-x snap-mandatory ${
+            className={`flex gap-10 lg:gap-14 xl:gap-16 overflow-x-auto pb-8 snap-x snap-mandatory ${
               displayList.length <= 3 ? 'md:grid md:grid-cols-3 md:overflow-visible' : ''
             }`}
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
@@ -98,10 +98,10 @@ export default function TestimonialSection({ testimonials = [] }: TestimonialSec
             {displayList.map((item, index) => (
               <div
                 key={item.id || index}
-                className="snap-center flex-shrink-0 w-[320px] sm:w-[380px] md:w-auto bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition-shadow border border-slate-100 flex flex-col justify-between"
+                className="snap-center flex-shrink-0 w-[340px] sm:w-[420px] md:w-auto bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition-shadow border border-slate-100 flex flex-col justify-between"
               >
-                {/* Zone image agrandie */}
-                <div className="relative h-64 sm:h-72 w-full bg-slate-100">
+                {/* Image dominante (~70% de la hauteur de la carte) */}
+                <div className="relative h-[380px] sm:h-[420px] lg:h-[460px] w-full bg-slate-100">
                   {item.image ? (
                     <Image
                       src={item.image}
@@ -110,18 +110,18 @@ export default function TestimonialSection({ testimonials = [] }: TestimonialSec
                       className="object-cover"
                     />
                   ) : (
-                    <div className="w-full h-full bg-slate-100 flex items-center justify-center text-slate-400 font-medium text-lg">
+                    <div className="w-full h-full bg-slate-100 flex items-center justify-center text-slate-400 font-medium text-xl">
                       {item.name}
                     </div>
                   )}
                 </div>
 
-                {/* Contenu textuel avec padding aéré */}
-                <div className="p-8 sm:p-10 flex-1 flex flex-col justify-between">
-                  <p className="text-slate-700 text-base sm:text-lg leading-relaxed mb-8 font-normal italic">
+                {/* Zone texte compacte (~30% de la carte) */}
+                <div className="p-6 sm:p-8 flex-1 flex flex-col justify-between bg-white">
+                  <p className="text-slate-700 text-sm sm:text-base leading-relaxed mb-6 font-normal italic">
                     &quot;{item.story}&quot;
                   </p>
-                  <p className="font-black text-[#001731] text-base uppercase tracking-wider">
+                  <p className="font-black text-[#001731] text-sm sm:text-base uppercase tracking-wider">
                     — {item.name}
                   </p>
                 </div>
