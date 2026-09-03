@@ -112,6 +112,20 @@ export async function initDatabase() {
         if (err.code !== '42P07') throw err;
       });
 
+      // À placer dans initDatabase() dans lib/db.ts avec les autres tables
+await client.query(`
+  CREATE TABLE IF NOT EXISTS event_registrations (
+    id VARCHAR(100) PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    phone VARCHAR(50) NOT NULL,
+    eventId VARCHAR(255),
+    eventTitle VARCHAR(255),
+    createdAt VARCHAR(50)
+  );
+`).catch(err => {
+  if (err.code !== '42P07') throw err;
+});
+
       // Create newsletter subscribers table
       await client.query(`
         CREATE TABLE IF NOT EXISTS subscribers (
@@ -542,3 +556,39 @@ export async function seedDatabase() {
 
 // Initialize and seed on module load
 seedDatabase().catch(err => console.error('Error initializing database:', err));
+
+// ============ Event Registrations / Inscriptions Événements ============
+export async function createEventRegistration(data: { name: string; phone: string; eventId?: string; eventTitle?: string }) {
+  await initDatabase();
+  const id = Date.now().toString();
+  const createdAt = new Date().toISOString();
+  await pool.query(
+    `INSERT INTO event_registrations (id, name, phone, eventId, eventTitle, createdAt)
+     VALUES ($1, $2, $3, $4, $5, $6)`,
+    [id, data.name.trim(), data.phone.trim(), data.eventId || '', data.eventTitle || 'Événement', createdAt]
+  );
+  return { id, ...data, createdAt };
+}
+
+export async function getEventRegistrations() {
+  await initDatabase();
+  try {
+    const result = await pool.query('SELECT * FROM event_registrations ORDER BY createdAt DESC');
+    return result.rows.map((r: any) => ({
+      id: r.id,
+      name: r.name,
+      phone: r.phone,
+      eventId: r.eventid || r.eventId,
+      eventTitle: r.eventtitle || r.eventTitle,
+      createdAt: r.createdat || r.createdAt,
+    }));
+  } catch (error) {
+    console.error('DB error (getEventRegistrations):', error);
+    return [];
+  }
+}
+
+export async function deleteEventRegistration(id: string) {
+  await initDatabase();
+  await pool.query('DELETE FROM event_registrations WHERE id = $1', [id]);
+}

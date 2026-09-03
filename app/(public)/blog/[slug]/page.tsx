@@ -3,7 +3,7 @@
 import React, { use, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { ArrowLeft, CheckCircle } from 'lucide-react';
+import { ArrowLeft, CheckCircle, Loader2 } from 'lucide-react';
 import { BlogPost } from '@/types/cancer';
 
 interface PageProps {
@@ -60,10 +60,12 @@ export default function EventDetailPage({ params }: PageProps) {
   const [post, setPost] = useState<EventData | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Formulaire d'inscription
+  // Formulaire d'inscription & états de soumission
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchPost() {
@@ -91,7 +93,7 @@ export default function EventDetailPage({ params }: PageProps) {
           setPost(MOCK_POSTS[slug] || MOCK_POSTS['conference-prevention-col-uterus']);
         }
       } catch (error) {
-        console.error('Erreur lors du chargement de l’événement:', error);
+        console.error("Erreur lors du chargement de l'événement:", error);
         setPost(MOCK_POSTS[slug] || MOCK_POSTS['conference-prevention-col-uterus']);
       } finally {
         setLoading(false);
@@ -103,10 +105,39 @@ export default function EventDetailPage({ params }: PageProps) {
     }
   }, [slug]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (fullName && phone) {
+    if (!fullName || !phone) return;
+
+    setIsSubmitting(true);
+    setSubmitError(null);
+
+    try {
+      const res = await fetch('/api/event-registrations', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: fullName,
+          phone: phone,
+          eventId: post?.id || '',
+          eventTitle: post?.title || '',
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Erreur lors de l'inscription.");
+      }
+
       setIsSubmitted(true);
+    } catch (err: any) {
+      console.error("Erreur lors de l'inscription :", err);
+      setSubmitError(err.message || "Une erreur est survenue lors de la validation.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -240,6 +271,12 @@ export default function EventDetailPage({ params }: PageProps) {
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-5">
+                {submitError && (
+                  <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl">
+                    {submitError}
+                  </div>
+                )}
+
                 <div className="space-y-2">
                   <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">
                     NOM COMPLET
@@ -270,9 +307,11 @@ export default function EventDetailPage({ params }: PageProps) {
 
                 <button
                   type="submit"
-                  className="w-full bg-[#0f766e] hover:bg-[#115e59] text-white font-bold py-4 px-6 rounded-xl transition shadow-md shadow-teal-900/10 text-sm mt-4"
+                  disabled={isSubmitting}
+                  className="w-full bg-[#0f766e] hover:bg-[#115e59] text-white font-bold py-4 px-6 rounded-xl transition shadow-md shadow-teal-900/10 text-sm mt-4 disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  Confirmer mon inscription
+                  {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
+                  {isSubmitting ? 'Inscription en cours...' : 'Confirmer mon inscription'}
                 </button>
               </form>
             )}
