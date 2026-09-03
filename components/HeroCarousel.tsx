@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -17,30 +17,30 @@ interface HeroCarouselProps {
 }
 
 export default function HeroCarousel({ testimonials }: HeroCarouselProps) {
-  const defaultBgImage = "https://firebasestorage.googleapis.com/v0/b/newafrique-b466a.appspot.com/o/292horjq9s7?alt=media&token=5ebc90cd-98ae-4ff4-a4fd-9bf540ad527a";
+  const slides = useMemo(() => {
+    const defaultSlide = {
+      id: 'hero-main',
+      title: "VISA ONG : Votre Partenaire pour la Santé et l'Espoir au Togo",
+      text: "Dédiés à la sensibilisation, la prévention et au dépistage précoce des cancers féminins.",
+      image: "https://firebasestorage.googleapis.com/v0/b/newafrique-b466a.appspot.com/o/292horjq9s7?alt=media&token=5ebc90cd-98ae-4ff4-a4fd-9bf540ad527a",
+      isDefault: true,
+    };
 
-  const defaultSlide = {
-    id: 'hero-main',
-    title: "VISA ONG : Votre Partenaire pour la Santé et l'Espoir au Togo",
-    text: "Dédiés à la sensibilisation, la prévention et au dépistage précoce des cancers féminins.",
-    image: defaultBgImage,
-    isDefault: true,
-  };
+    const testimonialSlides = (testimonials || [])
+      .filter((t) => t.image)
+      .map((t) => ({
+        id: t.id,
+        title: `L'histoire de ${t.name}`,
+        text: `"${t.story.length > 130 ? t.story.slice(0, 130) + '...' : t.story}"`,
+        image: t.image!,
+        isDefault: false,
+      }));
 
-  const testimonialSlides = (testimonials || [])
-    .filter((t) => t.image)
-    .map((t) => ({
-      id: t.id,
-      title: `L'histoire de ${t.name}`,
-      text: `"${t.story.length > 130 ? t.story.slice(0, 130) + '...' : t.story}"`,
-      image: t.image!,
-      isDefault: false,
-    }));
-
-  const slides = [defaultSlide, ...testimonialSlides];
+    return [defaultSlide, ...testimonialSlides];
+  }, [testimonials]);
   const [current, setCurrent] = useState(0);
 
-  // 1. PRÉCHARGEMENT INSTANTANÉ DES IMAGES (Élimine le délai de chargement)
+  // Préchargement immédiat des images
   useEffect(() => {
     slides.forEach((slide) => {
       if (slide.image) {
@@ -48,9 +48,9 @@ export default function HeroCarousel({ testimonials }: HeroCarouselProps) {
         img.src = slide.image;
       }
     });
-  }, []);
+  }, [slides]);
 
-  // 2. DÉFILEMENT AUTOMATIQUE (8 Secondes)
+  // Défilement toutes les 8 secondes
   useEffect(() => {
     if (slides.length <= 1) return;
     const interval = setInterval(() => {
@@ -62,10 +62,10 @@ export default function HeroCarousel({ testimonials }: HeroCarouselProps) {
   const activeSlide = slides[current];
 
   return (
-    <section className="relative w-full min-h-[520px] sm:min-h-[580px] flex items-center bg-white overflow-hidden py-12 sm:py-16">
-      {/* FOND IMAGE CONTINU (Plus de conteneur 55% = Plus de ligne verticale) */}
-      <div className="absolute inset-0 z-0 bg-slate-100">
-        <AnimatePresence>
+    <section className="relative w-full min-h-[500px] sm:min-h-[560px] flex items-center bg-white overflow-hidden py-12 sm:py-16">
+      {/* CADRAGE IMAGE SUR LA MOITIÉ DROITE (Pas de zoom 100%) */}
+      <div className="absolute top-0 right-0 w-full lg:w-[50%] h-full z-0 overflow-hidden">
+        <AnimatePresence mode="wait">
           <motion.img 
             key={activeSlide.id}
             src={activeSlide.image} 
@@ -73,25 +73,25 @@ export default function HeroCarousel({ testimonials }: HeroCarouselProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.6, ease: "linear" }}
-            className="absolute inset-0 w-full h-full object-cover object-center"
+            transition={{ duration: 0.8, ease: "easeInOut" }}
+            className="w-full h-full object-cover object-center"
           />
         </AnimatePresence>
 
-        {/* FONDU FLUIDE SANS BORDURE DURE */}
-        <div className="absolute inset-0 bg-gradient-to-r from-white via-white/95 lg:via-white/85 to-transparent w-full lg:w-[68%] z-10" />
-        <div className="absolute inset-0 bg-gradient-to-t from-white via-white/60 to-transparent lg:hidden z-10" />
+        {/* FONDU DE TRANSITION (Élimine la ligne sans cacher l'image) */}
+        <div className="hidden lg:block absolute inset-y-0 left-0 w-1/2 bg-gradient-to-r from-white via-white/60 to-transparent pointer-events-none" />
+        <div className="lg:hidden absolute inset-0 bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none" />
       </div>
 
-      {/* CONTENU TEXTE ET BOUTONS */}
+      {/* CONTENU TEXTE */}
       <div className="max-w-7xl w-full mx-auto px-4 sm:px-8 lg:px-12 relative z-20">
         <AnimatePresence mode="wait">
           <motion.div 
             key={activeSlide.id}
-            initial={{ opacity: 0, y: 8 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.3 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.4 }}
             className="max-w-xl text-slate-900"
           >
             {!activeSlide.isDefault && (
