@@ -321,12 +321,12 @@ export default async function Home() {
                           </p>
                         </div>
                         <Link
-                          href={`/blog/${evt.slug}`}
-                          className="mt-6 w-full bg-[#e91e63] hover:bg-[#d81b60] text-white py-3 rounded-2xl font-bold text-sm transition-all text-center flex items-center justify-center gap-2 shadow-md shadow-pink-500/25 hover:shadow-lg hover:shadow-pink-500/40 hover:scale-[1.02] active:scale-[0.98]"
-                        >
-                          <span>Détails de l'événement</span>
-                          <ArrowRight className="w-4 h-4" />
-                        </Link>
+  href={`/blog/${evt.slug || evt.id}`}
+  className="mt-6 w-full bg-[#0e5c54] hover:bg-[#0b4741] text-white py-3 rounded-2xl font-bold text-sm transition-all text-center flex items-center justify-center gap-2 shadow-md shadow-pink-500/25 hover:shadow-lg hover:shadow-pink-500/40 hover:scale-[1.02] active:scale-[0.98]"
+>
+  <span>Détails de l'événement</span>
+  <ArrowRight className="w-4 h-4" />
+</Link>
                       </div>
                     </div>
                   </Reveal>
