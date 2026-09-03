@@ -4,9 +4,10 @@ import { ArrowRight } from 'lucide-react';
 import HeroCarousel from '@/components/HeroCarousel';
 import TestimonialSection from '@/components/TestimonialSection';
 import Reveal from '@/components/Reveal';
-import { getApprovedTestimonials, getCancers, getBlogPosts, initDatabase, seedDatabase } from '@/lib/db';
+import { getApprovedTestimonials, getCancers, getBlogPosts } from '@/lib/db';
 
-export const dynamic = 'force-dynamic';
+// Active le cache Next.js et revalide toutes les 60 secondes
+export const revalidate = 180;
 
 interface CancerItem {
   id: string;
@@ -32,39 +33,21 @@ interface BlogPost {
 }
 
 export default async function Home() {
-  try {
-    await initDatabase();
-    await seedDatabase();
-  } catch (error: unknown) {
-    console.error('Error initializing database:', error);
-  }
+  // Exécution parallèle de toutes les requêtes BDD
+  const [testimonialsRes, cancersRes, postsRes] = await Promise.allSettled([
+    getApprovedTestimonials(),
+    getCancers(),
+    getBlogPosts(),
+  ]);
 
-  let testimonials: unknown[] = [];
-  let cancers: CancerItem[] = [];
-  let events: BlogPost[] = [];
+  const testimonials = testimonialsRes.status === 'fulfilled' ? testimonialsRes.value : [];
+  const cancers: CancerItem[] = cancersRes.status === 'fulfilled' ? (cancersRes.value as CancerItem[]) : [];
+  const allPosts: BlogPost[] = postsRes.status === 'fulfilled' ? (postsRes.value as BlogPost[]) : [];
 
-  try {
-    testimonials = await getApprovedTestimonials();
-  } catch (_e: unknown) {
-    testimonials = [];
-  }
-
-  try {
-    cancers = await getCancers();
-  } catch (_e: unknown) {
-    cancers = [];
-  }
-
-  try {
-    const allPosts: BlogPost[] = await getBlogPosts();
-    // Récupération dynamique des posts BDD (blog)
-    const publishedPosts = allPosts.filter((p) => p.published);
-    const eventCategoryPosts = publishedPosts.filter((p) => p.category?.toLowerCase() === 'événements');
-    
-    events = (eventCategoryPosts.length > 0 ? eventCategoryPosts : publishedPosts).slice(0, 3);
-  } catch (_e: unknown) {
-    events = [];
-  }
+  // Traitement des évènements
+  const publishedPosts = allPosts.filter((p) => p.published);
+  const eventCategoryPosts = publishedPosts.filter((p) => p.category?.toLowerCase() === 'événements');
+  const events = (eventCategoryPosts.length > 0 ? eventCategoryPosts : publishedPosts).slice(0, 3);
 
   // Fallback si la BDD est vide pour les cancers
   const defaultCancers: CancerItem[] = [
@@ -224,7 +207,7 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* ============ ÉVÉNEMENTS SECTION (DONNÉES BLOG) ============ */}
+      {/* ============ ÉVÉNEMENTS SECTION ============ */}
       <section className="py-20 bg-[#071327] text-white">
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
