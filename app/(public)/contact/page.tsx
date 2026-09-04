@@ -258,7 +258,7 @@ export default function ContactPage() {
 
               <div className="space-y-1.5">
                 <label htmlFor="subject" className="text-xs font-semibold text-slate-700 block">
-                  Sujet
+                  Sujet(Soyer Bref et précis)
                 </label>
                 <input
                   type="text"
@@ -273,7 +273,7 @@ export default function ContactPage() {
 
               <div className="space-y-1.5">
                 <label htmlFor="message" className="text-xs font-semibold text-slate-700 block">
-                  Message
+                  Message(Décrivez votre demande ou question en détail)
                 </label>
                 <textarea
                   id="message"
