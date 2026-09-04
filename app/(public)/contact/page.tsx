@@ -14,44 +14,46 @@ export default function ContactPage() {
   const [status, setStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    setStatus(null);
+  e.preventDefault();
+  setIsSubmitting(true);
+  setStatus(null);
 
-    try {
-      const response = await fetch('/api/subscriber', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
+  try {
+    const response = await fetch('/api/subscriber', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(formData),
+    });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Une erreur est survenue.');
-      }
-
-      setStatus({
-        type: 'success',
-        message: 'Vos informations ont été enregistrées avec succès !',
-      });
-
-      setFormData({
-        firstName: '',
-        lastName: '',
-        email: '',
-      });
-    } catch (err: any) {
-      setStatus({
-        type: 'error',
-        message: err.message || 'Impossible de traiter votre demande.',
-      });
-    } finally {
-      setIsSubmitting(false);
+    // Vérifier si le serveur a renvoyé du JSON ou du HTML
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      throw new Error(`Erreur serveur (${response.status}). La route API n'a pas renvoyé de JSON.`);
     }
-  };
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Une erreur est survenue.');
+    }
+
+    setStatus({
+      type: 'success',
+      message: 'Vos informations ont été enregistrées avec succès !',
+    });
+
+    setFormData({ firstName: '', lastName: '', email: '' });
+  } catch (err: any) {
+    setStatus({
+      type: 'error',
+      message: err.message || 'Impossible de traiter votre demande.',
+    });
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
