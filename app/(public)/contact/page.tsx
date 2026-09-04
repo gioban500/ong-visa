@@ -1,27 +1,59 @@
 'use client';
 
 import { useState } from 'react';
-import { Mail, Phone, MapPin, Clock, Send, CheckCircle2 } from 'lucide-react';
+import { Mail, Phone, MapPin, Clock, Send, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
-    name: '',
+    firstName: '',
+    lastName: '',
     email: '',
-    subject: '',
-    message: '',
   });
 
-  const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [status, setStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
-    setTimeout(() => setSubmitted(false), 5000);
+    setIsSubmitting(true);
+    setStatus(null);
+
+    try {
+      const response = await fetch('/api/subscriber', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Une erreur est survenue.');
+      }
+
+      setStatus({
+        type: 'success',
+        message: 'Vos informations ont été enregistrées avec succès !',
+      });
+
+      setFormData({
+        firstName: '',
+        lastName: '',
+        email: '',
+      });
+    } catch (err: any) {
+      setStatus({
+        type: 'error',
+        message: err.message || 'Impossible de traiter votre demande.',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
@@ -116,103 +148,101 @@ export default function ContactPage() {
             </div>
           </div>
 
-          {/* Formulaire de Contact */}
+          {/* Formulaire de Contact / Inscription */}
           <div className="lg:col-span-7 bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-200/80 space-y-6">
             <div>
               <h2 className="text-lg font-bold text-slate-900">
-                Envoyer un message
+                S'inscrire / Nous contacter
               </h2>
               <p className="text-xs text-slate-500 mt-1">
-                Remplissez les informations ci-dessous et notre équipe vous recontactera rapidement.
+                Remplissez vos informations pour rejoindre notre communauté et recevoir nos actualités.
               </p>
             </div>
 
-            {submitted && (
-              <div className="p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center gap-2.5 text-emerald-800 text-xs sm:text-sm">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                <p className="font-medium">
-                  Votre message a été envoyé avec succès !
-                </p>
+            {status && (
+              <div
+                className={`p-3.5 rounded-xl flex items-center gap-2.5 text-xs sm:text-sm border ${
+                  status.type === 'success'
+                    ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                    : 'bg-rose-50 border-rose-200 text-rose-800'
+                }`}
+              >
+                {status.type === 'success' ? (
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                ) : (
+                  <AlertCircle className="w-4 h-4 text-rose-600 flex-shrink-0" />
+                )}
+                <p className="font-medium">{status.message}</p>
               </div>
             )}
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label htmlFor="name" className="text-xs font-semibold text-slate-700 block">
-                    Nom complet *
+                  <label htmlFor="firstName" className="text-xs font-semibold text-slate-700 block">
+                    Prénom *
                   </label>
                   <input
                     type="text"
-                    id="name"
-                    name="name"
+                    id="firstName"
+                    name="firstName"
                     required
-                    value={formData.name}
+                    value={formData.firstName}
+                    onChange={handleChange}
+                    className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e] bg-white"
+                    placeholder="Votre prénom"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label htmlFor="lastName" className="text-xs font-semibold text-slate-700 block">
+                    Nom *
+                  </label>
+                  <input
+                    type="text"
+                    id="lastName"
+                    name="lastName"
+                    required
+                    value={formData.lastName}
                     onChange={handleChange}
                     className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e] bg-white"
                     placeholder="Votre nom"
                   />
                 </div>
-
-                <div className="space-y-1.5">
-                  <label htmlFor="email" className="text-xs font-semibold text-slate-700 block">
-                    Adresse email *
-                  </label>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    required
-                    value={formData.email}
-                    onChange={handleChange}
-                    className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e] bg-white"
-                    placeholder="votre@email.com"
-                  />
-                </div>
               </div>
 
               <div className="space-y-1.5">
-                <label htmlFor="subject" className="text-xs font-semibold text-slate-700 block">
-                  Sujet *
+                <label htmlFor="email" className="text-xs font-semibold text-slate-700 block">
+                  Adresse email *
                 </label>
-                <select
-                  id="subject"
-                  name="subject"
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
                   required
-                  value={formData.subject}
+                  value={formData.email}
                   onChange={handleChange}
                   className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e] bg-white"
-                >
-                  <option value="">Sélectionnez un sujet</option>
-                  <option value="info">Demande d'information</option>
-                  <option value="depistage">Planifier un dépistage</option>
-                  <option value="partenariat">Partenariat / Bénévole</option>
-                  <option value="autre">Autre</option>
-                </select>
-              </div>
-
-              <div className="space-y-1.5">
-                <label htmlFor="message" className="text-xs font-semibold text-slate-700 block">
-                  Message *
-                </label>
-                <textarea
-                  id="message"
-                  name="message"
-                  required
-                  rows={4}
-                  value={formData.message}
-                  onChange={handleChange}
-                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e] bg-white resize-none"
-                  placeholder="Écrivez votre message..."
+                  placeholder="votre@email.com"
                 />
               </div>
 
               <button
                 type="submit"
-                className="w-full sm:w-auto bg-[#0f766e] hover:bg-[#115e59] text-white font-semibold py-2.5 px-6 rounded-lg transition shadow-sm text-sm flex items-center justify-center gap-2 cursor-pointer mt-2"
+                disabled={isSubmitting}
+                className="w-full sm:w-auto bg-[#0f766e] hover:bg-[#115e59] text-white font-semibold py-2.5 px-6 rounded-lg transition shadow-sm text-sm flex items-center justify-center gap-2 cursor-pointer mt-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <Send className="w-4 h-4" />
-                Envoyer le message
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Envoi en cours...
+                  </>
+                ) : (
+                  <>
+                    <Send className="w-4 h-4" />
+                    Envoyer
+                  </>
+                )}
               </button>
             </form>
           </div>
