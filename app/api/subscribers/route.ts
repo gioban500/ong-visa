@@ -31,7 +31,11 @@ export async function POST(request: Request) {
       firstName: body.firstName,
       lastName: body.lastName,
       email,
+      phone: body.phone,
+      subject: body.subject,
+      message: body.message,
     });
+
     return NextResponse.json(subscriber, { status: 201 });
   } catch (error) {
     console.error(error);

@@ -74,7 +74,7 @@ export async function initDatabase() {
           resources JSONB
         );
       `).catch(err => {
-        if (err.code !== '42P07') throw err; // Ignorer "table already exists"
+        if (err.code !== '42P07') throw err;
       });
 
       // Create testimonials table
@@ -112,19 +112,19 @@ export async function initDatabase() {
         if (err.code !== '42P07') throw err;
       });
 
-      // À placer dans initDatabase() dans lib/db.ts avec les autres tables
-await client.query(`
-  CREATE TABLE IF NOT EXISTS event_registrations (
-    id VARCHAR(100) PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    phone VARCHAR(50) NOT NULL,
-    eventId VARCHAR(255),
-    eventTitle VARCHAR(255),
-    createdAt VARCHAR(50)
-  );
-`).catch(err => {
-  if (err.code !== '42P07') throw err;
-});
+      // Create event registrations table
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS event_registrations (
+          id VARCHAR(100) PRIMARY KEY,
+          name VARCHAR(255) NOT NULL,
+          phone VARCHAR(50) NOT NULL,
+          eventId VARCHAR(255),
+          eventTitle VARCHAR(255),
+          createdAt VARCHAR(50)
+        );
+      `).catch(err => {
+        if (err.code !== '42P07') throw err;
+      });
 
       // Create newsletter subscribers table
       await client.query(`
@@ -133,11 +133,22 @@ await client.query(`
           firstName VARCHAR(255),
           lastName VARCHAR(255),
           email VARCHAR(255) UNIQUE NOT NULL,
+          phone VARCHAR(50),
+          subject VARCHAR(100),
+          message TEXT,
           createdAt VARCHAR(50)
         );
       `).catch(err => {
         if (err.code !== '42P07') throw err;
       });
+
+      // Auto-migration : ajouter les colonnes phone, subject, message si elles n'existent pas encore
+      await client.query(`
+        ALTER TABLE subscribers 
+        ADD COLUMN IF NOT EXISTS phone VARCHAR(50),
+        ADD COLUMN IF NOT EXISTS subject VARCHAR(100),
+        ADD COLUMN IF NOT EXISTS message TEXT;
+      `).catch(err => console.error('Error altering subscribers table:', err));
 
       initialized = true;
       console.log('Database initialized successfully');
@@ -145,7 +156,6 @@ await client.query(`
       client.release();
     }
   } catch (error) {
-    // Ne pas bloquer si les tables existent déjà ou si connexion échoue
     console.log('Database initialization completed (tables may already exist or connection unavailable)');
     initialized = true;
   }
@@ -155,14 +165,12 @@ await client.query(`
 export async function getCancers() {
   await initDatabase();
   
-  // Fallback si pas de DB : retourner les données du fichier JSON
   if (!process.env.POSTGRES_URL) {
     const fs = require('fs');
     const path = require('path');
     try {
       const dataPath = path.join(process.cwd(), 'data', 'cancers.json');
-      const data = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
-      return data;
+      return JSON.parse(fs.readFileSync(dataPath, 'utf8'));
     } catch (error) {
       console.error('Error reading cancers.json:', error);
       return [];
@@ -188,7 +196,6 @@ export async function getCancers() {
 export async function getCancerById(id: string) {
   await initDatabase();
   
-  // Fallback si pas de DB : retourner les données du fichier JSON
   if (!process.env.POSTGRES_URL) {
     const fs = require('fs');
     const path = require('path');
@@ -217,11 +224,9 @@ export async function getCancerById(id: string) {
   });
 
   try {
-    // 1) Correspondance exacte sur l'id
     const result = await pool.query('SELECT * FROM cancers WHERE id = $1', [decodedId]);
     if (result.rows[0]) return format(result.rows[0]);
 
-    // 2) Recherche tolérante : comparer les slugs (id ou nom normalisé)
     const all = await pool.query('SELECT * FROM cancers');
     const match = all.rows.find(
       (row: any) => slugify(row.id) === wantedSlug || slugify(row.name) === wantedSlug
@@ -301,14 +306,12 @@ export async function deleteCancer(id: string) {
 export async function getTestimonials() {
   await initDatabase();
   
-  // Fallback si pas de DB
   if (!process.env.POSTGRES_URL) {
     const fs = require('fs');
     const path = require('path');
     try {
       const dataPath = path.join(process.cwd(), 'data', 'testimonials.json');
-      const data = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
-      return data;
+      return JSON.parse(fs.readFileSync(dataPath, 'utf8'));
     } catch (error) {
       return [];
     }
@@ -326,7 +329,6 @@ export async function getTestimonials() {
 export async function getApprovedTestimonials() {
   await initDatabase();
   
-  // Fallback si pas de DB
   if (!process.env.POSTGRES_URL) {
     const fs = require('fs');
     const path = require('path');
@@ -400,14 +402,12 @@ export async function deleteTestimonial(id: string) {
 export async function getBlogPosts() {
   await initDatabase();
   
-  // Fallback si pas de DB
   if (!process.env.POSTGRES_URL) {
     const fs = require('fs');
     const path = require('path');
     try {
       const dataPath = path.join(process.cwd(), 'data', 'blog.json');
-      const data = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
-      return data;
+      return JSON.parse(fs.readFileSync(dataPath, 'utf8'));
     } catch (error) {
       return [];
     }
@@ -430,7 +430,6 @@ export async function getBlogPosts() {
 export async function getBlogPostBySlug(slug: string) {
   await initDatabase();
   
-  // Fallback si pas de DB
   if (!process.env.POSTGRES_URL) {
     const fs = require('fs');
     const path = require('path');
@@ -514,14 +513,36 @@ export async function deleteBlogPost(slug: string) {
 }
 
 // ============ Newsletter / Liste de diffusion ============
-export async function createSubscriber(sub: { firstName?: string; lastName?: string; email: string }) {
+export async function createSubscriber(sub: { 
+  firstName?: string; 
+  lastName?: string; 
+  email: string;
+  phone?: string;
+  subject?: string;
+  message?: string;
+}) {
   await initDatabase();
   const id = Date.now().toString();
   await pool.query(
-    `INSERT INTO subscribers (id, firstName, lastName, email, createdAt)
-     VALUES ($1, $2, $3, $4, $5)
-     ON CONFLICT (email) DO NOTHING`,
-    [id, sub.firstName || '', sub.lastName || '', sub.email.toLowerCase().trim(), new Date().toISOString()]
+    `INSERT INTO subscribers (id, firstName, lastName, email, phone, subject, message, createdAt)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+     ON CONFLICT (email) DO UPDATE SET
+       firstName = EXCLUDED.firstName,
+       lastName = EXCLUDED.lastName,
+       phone = EXCLUDED.phone,
+       subject = EXCLUDED.subject,
+       message = EXCLUDED.message,
+       createdAt = EXCLUDED.createdAt`,
+    [
+      id, 
+      sub.firstName || '', 
+      sub.lastName || '', 
+      sub.email.toLowerCase().trim(),
+      sub.phone || '',
+      sub.subject || '',
+      sub.message || '',
+      new Date().toISOString()
+    ]
   );
   return { id, ...sub };
 }
@@ -535,6 +556,9 @@ export async function getSubscribers() {
       firstName: r.firstname,
       lastName: r.lastname,
       email: r.email,
+      phone: r.phone,
+      subject: r.subject,
+      message: r.message,
       createdAt: r.createdat,
     }));
   } catch (error) {

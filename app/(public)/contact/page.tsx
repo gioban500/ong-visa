@@ -8,54 +8,64 @@ export default function ContactPage() {
     firstName: '',
     lastName: '',
     email: '',
+    phone: '',
+    subject: '',
+    message: '',
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [status, setStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setIsSubmitting(true);
-  setStatus(null);
+    e.preventDefault();
+    setIsSubmitting(true);
+    setStatus(null);
 
-  try {
-    const response = await fetch('/api/subscribers', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(formData),
-    });
+    try {
+      const response = await fetch('/api/subscribers', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
 
-    // Vérifier si le serveur a renvoyé du JSON ou du HTML
-    const contentType = response.headers.get('content-type');
-    if (!contentType || !contentType.includes('application/json')) {
-      throw new Error(`Erreur serveur (${response.status}). La route API n'a pas renvoyé de JSON.`);
+      // Vérifier si le serveur a renvoyé du JSON ou du HTML
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error(`Erreur serveur (${response.status}). La route API n'a pas renvoyé de JSON.`);
+      }
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Une erreur est survenue.');
+      }
+
+      setStatus({
+        type: 'success',
+        message: 'Vos informations ont été enregistrées avec succès !',
+      });
+
+      setFormData({
+        firstName: '',
+        lastName: '',
+        email: '',
+        phone: '',
+        subject: '',
+        message: '',
+      });
+    } catch (err: any) {
+      setStatus({
+        type: 'error',
+        message: err.message || 'Impossible de traiter votre demande.',
+      });
+    } finally {
+      setIsSubmitting(false);
     }
+  };
 
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.error || 'Une erreur est survenue.');
-    }
-
-    setStatus({
-      type: 'success',
-      message: 'Vos informations ont été enregistrées avec succès !',
-    });
-
-    setFormData({ firstName: '', lastName: '', email: '' });
-  } catch (err: any) {
-    setStatus({
-      type: 'error',
-      message: err.message || 'Impossible de traiter votre demande.',
-    });
-  } finally {
-    setIsSubmitting(false);
-  }
-};
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
@@ -64,7 +74,7 @@ export default function ContactPage() {
 
   return (
     <div className="w-full bg-[#faf9f6] min-h-screen pb-16">
-      {/* Header Banner - Fond blanc épuré aligné avec le Hero */}
+      {/* Header Banner */}
       <section className="bg-white border-b border-slate-100 pt-10 pb-12 px-4 sm:px-6 lg:px-12">
         <div className="max-w-4xl mx-auto text-center space-y-3">
           <span className="text-[#e11d48] text-xs font-bold uppercase tracking-wider bg-rose-50 px-3.5 py-1 rounded-full border border-rose-100 inline-block">
@@ -150,7 +160,7 @@ export default function ContactPage() {
             </div>
           </div>
 
-          {/* Formulaire de Contact / Inscription */}
+          {/* Formulaire de Contact */}
           <div className="lg:col-span-7 bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-200/80 space-y-6">
             <div>
               <h2 className="text-lg font-bold text-slate-900">
@@ -213,19 +223,66 @@ export default function ContactPage() {
                 </div>
               </div>
 
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label htmlFor="email" className="text-xs font-semibold text-slate-700 block">
+                    Adresse email *
+                  </label>
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    required
+                    value={formData.email}
+                    onChange={handleChange}
+                    className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e] bg-white"
+                    placeholder="votre@email.com"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label htmlFor="phone" className="text-xs font-semibold text-slate-700 block">
+                    Téléphone
+                  </label>
+                  <input
+                    type="tel"
+                    id="phone"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e] bg-white"
+                    placeholder="+228 90 00 00 00"
+                  />
+                </div>
+              </div>
+
               <div className="space-y-1.5">
-                <label htmlFor="email" className="text-xs font-semibold text-slate-700 block">
-                  Adresse email *
+                <label htmlFor="subject" className="text-xs font-semibold text-slate-700 block">
+                  Sujet
                 </label>
                 <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  required
-                  value={formData.email}
+                  type="text"
+                  id="subject"
+                  name="subject"
+                  value={formData.subject}
                   onChange={handleChange}
                   className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e] bg-white"
-                  placeholder="votre@email.com"
+                  placeholder="Objet de votre message"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label htmlFor="message" className="text-xs font-semibold text-slate-700 block">
+                  Message
+                </label>
+                <textarea
+                  id="message"
+                  name="message"
+                  rows={4}
+                  value={formData.message}
+                  onChange={handleChange}
+                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e] bg-white resize-none"
+                  placeholder="Votre message ici..."
                 />
               </div>
 
