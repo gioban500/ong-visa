@@ -29,7 +29,7 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="w-full bg-[#f9fafb] min-h-screen pb-16">
+    <div className="w-full bg-[#f0f4f8] min-h-screen pb-16">
       {/* Header Banner - Fond blanc épuré aligné avec le Hero */}
       <section className="bg-white border-b border-slate-100 pt-10 pb-12 px-4 sm:px-6 lg:px-12">
         <div className="max-w-4xl mx-auto text-center space-y-3">
