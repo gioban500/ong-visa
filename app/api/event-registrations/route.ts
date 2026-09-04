@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { createEventRegistration, getEventRegistrations } from '@/lib/db';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: Request) {
   try {
     const { name, phone, eventId, eventTitle } = await request.json();
@@ -20,8 +22,10 @@ export async function POST(request: Request) {
     );
   } catch (error: any) {
     console.error("Erreur d'inscription :", error);
+    
+    // Renvoyer le message d'erreur exact pour le diagnostic
     return NextResponse.json(
-      { error: "Une erreur est survenue lors de l'enregistrement." },
+      { error: error?.message || "Une erreur est survenue lors de l'enregistrement." },
       { status: 500 }
     );
   }
@@ -34,7 +38,7 @@ export async function GET() {
   } catch (error: any) {
     console.error('Erreur récupération :', error);
     return NextResponse.json(
-      { error: 'Impossible de récupérer les inscriptions.' },
+      { error: error?.message || 'Impossible de récupérer les inscriptions.' },
       { status: 500 }
     );
   }
