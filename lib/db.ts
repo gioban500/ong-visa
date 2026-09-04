@@ -563,7 +563,7 @@ export async function createEventRegistration(data: { name: string; phone: strin
   const id = Date.now().toString();
   const createdAt = new Date().toISOString();
   await pool.query(
-    `INSERT INTO event_registrations (id, name, phone, event_id, event_title, createdAt)
+    `INSERT INTO event_registrations (id, name, phone, event_id, event_title, created_at)
      VALUES ($1, $2, $3, $4, $5, $6)`,
     [id, data.name.trim(), data.phone.trim(), data.eventId || '', data.eventTitle || 'Événement', createdAt]
   );
@@ -573,14 +573,14 @@ export async function createEventRegistration(data: { name: string; phone: strin
 export async function getEventRegistrations() {
   await initDatabase();
   try {
-    const result = await pool.query('SELECT * FROM event_registrations ORDER BY createdAt DESC');
+    const result = await pool.query('SELECT * FROM event_registrations ORDER BY created_at DESC');
     return result.rows.map((r: any) => ({
       id: r.id,
       name: r.name,
       phone: r.phone,
       eventId: r.event_id || r.eventId,
       eventTitle: r.event_title || r.eventTitle,
-      createdAt: r.createdat || r.createdAt,
+      createdAt: r.created_at || r.createdAt,
     }));
   } catch (error) {
     console.error('DB error (getEventRegistrations):', error);
