@@ -16,6 +16,22 @@ interface EventData extends BlogPost {
   location?: string;
 }
 
+// Fonction de formatage propre de la date (JJ/MM/AAAA)
+const formatDate = (dateString?: string) => {
+  if (!dateString) return 'Date à préciser';
+  
+  const date = new Date(dateString);
+
+  // Si ce n'est pas une date ISO valide (ou déjà du texte personnalisé), on la garde telle quelle
+  if (isNaN(date.getTime())) return dateString;
+
+  return date.toLocaleDateString('fr-FR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  });
+};
+
 const MOCK_POSTS: Record<string, EventData> = {
   'campagne-depistage-sein': {
     id: '1',
@@ -30,7 +46,7 @@ L'événement est entièrement gratuit et ouvert à toutes les femmes de Lomé e
     image: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=1000&q=80',
     author: 'ONG VISA',
     organizer: 'Comité Médical ONG VISA',
-    publishedDate: '15 Octobre 2026',
+    publishedDate: '15/10/2026',
     time: '08h00 - 16h00',
     location: 'CMS Agoè-Nyivé, Lomé, Togo',
     readTime: 5,
@@ -46,7 +62,7 @@ L'événement est entièrement gratuit et ouvert à toutes les femmes de Lomé e
     image: 'https://images.unsplash.com/photo-1587825140708-dfaf72ae4b04?auto=format&fit=crop&w=1000&q=80',
     author: 'Dr. Lawson',
     organizer: 'Comité Scientifique ONG VISA',
-    publishedDate: '28 novembre 2026',
+    publishedDate: '28/11/2026',
     time: '14h00 - 18h00',
     location: 'Avenue de la Présidence, Lomé, Togo',
     readTime: 4,
@@ -56,6 +72,7 @@ L'événement est entièrement gratuit et ouvert à toutes les femmes de Lomé e
 };
 
 export default function EventDetailPage({ params }: PageProps) {
+  
   const { slug } = use(params);
   const [post, setPost] = useState<EventData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -82,7 +99,7 @@ export default function EventDetailPage({ params }: PageProps) {
             image: item.image || '',
             author: item.author || 'ONG VISA',
             organizer: item.organizer || item.author || 'Comité Scientifique ONG VISA',
-            publishedDate: item.publishedDate || item.published_date || item.created_at || item.date || 'Date à préciser',
+            publishedDate: formatDate(item.publishedDate || item.published_date || item.created_at || item.date),
             time: item.time || item.horaire || '09h00 - 17h00',
             location: item.location || item.lieu || 'Lomé, Togo',
             readTime: Number(item.readTime || item.read_time) || 5,
