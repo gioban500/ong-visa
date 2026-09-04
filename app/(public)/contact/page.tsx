@@ -19,7 +19,7 @@ export default function ContactPage() {
   setStatus(null);
 
   try {
-    const response = await fetch('/api/subscriber', {
+    const response = await fetch('/api/subscribers', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
