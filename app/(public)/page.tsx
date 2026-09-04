@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, HeartHandshake, ShieldCheck, Users, Calendar, Sparkles } from 'lucide-react';
 import HeroCarousel from '@/components/HeroCarousel';
 import TestimonialSection from '@/components/TestimonialSection';
 import Reveal from '@/components/Reveal';
@@ -71,33 +71,43 @@ export default async function Home() {
   ];
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#faf9f6]">
+    <div className="flex flex-col min-h-screen bg-[#faf9f6] overflow-x-hidden">
       {/* ============ HERO CAROUSEL ============ */}
       <HeroCarousel testimonials={testimonials as any} />
 
       {/* ============ MISSION SECTION ============ */}
-      <section className="py-20 bg-[#faf9f6]">
-        <div className="container mx-auto px-4">
+      <section className="py-24 bg-[#faf9f6] relative overflow-hidden">
+        {/* Orbes décoratifs animés en arrière-plan */}
+        <div className="absolute top-10 -left-20 w-72 h-72 bg-emerald-300/20 rounded-full blur-3xl animate-pulse pointer-events-none" />
+        <div className="absolute bottom-10 -right-20 w-80 h-80 bg-pink-300/20 rounded-full blur-3xl animate-pulse delay-700 pointer-events-none" />
+
+        <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-6xl mx-auto">
             <Reveal>
-              <div className="text-center mb-14">
-                <h2 className="text-3xl sm:text-4xl font-black text-[#0e5c54] tracking-wide uppercase">
+              <div className="text-center mb-16">
+                <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-100 text-[#0e5c54] text-xs font-bold uppercase tracking-wider mb-4 animate-bounce">
+                  <Sparkles className="w-3.5 h-3.5" /> Ensembles engagés
+                </span>
+                <h2 className="text-3xl sm:text-5xl font-black text-[#0e5c54] tracking-tight uppercase">
                   NOTRE MISSION
                 </h2>
+                <div className="w-20 h-1.5 bg-[#e91e63] mx-auto mt-4 rounded-full" />
               </div>
             </Reveal>
 
             <div className="grid md:grid-cols-3 gap-8">
+              {/* Carte 1 : Sensibiliser */}
               <Reveal delay={0} direction="up">
-                <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 h-full flex flex-col items-center text-center">
-                  <div className="w-32 h-32 mb-6 flex items-center justify-center">
+                <div className="group bg-white rounded-3xl p-8 shadow-sm hover:shadow-2xl border border-slate-100 hover:border-emerald-500/30 h-full flex flex-col items-center text-center transition-all duration-300 transform hover:-translate-y-2">
+                  <div className="w-32 h-32 mb-6 flex items-center justify-center relative">
+                    <div className="absolute inset-0 bg-emerald-100/50 rounded-2xl scale-0 group-hover:scale-100 transition-transform duration-300 -z-0" />
                     <img
                       src="https://cdn-icons-png.flaticon.com/512/3050/3050525.png"
                       alt="Sensibiliser"
-                      className="max-w-full max-h-full object-contain"
+                      className="max-w-full max-h-full object-contain relative z-10 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3"
                     />
                   </div>
-                  <h3 className="text-xl font-extrabold text-[#001731] mb-4 tracking-tight">
+                  <h3 className="text-xl font-extrabold text-[#001731] mb-4 tracking-tight group-hover:text-[#0e5c54] transition-colors">
                     1. SENSIBILISER
                   </h3>
                   <p className="text-slate-600 text-sm sm:text-base leading-relaxed">
@@ -106,16 +116,18 @@ export default async function Home() {
                 </div>
               </Reveal>
 
+              {/* Carte 2 : Prévenir */}
               <Reveal delay={150} direction="up">
-                <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 h-full flex flex-col items-center text-center">
-                  <div className="w-32 h-32 mb-6 flex items-center justify-center">
+                <div className="group bg-white rounded-3xl p-8 shadow-sm hover:shadow-2xl border border-slate-100 hover:border-pink-500/30 h-full flex flex-col items-center text-center transition-all duration-300 transform hover:-translate-y-2">
+                  <div className="w-32 h-32 mb-6 flex items-center justify-center relative">
+                    <div className="absolute inset-0 bg-pink-100/50 rounded-2xl scale-0 group-hover:scale-100 transition-transform duration-300 -z-0" />
                     <img
                       src="https://static.vecteezy.com/ti/vecteur-libre/t1/34611704-protection-vecteur-icone-conception-illustration-vectoriel.jpg"
                       alt="Prévenir"
-                      className="max-w-full max-h-full object-contain"
+                      className="max-w-full max-h-full object-contain relative z-10 transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-3"
                     />
                   </div>
-                  <h3 className="text-xl font-extrabold text-[#001731] mb-4 tracking-tight">
+                  <h3 className="text-xl font-extrabold text-[#001731] mb-4 tracking-tight group-hover:text-[#e91e63] transition-colors">
                     2. PRÉVENIR
                   </h3>
                   <p className="text-slate-600 text-sm sm:text-base leading-relaxed">
@@ -124,16 +136,18 @@ export default async function Home() {
                 </div>
               </Reveal>
 
+              {/* Carte 3 : Accompagner */}
               <Reveal delay={300} direction="up">
-                <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 h-full flex flex-col items-center text-center">
-                  <div className="w-32 h-32 mb-6 flex items-center justify-center">
+                <div className="group bg-white rounded-3xl p-8 shadow-sm hover:shadow-2xl border border-slate-100 hover:border-emerald-500/30 h-full flex flex-col items-center text-center transition-all duration-300 transform hover:-translate-y-2">
+                  <div className="w-32 h-32 mb-6 flex items-center justify-center relative">
+                    <div className="absolute inset-0 bg-emerald-100/50 rounded-2xl scale-0 group-hover:scale-100 transition-transform duration-300 -z-0" />
                     <img
                       src="https://static.vecteezy.com/ti/vecteur-libre/t1/75893034-travail-en-equipe-ou-mains-copains-vectoriel.jpg"
                       alt="Accompagner"
-                      className="max-w-full max-h-full object-contain"
+                      className="max-w-full max-h-full object-contain relative z-10 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3"
                     />
                   </div>
-                  <h3 className="text-xl font-extrabold text-[#001731] mb-4 tracking-tight">
+                  <h3 className="text-xl font-extrabold text-[#001731] mb-4 tracking-tight group-hover:text-[#0e5c54] transition-colors">
                     3. ACCOMPAGNER
                   </h3>
                   <p className="text-slate-600 text-sm sm:text-base leading-relaxed">
@@ -146,20 +160,71 @@ export default async function Home() {
         </div>
       </section>
 
+      {/* ============ SECTION IMPACT / CHIFFRES CLÉS (NOUVELLE SECTION DYNAMIQUE) ============ */}
+      <section className="py-16 bg-gradient-to-r from-[#0e5c54] to-[#073833] text-white shadow-inner relative">
+        <div className="container mx-auto px-4">
+          <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+            <Reveal delay={0}>
+              <div className="p-4 group">
+                <div className="w-12 h-12 mx-auto mb-3 bg-white/10 rounded-2xl flex items-center justify-center group-hover:bg-[#e91e63] group-hover:scale-110 transition-all">
+                  <Users className="w-6 h-6 text-white" />
+                </div>
+                <div className="text-3xl sm:text-4xl font-black text-white mb-1">5,000+</div>
+                <p className="text-xs sm:text-sm text-emerald-100 font-medium uppercase tracking-wider">Femmes sensibilisées</p>
+              </div>
+            </Reveal>
+
+            <Reveal delay={100}>
+              <div className="p-4 group">
+                <div className="w-12 h-12 mx-auto mb-3 bg-white/10 rounded-2xl flex items-center justify-center group-hover:bg-[#e91e63] group-hover:scale-110 transition-all">
+                  <ShieldCheck className="w-6 h-6 text-white" />
+                </div>
+                <div className="text-3xl sm:text-4xl font-black text-white mb-1">1,200+</div>
+                <p className="text-xs sm:text-sm text-emerald-100 font-medium uppercase tracking-wider">Dépistages gratuits</p>
+              </div>
+            </Reveal>
+
+            <Reveal delay={200}>
+              <div className="p-4 group">
+                <div className="w-12 h-12 mx-auto mb-3 bg-white/10 rounded-2xl flex items-center justify-center group-hover:bg-[#e91e63] group-hover:scale-110 transition-all">
+                  <Calendar className="w-6 h-6 text-white" />
+                </div>
+                <div className="text-3xl sm:text-4xl font-black text-white mb-1">20+</div>
+                <p className="text-xs sm:text-sm text-emerald-100 font-medium uppercase tracking-wider">Campagnes terrain</p>
+              </div>
+            </Reveal>
+
+            <Reveal delay={300}>
+              <div className="p-4 group">
+                <div className="w-12 h-12 mx-auto mb-3 bg-white/10 rounded-2xl flex items-center justify-center group-hover:bg-[#e91e63] group-hover:scale-110 transition-all">
+                  <HeartHandshake className="w-6 h-6 text-white" />
+                </div>
+                <div className="text-3xl sm:text-4xl font-black text-white mb-1">100%</div>
+                <p className="text-xs sm:text-sm text-emerald-100 font-medium uppercase tracking-wider">Engagement bénévoles</p>
+              </div>
+            </Reveal>
+          </div>
+        </div>
+      </section>
+
       {/* ============ NOS FOCUS CANCERS SECTION ============ */}
-      <section className="py-20 bg-[#faf9f6]">
+      <section className="py-24 bg-[#faf9f6] relative">
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
             <Reveal>
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-12 gap-4">
-                <h2 className="text-3xl sm:text-4xl font-black text-[#001731] tracking-wide uppercase">
-                  NOS FOCUS CANCERS
-                </h2>
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-14 gap-4 border-b border-slate-200/60 pb-6">
+                <div>
+                  <h2 className="text-3xl sm:text-4xl font-black text-[#001731] tracking-wide uppercase">
+                    NOS FOCUS CANCERS
+                  </h2>
+                  <p className="text-slate-500 text-sm mt-1">S'informer pour mieux se protéger au quotidien</p>
+                </div>
                 <Link
                   href="/cancers"
-                  className="text-[#0e5c54] hover:text-[#0b4741] font-bold flex items-center gap-1 text-sm sm:text-base transition-colors"
+                  className="group text-[#0e5c54] hover:text-[#0b4741] font-bold flex items-center gap-1.5 text-sm sm:text-base transition-all"
                 >
-                  Voir toutes les informations <ArrowRight className="w-4 h-4 ml-1" />
+                  <span>Voir toutes les informations</span>
+                  <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                 </Link>
               </div>
             </Reveal>
@@ -167,30 +232,33 @@ export default async function Home() {
             <div className="grid md:grid-cols-3 gap-8">
               {(cancers.length > 0 ? cancers.slice(0, 3) : defaultCancers).map((cancer, i) => (
                 <Reveal key={cancer.id} delay={i * 150} direction="up">
-                  <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-slate-100 h-full flex flex-col">
-                    <div className="relative h-56 w-full bg-slate-100">
+                  <div className="group bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl border border-slate-100 hover:border-pink-500/20 h-full flex flex-col transition-all duration-300 transform hover:-translate-y-2">
+                    <div className="relative h-60 w-full overflow-hidden bg-slate-100">
                       <Image
                         src={cancer.image || `/images/cancers/${cancer.id}.jpg`}
                         alt={cancer.name}
                         fill
-                        className="object-cover"
+                        className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
                       />
-                      <span className="absolute top-4 right-4 bg-[#e91e63] text-white text-xs font-bold px-3 py-1 rounded-full shadow-[0_4px_14px_rgba(233,30,99,0.4)]">
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      <span className="absolute top-4 right-4 bg-[#e91e63] text-white text-xs font-extrabold px-3.5 py-1.5 rounded-full shadow-[0_4px_14px_rgba(233,30,99,0.4)] animate-pulse">
                         Focus 0{i + 1}
                       </span>
                     </div>
-                    <div className="p-6 flex-1 flex flex-col justify-between text-center">
+
+                    <div className="p-7 flex-1 flex flex-col justify-between text-center">
                       <div>
-                        <h3 className="text-lg font-black text-[#001731] mb-3 uppercase tracking-tight">
+                        <h3 className="text-lg font-black text-[#001731] mb-3 uppercase tracking-tight group-hover:text-[#0e5c54] transition-colors">
                           {cancer.name}
                         </h3>
                         <p className="text-slate-600 text-xs sm:text-sm leading-relaxed mb-6">
                           {('shortDescription' in cancer && cancer.shortDescription) || cancer.description}
                         </p>
                       </div>
+
                       <Link
                         href={`/cancers/${cancer.id}`}
-                        className="w-full bg-[#0e5c54] hover:bg-[#0b4741] text-white py-3 rounded-2xl font-bold text-sm transition-all text-center block shadow-md shadow-pink-500/25 hover:shadow-lg hover:shadow-pink-500/40 hover:scale-[1.02] active:scale-[0.98]"
+                        className="w-full bg-[#0e5c54] hover:bg-[#0b4741] text-white py-3.5 rounded-2xl font-bold text-sm transition-all text-center block shadow-md shadow-emerald-700/20 hover:shadow-lg hover:shadow-emerald-700/30 hover:scale-[1.02] active:scale-[0.98]"
                       >
                         En savoir plus
                       </Link>
@@ -204,19 +272,26 @@ export default async function Home() {
       </section>
 
       {/* ============ ÉVÉNEMENTS SECTION ============ */}
-      <section className="py-20 bg-[#071327] text-white">
-        <div className="container mx-auto px-4">
+      <section className="py-24 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#112647] via-[#071327] to-[#030914] text-white relative overflow-hidden">
+        {/* Glow ambient */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-pink-500/10 rounded-full blur-[120px] pointer-events-none" />
+
+        <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-6xl mx-auto">
             <Reveal>
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-12 gap-4">
-                <h2 className="text-3xl sm:text-4xl font-black tracking-wide uppercase text-white">
-                  ÉVÉNEMENTS À VENIR
-                </h2>
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-14 gap-4 border-b border-slate-800 pb-6">
+                <div>
+                  <h2 className="text-3xl sm:text-4xl font-black tracking-wide uppercase text-white">
+                    ÉVÉNEMENTS À VENIR
+                  </h2>
+                  <p className="text-slate-400 text-sm mt-1">Rejoignez-nous sur le terrain lors de nos prochaines actions</p>
+                </div>
                 <Link
                   href="/blog"
-                  className="text-pink-400 hover:text-pink-300 font-bold flex items-center gap-1 text-sm sm:text-base transition-colors"
+                  className="group text-pink-400 hover:text-pink-300 font-bold flex items-center gap-1.5 text-sm sm:text-base transition-all"
                 >
-                  Voir tous les événements <ArrowRight className="w-4 h-4 ml-1" />
+                  <span>Voir tous les événements</span>
+                  <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                 </Link>
               </div>
             </Reveal>
@@ -235,35 +310,43 @@ export default async function Home() {
 
                   return (
                     <Reveal key={evt.id} delay={i * 150} direction="up">
-                      <div className="bg-white text-slate-900 rounded-3xl overflow-hidden shadow-md h-full flex flex-col">
-                        <div className="relative h-52 w-full bg-slate-200">
+                      <div className="group bg-white text-slate-900 rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl h-full flex flex-col transition-all duration-300 transform hover:-translate-y-2">
+                        <div className="relative h-56 w-full overflow-hidden bg-slate-200">
                           {evt.image ? (
-                            <Image src={evt.image} alt={evt.title} fill className="object-cover" />
+                            <Image
+                              src={evt.image}
+                              alt={evt.title}
+                              fill
+                              className="object-cover transition-transform duration-700 group-hover:scale-110"
+                            />
                           ) : (
-                            <div className="w-full h-full bg-slate-300 flex items-center justify-center text-4xl">🗓️</div>
+                            <div className="w-full h-full bg-slate-800 flex items-center justify-center text-5xl">🗓️</div>
                           )}
-                          <span className="absolute top-4 right-4 bg-[#e91e63] text-white text-xs font-bold px-3 py-1 rounded-full shadow-[0_4px_12px_rgba(233,30,99,0.35)]">
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-60" />
+                          <span className="absolute top-4 right-4 bg-[#e91e63] text-white text-xs font-extrabold px-3.5 py-1.5 rounded-full shadow-[0_4px_12px_rgba(233,30,99,0.4)] backdrop-blur-md">
                             {formattedDate}
                           </span>
                         </div>
-                        <div className="p-6 flex-1 flex flex-col justify-between">
+
+                        <div className="p-7 flex-1 flex flex-col justify-between">
                           <div>
-                            <p className="text-[#0e5c54] font-bold text-xs uppercase mb-2 tracking-wider">
-                              {evt.location || 'LOMÉ, TOGO'}
+                            <p className="text-[#0e5c54] font-bold text-xs uppercase mb-2 tracking-wider flex items-center gap-1">
+                              📍 {evt.location || 'LOMÉ, TOGO'}
                             </p>
-                            <h3 className="text-base font-black text-[#001731] mb-3 uppercase leading-snug">
+                            <h3 className="text-base font-black text-[#001731] mb-3 uppercase leading-snug group-hover:text-[#e91e63] transition-colors">
                               {evt.title}
                             </h3>
                             <p className="text-slate-600 text-xs sm:text-sm leading-relaxed line-clamp-3">
                               {evt.excerpt}
                             </p>
                           </div>
+
                           <Link
                             href={`/blog/${evt.slug || evt.id}`}
-                            className="mt-6 w-full bg-[#e91e63] hover:bg-[#d81b60] text-white py-3 rounded-2xl font-bold text-sm transition-all text-center flex items-center justify-center gap-2 shadow-md shadow-pink-500/25 hover:shadow-lg hover:shadow-pink-500/40 hover:scale-[1.02] active:scale-[0.98]"
+                            className="mt-6 w-full bg-[#e91e63] hover:bg-[#d81b60] text-white py-3.5 rounded-2xl font-bold text-sm transition-all text-center flex items-center justify-center gap-2 shadow-md shadow-pink-500/25 hover:shadow-lg hover:shadow-pink-500/40 hover:scale-[1.02] active:scale-[0.98]"
                           >
                             <span>Détails de l'événement</span>
-                            <ArrowRight className="w-4 h-4" />
+                            <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                           </Link>
                         </div>
                       </div>
@@ -301,32 +384,40 @@ export default async function Home() {
                   },
                 ].map((evt, i) => (
                   <Reveal key={evt.id} delay={i * 150} direction="up">
-                    <div className="bg-white text-slate-900 rounded-3xl overflow-hidden shadow-md h-full flex flex-col">
-                      <div className="relative h-52 w-full bg-slate-200">
-                        <Image src={evt.img} alt={evt.title} fill className="object-cover" />
-                        <span className="absolute top-4 right-4 bg-[#e91e63] text-white text-xs font-bold px-3 py-1 rounded-full shadow-[0_4px_12px_rgba(233,30,99,0.35)]">
+                    <div className="group bg-white text-slate-900 rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl h-full flex flex-col transition-all duration-300 transform hover:-translate-y-2">
+                      <div className="relative h-56 w-full overflow-hidden bg-slate-200">
+                        <Image
+                          src={evt.img}
+                          alt={evt.title}
+                          fill
+                          className="object-cover transition-transform duration-700 group-hover:scale-110"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-60" />
+                        <span className="absolute top-4 right-4 bg-[#e91e63] text-white text-xs font-extrabold px-3.5 py-1.5 rounded-full shadow-[0_4px_12px_rgba(233,30,99,0.4)] backdrop-blur-md">
                           {evt.date}
                         </span>
                       </div>
-                      <div className="p-6 flex-1 flex flex-col justify-between">
+
+                      <div className="p-7 flex-1 flex flex-col justify-between">
                         <div>
-                          <p className="text-[#0e5c54] font-bold text-xs uppercase mb-2 tracking-wider">
-                            {evt.location}
+                          <p className="text-[#0e5c54] font-bold text-xs uppercase mb-2 tracking-wider flex items-center gap-1">
+                            📍 {evt.location}
                           </p>
-                          <h3 className="text-base font-black text-[#001731] mb-3 uppercase leading-snug">
+                          <h3 className="text-base font-black text-[#001731] mb-3 uppercase leading-snug group-hover:text-[#e91e63] transition-colors">
                             {evt.title}
                           </h3>
                           <p className="text-slate-600 text-xs sm:text-sm leading-relaxed">
                             {evt.desc}
                           </p>
                         </div>
+
                         <Link
-  href={`/blog/${evt.slug || evt.id}`}
-  className="mt-6 w-full bg-[#0e5c54] hover:bg-[#0b4741] text-white py-3 rounded-2xl font-bold text-sm transition-all text-center flex items-center justify-center gap-2 shadow-md shadow-pink-500/25 hover:shadow-lg hover:shadow-pink-500/40 hover:scale-[1.02] active:scale-[0.98]"
->
-  <span>Détails de l'événement</span>
-  <ArrowRight className="w-4 h-4" />
-</Link>
+                          href={`/blog/${evt.slug || evt.id}`}
+                          className="mt-6 w-full bg-[#0e5c54] hover:bg-[#0b4741] text-white py-3.5 rounded-2xl font-bold text-sm transition-all text-center flex items-center justify-center gap-2 shadow-md shadow-emerald-700/20 hover:shadow-lg hover:shadow-emerald-700/30 hover:scale-[1.02] active:scale-[0.98]"
+                        >
+                          <span>Détails de l'événement</span>
+                          <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                        </Link>
                       </div>
                     </div>
                   </Reveal>
@@ -339,6 +430,40 @@ export default async function Home() {
 
       {/* ============ TÉMOIGNAGES SECTION ============ */}
       <TestimonialSection testimonials={testimonials as any} />
+
+      {/* ============ BANNIÈRE BANNER CALL TO ACTION ============ */}
+      <section className="py-20 bg-gradient-to-br from-[#e91e63] via-[#d81b60] to-[#880e4f] text-white relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="container mx-auto px-4 text-center relative z-10">
+          <Reveal>
+            <div className="max-w-3xl mx-auto space-y-6">
+              <span className="inline-block px-4 py-1.5 bg-white/20 rounded-full text-xs font-bold uppercase tracking-widest backdrop-blur-md">
+                ENSEMBLE CONTRE LE CANCER
+              </span>
+              <h2 className="text-3xl sm:text-5xl font-black uppercase tracking-tight leading-tight">
+                VOTRE SOUTIEN PEUT SAUVER DES VIES
+              </h2>
+              <p className="text-pink-100 text-sm sm:text-base max-w-xl mx-auto leading-relaxed">
+                Chaque don nous permet d'offrir des dépistages gratuits aux femmes les plus vulnérables et de multiplier nos campagnes de sensibilisation.
+              </p>
+              <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
+                <Link
+                  href="/contact"
+                  className="w-full sm:w-auto px-8 py-4 bg-white text-[#e91e63] rounded-2xl font-black text-sm uppercase tracking-wider transition-all hover:bg-slate-100 shadow-xl hover:scale-105 active:scale-95"
+                >
+                  Faire un don
+                </Link>
+                <Link
+                  href="/contact"
+                  className="w-full sm:w-auto px-8 py-4 bg-transparent border-2 border-white text-white rounded-2xl font-black text-sm uppercase tracking-wider transition-all hover:bg-white/10 hover:scale-105 active:scale-95"
+                >
+                  Devenir bénévole
+                </Link>
+              </div>
+            </div>
+          </Reveal>
+        </div>
+      </section>
     </div>
   );
 }
