@@ -4,18 +4,16 @@ import { useState, useEffect } from 'react';
 import { 
   MessageSquare, 
   FileText, 
-  Eye, 
   Dna, 
   Clock, 
   CheckCircle, 
-  AlertCircle, 
-  Calendar, 
   Users, 
   ArrowRight,
   BarChart3,
-  TrendingUp,
   ShieldCheck,
-  BookOpen
+  BookOpen,
+  Mail,
+  Inbox
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -27,6 +25,7 @@ interface DashboardData {
     blogPosts: number;
     publishedPosts: number;
     cancers: number;
+    subscribers: number;
   };
   recentTestimonials: {
     id: string;
@@ -44,6 +43,14 @@ interface DashboardData {
     category: string;
     published: boolean;
     image: string;
+  }[];
+  recentSubscribers?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    subject?: string;
+    createdAt?: string;
   }[];
 }
 
@@ -96,27 +103,27 @@ export default function AdminDashboard() {
       href: '/admin/blog',
     },
     {
+      label: 'Contacts / Abonnés',
+      value: data.stats.subscribers ?? 0,
+      sub: 'Messages reçus',
+      icon: Mail,
+      bgColor: 'bg-gradient-to-r from-teal-500 to-emerald-600',
+      href: '/admin/subscribers',
+    },
+    {
       label: 'Types de Cancer',
       value: data.stats.cancers,
       sub: 'Pages gérées',
       icon: ShieldCheck,
-      bgColor: 'bg-gradient-to-r from-emerald-400 to-green-500',
+      bgColor: 'bg-gradient-to-r from-rose-500 to-pink-500',
       href: '/admin/cancers',
-    },
-    {
-      label: 'À valider',
-      value: data.stats.pendingTestimonials,
-      sub: 'Témoignages',
-      icon: MessageSquare,
-      bgColor: 'bg-gradient-to-r from-lime-400 to-green-500',
-      href: '/admin/testimonials',
     },
   ];
 
   return (
     <div className="max-w-7xl mx-auto">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        {/* Left Column: Profile & Stats Grid */}
+        {/* Left Column: Profile & Recent Activity */}
         <div className="lg:col-span-1 space-y-6">
           {/* Profile Card */}
           <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-200">
@@ -125,7 +132,7 @@ export default function AdminDashboard() {
                 A
               </div>
               <h3 className="text-xl font-bold text-gray-900">Admin</h3>
-              <p className="text-gray-500">Administrateur</p>
+              <p className="text-gray-500">Administrateur ONG</p>
             </div>
 
             <div className="flex justify-around mb-6">
@@ -142,7 +149,7 @@ export default function AdminDashboard() {
             <div className="space-y-2">
               <h4 className="font-semibold text-gray-800 text-sm">Activité Récente</h4>
               <div className="space-y-2">
-                {data.recentTestimonials.slice(0, 2).map((t, index) => (
+                {data.recentTestimonials.slice(0, 2).map((t) => (
                   <div key={t.id} className="flex items-center gap-3 text-sm">
                     <div className="w-6 h-6 bg-purple-100 text-purple-600 rounded flex items-center justify-center flex-shrink-0">
                       {t.approved ? <CheckCircle className="w-4 h-4" /> : <Clock className="w-4 h-4" />}
@@ -155,7 +162,24 @@ export default function AdminDashboard() {
                     </div>
                   </div>
                 ))}
-                {data.recentPosts.slice(0, 1).map((post, index) => (
+
+                {data.recentSubscribers && data.recentSubscribers.slice(0, 1).map((sub) => (
+                  <div key={sub.id} className="flex items-center gap-3 text-sm">
+                    <div className="w-6 h-6 bg-teal-100 text-teal-600 rounded flex items-center justify-center flex-shrink-0">
+                      <Mail className="w-4 h-4" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-gray-700 truncate">
+                        Message de {sub.firstName} {sub.lastName}
+                      </p>
+                      {sub.createdAt && (
+                        <p className="text-xs text-gray-500">{new Date(sub.createdAt).toLocaleDateString('fr-FR')}</p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+
+                {data.recentPosts.slice(0, 1).map((post) => (
                   <div key={post.id} className="flex items-center gap-3 text-sm">
                     <div className="w-6 h-6 bg-blue-100 text-blue-600 rounded flex items-center justify-center flex-shrink-0">
                       <FileText className="w-4 h-4" />
@@ -168,7 +192,8 @@ export default function AdminDashboard() {
                     </div>
                   </div>
                 ))}
-                {data.recentTestimonials.length === 0 && data.recentPosts.length === 0 && (
+
+                {data.recentTestimonials.length === 0 && data.recentPosts.length === 0 && (!data.recentSubscribers || data.recentSubscribers.length === 0) && (
                   <p className="text-sm text-gray-500 text-center py-2">Pas d'activité récente</p>
                 )}
               </div>
@@ -180,7 +205,7 @@ export default function AdminDashboard() {
         <div className="lg:col-span-2 space-y-6">
           {/* Stats Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            {statCards.map((stat, index) => {
+            {statCards.map((stat) => {
               const Icon = stat.icon;
               return (
                 <Link 
@@ -212,50 +237,44 @@ export default function AdminDashboard() {
                   <button className="text-purple-600 border-b-2 border-purple-600 pb-1">Activité</button>
                   <button className="hover:text-gray-700 pb-1">Stats</button>
                 </div>
-                <div className="flex items-center gap-2 text-sm text-gray-500">
-                  <Calendar className="w-4 h-4" />
-                  <span>Juillet 2025</span>
-                </div>
               </div>
 
               {/* Placeholder Chart */}
               <div className="h-52 bg-gradient-to-b from-indigo-50 to-white rounded-xl border border-dashed border-gray-300 flex items-center justify-center">
                 <div className="text-center text-gray-400">
                   <BarChart3 className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                  <p>Graphique d&apos;activité</p>
+                  <p>Graphique d'activité</p>
                 </div>
               </div>
             </div>
 
             {/* Recent Items */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">Récents</h3>
+              <h3 className="text-lg font-bold text-gray-900 mb-4">Témoignages récents</h3>
               
               <div className="space-y-4">
                 {data.recentTestimonials.length > 0 ? (
-                  data.recentTestimonials.slice(0, 2).map((t) => (
+                  data.recentTestimonials.slice(0, 3).map((t) => (
                     <div key={t.id} className="flex items-center gap-4 p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
-                      <div className="w-12 h-12 bg-gradient-to-br from-purple-400 to-pink-500 rounded-full flex items-center justify-center text-white font-bold">
+                      <div className="w-10 h-10 bg-gradient-to-br from-purple-400 to-pink-500 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0">
                         {t.name.charAt(0)}
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="font-semibold text-gray-900 text-sm">{t.name}</p>
                         <p className="text-xs text-gray-600 truncate">{t.excerpt}</p>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <span className={`text-xs font-semibold px-3 py-1 rounded-full ${
-                          t.approved 
-                            ? 'bg-green-100 text-green-700' 
-                            : 'bg-amber-100 text-amber-700'
-                        }`}>
-                          {t.approved ? 'Approuvé' : 'En attente'}
-                        </span>
-                      </div>
+                      <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
+                        t.approved 
+                          ? 'bg-green-100 text-green-700' 
+                          : 'bg-amber-100 text-amber-700'
+                      }`}>
+                        {t.approved ? 'Approuvé' : 'Attente'}
+                      </span>
                     </div>
                   ))
                 ) : (
                   <div className="text-center py-8 text-gray-500 text-sm">
-                    Pas d&apos;activité récente
+                    Pas d'activité récente
                   </div>
                 )}
               </div>
@@ -265,46 +284,63 @@ export default function AdminDashboard() {
       </div>
 
       {/* Bottom Section: Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-        <Link href="/admin/cancers" className="block">
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 hover:shadow-md transition-all">
-            <div className="flex items-center gap-4">
-              <div className="w-14 h-14 bg-gradient-to-br from-blue-100 to-indigo-200 rounded-xl flex items-center justify-center">
-                <Dna className="w-7 h-7 text-indigo-600" />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <Link href="/admin/subscribers" className="block">
+          <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-200 hover:shadow-md transition-all">
+            <div className="flex items-center gap-3.5">
+              <div className="w-12 h-12 bg-teal-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                <Inbox className="w-6 h-6 text-teal-700" />
               </div>
-              <div>
-                <p className="font-bold text-gray-900">Types de Cancer</p>
-                <p className="text-sm text-gray-500">Gérer les fiches</p>
+              <div className="min-w-0">
+                <p className="font-bold text-gray-900 text-sm truncate">Contacts / Abonnés</p>
+                <p className="text-xs text-gray-500 truncate">Voir les messages</p>
               </div>
-              <ArrowRight className="w-5 h-5 text-gray-400 ml-auto" />
+              <ArrowRight className="w-4 h-4 text-gray-400 ml-auto flex-shrink-0" />
             </div>
           </div>
         </Link>
+
         <Link href="/admin/testimonials" className="block">
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 hover:shadow-md transition-all">
-            <div className="flex items-center gap-4">
-              <div className="w-14 h-14 bg-gradient-to-br from-pink-100 to-rose-200 rounded-xl flex items-center justify-center">
-                <MessageSquare className="w-7 h-7 text-rose-600" />
+          <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-200 hover:shadow-md transition-all">
+            <div className="flex items-center gap-3.5">
+              <div className="w-12 h-12 bg-pink-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                <MessageSquare className="w-6 h-6 text-rose-600" />
               </div>
-              <div>
-                <p className="font-bold text-gray-900">Témoignages</p>
-                <p className="text-sm text-gray-500">Approuver & publier</p>
+              <div className="min-w-0">
+                <p className="font-bold text-gray-900 text-sm truncate">Témoignages</p>
+                <p className="text-xs text-gray-500 truncate">Approuver & publier</p>
               </div>
-              <ArrowRight className="w-5 h-5 text-gray-400 ml-auto" />
+              <ArrowRight className="w-4 h-4 text-gray-400 ml-auto flex-shrink-0" />
             </div>
           </div>
         </Link>
+
         <Link href="/admin/blog" className="block">
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 hover:shadow-md transition-all">
-            <div className="flex items-center gap-4">
-              <div className="w-14 h-14 bg-gradient-to-br from-emerald-100 to-green-200 rounded-xl flex items-center justify-center">
-                <FileText className="w-7 h-7 text-emerald-600" />
+          <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-200 hover:shadow-md transition-all">
+            <div className="flex items-center gap-3.5">
+              <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                <FileText className="w-6 h-6 text-emerald-600" />
               </div>
-              <div>
-                <p className="font-bold text-gray-900">Blog</p>
-                <p className="text-sm text-gray-500">Rédiger des articles</p>
+              <div className="min-w-0">
+                <p className="font-bold text-gray-900 text-sm truncate">Blog</p>
+                <p className="text-xs text-gray-500 truncate">Rédiger des articles</p>
               </div>
-              <ArrowRight className="w-5 h-5 text-gray-400 ml-auto" />
+              <ArrowRight className="w-4 h-4 text-gray-400 ml-auto flex-shrink-0" />
+            </div>
+          </div>
+        </Link>
+
+        <Link href="/admin/cancers" className="block">
+          <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-200 hover:shadow-md transition-all">
+            <div className="flex items-center gap-3.5">
+              <div className="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                <Dna className="w-6 h-6 text-indigo-600" />
+              </div>
+              <div className="min-w-0">
+                <p className="font-bold text-gray-900 text-sm truncate">Types de Cancer</p>
+                <p className="text-xs text-gray-500 truncate">Gérer les fiches</p>
+              </div>
+              <ArrowRight className="w-4 h-4 text-gray-400 ml-auto flex-shrink-0" />
             </div>
           </div>
         </Link>
