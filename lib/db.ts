@@ -563,7 +563,7 @@ export async function createEventRegistration(data: { name: string; phone: strin
   const id = Date.now().toString();
   const createdAt = new Date().toISOString();
   await pool.query(
-    `INSERT INTO event_registrations (id, name, phone, eventId, eventTitle, createdAt)
+    `INSERT INTO event_registrations (id, name, phone, event_id, event_title, createdAt)
      VALUES ($1, $2, $3, $4, $5, $6)`,
     [id, data.name.trim(), data.phone.trim(), data.eventId || '', data.eventTitle || 'Événement', createdAt]
   );
@@ -578,8 +578,8 @@ export async function getEventRegistrations() {
       id: r.id,
       name: r.name,
       phone: r.phone,
-      eventId: r.eventid || r.eventId,
-      eventTitle: r.eventtitle || r.eventTitle,
+      eventId: r.event_id || r.eventId,
+      eventTitle: r.event_title || r.eventTitle,
       createdAt: r.createdat || r.createdAt,
     }));
   } catch (error) {
