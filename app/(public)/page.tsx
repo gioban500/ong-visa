@@ -77,7 +77,6 @@ export default async function Home() {
 
       {/* ============ MISSION SECTION ============ */}
       <section className="py-24 bg-[#faf9f6] relative overflow-hidden">
-        {/* Orbes décoratifs animés en arrière-plan */}
         <div className="absolute top-10 -left-20 w-72 h-72 bg-emerald-300/20 rounded-full blur-3xl animate-pulse pointer-events-none" />
         <div className="absolute bottom-10 -right-20 w-80 h-80 bg-pink-300/20 rounded-full blur-3xl animate-pulse delay-700 pointer-events-none" />
 
@@ -86,7 +85,7 @@ export default async function Home() {
             <Reveal>
               <div className="text-center mb-16">
                 <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-100 text-[#0e5c54] text-xs font-bold uppercase tracking-wider mb-4 animate-bounce">
-                  <Sparkles className="w-3.5 h-3.5" /> Ensembles engagés
+                  <Sparkles className="w-3.5 h-3.5 text-[#e91e63]" /> Ensemble Engagés
                 </span>
                 <h2 className="text-3xl sm:text-5xl font-black text-[#0e5c54] tracking-tight uppercase">
                   NOTRE MISSION
@@ -96,7 +95,6 @@ export default async function Home() {
             </Reveal>
 
             <div className="grid md:grid-cols-3 gap-8">
-              {/* Carte 1 : Sensibiliser */}
               <Reveal delay={0} direction="up">
                 <div className="group bg-white rounded-3xl p-8 shadow-sm hover:shadow-2xl border border-slate-100 hover:border-emerald-500/30 h-full flex flex-col items-center text-center transition-all duration-300 transform hover:-translate-y-2">
                   <div className="w-32 h-32 mb-6 flex items-center justify-center relative">
@@ -116,7 +114,6 @@ export default async function Home() {
                 </div>
               </Reveal>
 
-              {/* Carte 2 : Prévenir */}
               <Reveal delay={150} direction="up">
                 <div className="group bg-white rounded-3xl p-8 shadow-sm hover:shadow-2xl border border-slate-100 hover:border-pink-500/30 h-full flex flex-col items-center text-center transition-all duration-300 transform hover:-translate-y-2">
                   <div className="w-32 h-32 mb-6 flex items-center justify-center relative">
@@ -136,7 +133,6 @@ export default async function Home() {
                 </div>
               </Reveal>
 
-              {/* Carte 3 : Accompagner */}
               <Reveal delay={300} direction="up">
                 <div className="group bg-white rounded-3xl p-8 shadow-sm hover:shadow-2xl border border-slate-100 hover:border-emerald-500/30 h-full flex flex-col items-center text-center transition-all duration-300 transform hover:-translate-y-2">
                   <div className="w-32 h-32 mb-6 flex items-center justify-center relative">
@@ -160,49 +156,68 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* ============ SECTION IMPACT / CHIFFRES CLÉS (NOUVELLE SECTION DYNAMIQUE) ============ */}
-      <section className="py-16 bg-gradient-to-r from-[#0e5c54] to-[#073833] text-white shadow-inner relative">
-        <div className="container mx-auto px-4">
-          <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            <Reveal delay={0}>
-              <div className="p-4 group">
-                <div className="w-12 h-12 mx-auto mb-3 bg-white/10 rounded-2xl flex items-center justify-center group-hover:bg-[#e91e63] group-hover:scale-110 transition-all">
-                  <Users className="w-6 h-6 text-white" />
-                </div>
-                <div className="text-3xl sm:text-4xl font-black text-white mb-1">5,000+</div>
-                <p className="text-xs sm:text-sm text-emerald-100 font-medium uppercase tracking-wider">Femmes sensibilisées</p>
+      {/* ============ SECTION IMPACT / CHIFFRES CLÉS (REDESIGNÉE) ============ */}
+      <section className="py-24 bg-gradient-to-b from-[#073833] via-[#052b27] to-[#031d1a] text-white relative overflow-hidden">
+        <div className="absolute -top-24 -left-24 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-pink-500/10 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="max-w-6xl mx-auto">
+            {/* Titre d'accroche */}
+            <Reveal>
+              <div className="text-center mb-16">
+                <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/20 text-xs font-bold uppercase tracking-wider mb-3">
+                  <Sparkles className="w-3.5 h-3.5 text-[#e91e63]" /> Notre Impact en Chiffres
+                </span>
+                <h2 className="text-3xl sm:text-4xl font-black text-white uppercase tracking-tight">
+                  DES ACTIONS CONCRÈTES SUR LE TERRAIN
+                </h2>
+                <div className="w-16 h-1 bg-[#e91e63] mx-auto mt-4 rounded-full" />
               </div>
             </Reveal>
 
-            <Reveal delay={100}>
-              <div className="p-4 group">
-                <div className="w-12 h-12 mx-auto mb-3 bg-white/10 rounded-2xl flex items-center justify-center group-hover:bg-[#e91e63] group-hover:scale-110 transition-all">
-                  <ShieldCheck className="w-6 h-6 text-white" />
+            {/* Grille de cartes impact */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              <Reveal delay={0} direction="up">
+                <div className="group bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 text-center hover:bg-white/10 hover:border-pink-500/40 transition-all duration-300 transform hover:-translate-y-2 shadow-2xl">
+                  <div className="w-14 h-14 mx-auto mb-6 bg-gradient-to-br from-[#e91e63] to-[#d81b60] rounded-2xl flex items-center justify-center shadow-lg shadow-pink-500/30 group-hover:scale-110 transition-transform">
+                    <Users className="w-7 h-7 text-white" />
+                  </div>
+                  <div className="text-4xl sm:text-5xl font-black text-white mb-2 tracking-tight">5,000+</div>
+                  <p className="text-xs sm:text-sm text-emerald-200 font-bold uppercase tracking-wider">Femmes sensibilisées</p>
                 </div>
-                <div className="text-3xl sm:text-4xl font-black text-white mb-1">1,200+</div>
-                <p className="text-xs sm:text-sm text-emerald-100 font-medium uppercase tracking-wider">Dépistages gratuits</p>
-              </div>
-            </Reveal>
+              </Reveal>
 
-            <Reveal delay={200}>
-              <div className="p-4 group">
-                <div className="w-12 h-12 mx-auto mb-3 bg-white/10 rounded-2xl flex items-center justify-center group-hover:bg-[#e91e63] group-hover:scale-110 transition-all">
-                  <Calendar className="w-6 h-6 text-white" />
+              <Reveal delay={100} direction="up">
+                <div className="group bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 text-center hover:bg-white/10 hover:border-pink-500/40 transition-all duration-300 transform hover:-translate-y-2 shadow-2xl">
+                  <div className="w-14 h-14 mx-auto mb-6 bg-gradient-to-br from-[#e91e63] to-[#d81b60] rounded-2xl flex items-center justify-center shadow-lg shadow-pink-500/30 group-hover:scale-110 transition-transform">
+                    <ShieldCheck className="w-7 h-7 text-white" />
+                  </div>
+                  <div className="text-4xl sm:text-5xl font-black text-white mb-2 tracking-tight">1,200+</div>
+                  <p className="text-xs sm:text-sm text-emerald-200 font-bold uppercase tracking-wider">Dépistages gratuits</p>
                 </div>
-                <div className="text-3xl sm:text-4xl font-black text-white mb-1">20+</div>
-                <p className="text-xs sm:text-sm text-emerald-100 font-medium uppercase tracking-wider">Campagnes terrain</p>
-              </div>
-            </Reveal>
+              </Reveal>
 
-            <Reveal delay={300}>
-              <div className="p-4 group">
-                <div className="w-12 h-12 mx-auto mb-3 bg-white/10 rounded-2xl flex items-center justify-center group-hover:bg-[#e91e63] group-hover:scale-110 transition-all">
-                  <HeartHandshake className="w-6 h-6 text-white" />
+              <Reveal delay={200} direction="up">
+                <div className="group bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 text-center hover:bg-white/10 hover:border-pink-500/40 transition-all duration-300 transform hover:-translate-y-2 shadow-2xl">
+                  <div className="w-14 h-14 mx-auto mb-6 bg-gradient-to-br from-[#e91e63] to-[#d81b60] rounded-2xl flex items-center justify-center shadow-lg shadow-pink-500/30 group-hover:scale-110 transition-transform">
+                    <Calendar className="w-7 h-7 text-white" />
+                  </div>
+                  <div className="text-4xl sm:text-5xl font-black text-white mb-2 tracking-tight">20+</div>
+                  <p className="text-xs sm:text-sm text-emerald-200 font-bold uppercase tracking-wider">Campagnes terrain</p>
                 </div>
-                <div className="text-3xl sm:text-4xl font-black text-white mb-1">100%</div>
-                <p className="text-xs sm:text-sm text-emerald-100 font-medium uppercase tracking-wider">Engagement bénévoles</p>
-              </div>
-            </Reveal>
+              </Reveal>
+
+              <Reveal delay={300} direction="up">
+                <div className="group bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 text-center hover:bg-white/10 hover:border-pink-500/40 transition-all duration-300 transform hover:-translate-y-2 shadow-2xl">
+                  <div className="w-14 h-14 mx-auto mb-6 bg-gradient-to-br from-[#e91e63] to-[#d81b60] rounded-2xl flex items-center justify-center shadow-lg shadow-pink-500/30 group-hover:scale-110 transition-transform">
+                    <HeartHandshake className="w-7 h-7 text-white" />
+                  </div>
+                  <div className="text-4xl sm:text-5xl font-black text-white mb-2 tracking-tight">100%</div>
+                  <p className="text-xs sm:text-sm text-emerald-200 font-bold uppercase tracking-wider">Engagement bénévoles</p>
+                </div>
+              </Reveal>
+            </div>
           </div>
         </div>
       </section>
@@ -273,7 +288,6 @@ export default async function Home() {
 
       {/* ============ ÉVÉNEMENTS SECTION ============ */}
       <section className="py-24 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#112647] via-[#071327] to-[#030914] text-white relative overflow-hidden">
-        {/* Glow ambient */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-pink-500/10 rounded-full blur-[120px] pointer-events-none" />
 
         <div className="container mx-auto px-4 relative z-10">
