@@ -86,7 +86,8 @@ export async function initDatabase() {
           story TEXT NOT NULL,
           cancerType VARCHAR(255),
           date VARCHAR(50),
-          approved BOOLEAN DEFAULT TRUE
+          approved BOOLEAN DEFAULT TRUE,
+          hero BOOLEAN DEFAULT FALSE
         );
       `).catch(err => {
         if (err.code !== '42P07') throw err;
@@ -149,6 +150,12 @@ export async function initDatabase() {
         ADD COLUMN IF NOT EXISTS subject VARCHAR(100),
         ADD COLUMN IF NOT EXISTS message TEXT;
       `).catch(err => console.error('Error altering subscribers table:', err));
+
+      // Auto-migration : ajouter la colonne hero dans testimonials si elle n'existe pas encore
+      await client.query(`
+        ALTER TABLE testimonials 
+        ADD COLUMN IF NOT EXISTS hero BOOLEAN DEFAULT FALSE;
+      `).catch(err => console.error('Error altering testimonials table:', err));
 
       initialized = true;
       console.log('Database initialized successfully');
@@ -360,12 +367,17 @@ export async function getTestimonialById(id: string) {
 export async function createTestimonial(testimonial: any) {
   await initDatabase();
   await pool.query(`
-    INSERT INTO testimonials (id, name, image, story, cancerType, date, approved)
-    VALUES ($1, $2, $3, $4, $5, $6, $7)
+    INSERT INTO testimonials (id, name, image, story, cancerType, date, approved, hero)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
   `, [
-    testimonial.id, testimonial.name, testimonial.image, 
-    testimonial.story, testimonial.cancerType, 
-    testimonial.date, testimonial.approved ?? true
+    testimonial.id, 
+    testimonial.name, 
+    testimonial.image, 
+    testimonial.story, 
+    testimonial.cancerType, 
+    testimonial.date, 
+    testimonial.approved ?? true,
+    testimonial.hero ?? false
   ]);
   return testimonial;
 }
@@ -374,21 +386,23 @@ export async function updateTestimonial(id: string, updates: any) {
   await initDatabase();
   await pool.query(`
     UPDATE testimonials SET
-      name = $2,
-      image = $3,
-      story = $4,
-      cancerType = $5,
-      date = $6,
-      approved = $7
+      name = COALESCE($2, name),
+      image = COALESCE($3, image),
+      story = COALESCE($4, story),
+      cancerType = COALESCE($5, cancerType),
+      date = COALESCE($6, date),
+      approved = COALESCE($7, approved),
+      hero = COALESCE($8, hero)
     WHERE id = $1
   `, [
     id,
-    updates.name,
-    updates.image,
-    updates.story,
-    updates.cancerType,
-    updates.date,
-    updates.approved
+    updates.name ?? null,
+    updates.image ?? null,
+    updates.story ?? null,
+    updates.cancerType ?? null,
+    updates.date ?? null,
+    updates.approved ?? null,
+    updates.hero ?? null
   ]);
   return getTestimonialById(id);
 }

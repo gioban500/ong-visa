@@ -40,6 +40,7 @@ export interface Testimonial {
   rating?: number;
   date: string;
   anonymous?: boolean;
+  hero?: boolean;
 }
 
 export interface Resource {

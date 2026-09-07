@@ -10,6 +10,7 @@ interface Testimonial {
   image?: string;
   story: string;
   cancerType?: string;
+  hero?: boolean; // Ajout du champ hero
 }
 
 interface HeroCarouselProps {
@@ -26,8 +27,9 @@ export default function HeroCarousel({ testimonials }: HeroCarouselProps) {
       isDefault: true,
     };
 
+    // Filtrage strict : uniquement les témoignages avec hero === true et une image
     const testimonialSlides = (testimonials || [])
-      .filter((t) => t.image)
+      .filter((t) => t.hero && t.image)
       .map((t) => ({
         id: t.id,
         title: `L'histoire de ${t.name}`,
@@ -38,6 +40,7 @@ export default function HeroCarousel({ testimonials }: HeroCarouselProps) {
 
     return [defaultSlide, ...testimonialSlides];
   }, [testimonials]);
+
   const [current, setCurrent] = useState(0);
 
   // Préchargement immédiat des images
@@ -63,7 +66,7 @@ export default function HeroCarousel({ testimonials }: HeroCarouselProps) {
 
   return (
     <section className="relative w-full min-h-[500px] sm:min-h-[560px] flex items-center bg-white overflow-hidden py-12 sm:py-16">
-      {/* CADRAGE IMAGE SUR LA MOITIÉ DROITE (Pas de zoom 100%) */}
+      {/* CADRAGE IMAGE SUR LA MOITIÉ DROITE */}
       <div className="absolute top-0 right-0 w-full lg:w-[50%] h-full z-0 overflow-hidden">
         <AnimatePresence mode="wait">
           <motion.img 
@@ -78,7 +81,7 @@ export default function HeroCarousel({ testimonials }: HeroCarouselProps) {
           />
         </AnimatePresence>
 
-        {/* FONDU DE TRANSITION (Élimine la ligne sans cacher l'image) */}
+        {/* FONDU DE TRANSITION */}
         <div className="hidden lg:block absolute inset-y-0 left-0 w-1/2 bg-gradient-to-r from-white via-white/60 to-transparent pointer-events-none" />
         <div className="lg:hidden absolute inset-0 bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none" />
       </div>

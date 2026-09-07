@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Plus, Edit, Trash2, Check, X, Upload, Loader2, RefreshCw } from 'lucide-react';
+import { Plus, Edit, Trash2, Upload, Loader2, RefreshCw, Star } from 'lucide-react';
 
 interface Testimonial {
   id: string;
@@ -11,6 +11,7 @@ interface Testimonial {
   cancerType: string;
   date: string;
   approved: boolean;
+  hero?: boolean; // Champ Hero ajouté
 }
 
 export default function AdminTestimonials() {
@@ -26,6 +27,7 @@ export default function AdminTestimonials() {
     image: '',
     story: '',
     approved: true,
+    hero: false,
   });
 
   const fetchTestimonials = async () => {
@@ -37,7 +39,11 @@ export default function AdminTestimonials() {
   };
 
   useEffect(() => {
-    fetchTestimonials();
+    const timeoutId = window.setTimeout(() => {
+      void fetchTestimonials();
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
   }, []);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -77,14 +83,20 @@ export default function AdminTestimonials() {
   };
 
   const resetForm = () => {
-    setFormData({ name: '', image: '', story: '', approved: true });
+    setFormData({ name: '', image: '', story: '', approved: true, hero: false });
     setEditingTestimonial(null);
     if (fileRef.current) fileRef.current.value = '';
   };
 
   const handleEdit = (t: Testimonial) => {
     setEditingTestimonial(t);
-    setFormData({ name: t.name, image: t.image, story: t.story, approved: t.approved });
+    setFormData({
+      name: t.name,
+      image: t.image,
+      story: t.story,
+      approved: t.approved,
+      hero: t.hero || false,
+    });
     setIsModalOpen(true);
   };
 
@@ -98,7 +110,16 @@ export default function AdminTestimonials() {
     await fetch(`/api/testimonials/${t.id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ approved: !t.approved }),
+      body: JSON.stringify({ ...t, approved: !t.approved }),
+    });
+    await fetchTestimonials();
+  };
+
+  const toggleHero = async (t: Testimonial) => {
+    await fetch(`/api/testimonials/${t.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...t, hero: !t.hero }),
     });
     await fetchTestimonials();
   };
@@ -140,6 +161,7 @@ export default function AdminTestimonials() {
                 <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Patient</th>
                 <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900 hidden lg:table-cell">Témoignage</th>
                 <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Statut</th>
+                <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900">Hero</th>
                 <th className="px-6 py-4 text-right text-sm font-semibold text-gray-900">Actions</th>
               </tr>
             </thead>
@@ -169,6 +191,17 @@ export default function AdminTestimonials() {
                       }`}
                     >
                       {t.approved ? '✓ Approuvé' : '⏳ En attente'}
+                    </button>
+                  </td>
+                  <td className="px-6 py-4 text-center">
+                    <button
+                      onClick={() => toggleHero(t)}
+                      className={`p-2 rounded-lg transition-colors ${
+                        t.hero ? 'bg-amber-100 text-amber-600 hover:bg-amber-200' : 'text-gray-300 hover:text-amber-500 hover:bg-gray-100'
+                      }`}
+                      title={t.hero ? 'Retirer du Hero' : 'Mettre en avant (Hero)'}
+                    >
+                      <Star className={`w-5 h-5 ${t.hero ? 'fill-amber-500' : ''}`} />
                     </button>
                   </td>
                   <td className="px-6 py-4">
@@ -243,17 +276,33 @@ export default function AdminTestimonials() {
                 />
               </div>
 
-              <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
-                <input
-                  type="checkbox"
-                  id="approved"
-                  checked={formData.approved}
-                  onChange={(e) => setFormData(f => ({ ...f, approved: e.target.checked }))}
-                  className="w-5 h-5 text-pink-600 rounded"
-                />
-                <label htmlFor="approved" className="text-sm font-medium text-gray-700">
-                  Approuver immédiatement
-                </label>
+              <div className="space-y-3">
+                <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
+                  <input
+                    type="checkbox"
+                    id="approved"
+                    checked={formData.approved}
+                    onChange={(e) => setFormData(f => ({ ...f, approved: e.target.checked }))}
+                    className="w-5 h-5 text-pink-600 rounded"
+                  />
+                  <label htmlFor="approved" className="text-sm font-medium text-gray-700 cursor-pointer">
+                    Approuver immédiatement
+                  </label>
+                </div>
+
+                <div className="flex items-center gap-3 p-4 bg-amber-50/60 border border-amber-100 rounded-lg">
+                  <input
+                    type="checkbox"
+                    id="hero"
+                    checked={formData.hero}
+                    onChange={(e) => setFormData(f => ({ ...f, hero: e.target.checked }))}
+                    className="w-5 h-5 text-amber-600 rounded focus:ring-amber-500"
+                  />
+                  <label htmlFor="hero" className="text-sm font-medium text-amber-900 cursor-pointer flex items-center gap-1.5">
+                    <Star className="w-4 h-4 fill-amber-500 text-amber-500" />
+                    Mettre en avant dans la section Hero
+                  </label>
+                </div>
               </div>
 
               <div className="flex gap-3 pt-2">
