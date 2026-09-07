@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Search, ArrowRight, Sparkles } from 'lucide-react';
+import { Search, ArrowRight } from 'lucide-react';
 import { Cancer } from '@/types/cancer';
 
 export default function CancersPage() {
@@ -55,15 +55,9 @@ export default function CancersPage() {
 
   return (
     <div className="w-full bg-[#faf9f6] min-h-screen pb-24">
-      {/* Banner Héro Dynamique */}
-      <section className="bg-gradient-to-b from-[#0e5c54] to-[#073833] text-white pt-20 pb-24 px-4 sm:px-6 lg:px-8 text-center shadow-xl relative overflow-hidden">
-        <div className="absolute -top-20 -left-20 w-72 h-72 bg-emerald-300/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-20 -right-20 w-80 h-80 bg-[#e91e63]/15 rounded-full blur-3xl pointer-events-none" />
-
-        <div className="max-w-4xl mx-auto space-y-5 relative z-10">
-          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-white/15 text-pink-300 font-extrabold text-xs uppercase tracking-widest">
-            <Sparkles className="w-3.5 h-3.5 text-[#e91e63]" /> Prévention & Informations Médicales
-          </span>
+      {/* Banner Héro Original Unicolore */}
+      <section className="bg-[#0e5c54] text-white pt-16 pb-20 px-4 sm:px-6 lg:px-8 text-center shadow-md">
+        <div className="max-w-4xl mx-auto space-y-5">
           <h1 className="text-4xl sm:text-6xl font-black uppercase tracking-tight text-white leading-tight">
             COMPRENDRE LES CANCERS FÉMININS
           </h1>
@@ -86,7 +80,7 @@ export default function CancersPage() {
         </div>
       </section>
 
-      {/* Grille des cartes */}
+      {/* Grille des cartes avec animations */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12">
         {loading ? (
           <div className="bg-white rounded-3xl p-12 text-center border border-slate-100 shadow-xl">

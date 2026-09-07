@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Search, ArrowRight, Sparkles } from 'lucide-react';
+import { Search, ArrowRight } from 'lucide-react';
 import { BlogPost } from '@/types/cancer';
 
 interface EventPost extends BlogPost {
@@ -93,14 +93,9 @@ export default function BlogEventsPage() {
 
   return (
     <div className="w-full bg-[#faf9f6] min-h-screen pb-24">
-      {/* BANNIÈRE SOMBRE DYNAMIQUE */}
-      <section className="bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#112647] via-[#071327] to-[#030914] text-white pt-20 pb-24 px-4 sm:px-6 lg:px-8 text-center shadow-xl relative overflow-hidden">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-pink-500/10 rounded-full blur-[100px] pointer-events-none" />
-
-        <div className="max-w-4xl mx-auto space-y-5 relative z-10">
-          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-white/10 text-pink-400 font-extrabold text-xs uppercase tracking-widest">
-            <Sparkles className="w-3.5 h-3.5 text-[#e91e63]" /> Agenda & Mobilisation
-          </span>
+      {/* BANNIÈRE ORIGINALE BLEU NUIT UNIFORME */}
+      <section className="bg-[#0f172a] text-white pt-16 pb-20 px-4 sm:px-6 lg:px-8 text-center shadow-md">
+        <div className="max-w-4xl mx-auto space-y-5">
           <h1 className="text-4xl sm:text-6xl font-black uppercase tracking-tight text-white leading-tight">
             TOUS NOS ÉVÉNEMENTS
           </h1>
@@ -116,14 +111,14 @@ export default function BlogEventsPage() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Rechercher un événement ou lieu..."
-                className="w-full pl-12 pr-4 py-4 rounded-2xl bg-[#17233d] border border-slate-700/60 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#e91e63] shadow-lg text-sm font-medium transition-all"
+                className="w-full pl-12 pr-4 py-4 rounded-2xl bg-[#1e293b] border border-slate-700/60 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#e91e63] shadow-lg text-sm font-medium transition-all"
               />
             </div>
           </div>
         </div>
       </section>
 
-      {/* GRILLE D'ÉVÉNEMENTS */}
+      {/* GRILLE D'ÉVÉNEMENTS AVEC ANIMATIONS */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {loading ? (
           <div className="bg-white rounded-3xl p-12 text-center border border-slate-100 shadow-sm">
