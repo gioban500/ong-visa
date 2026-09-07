@@ -48,7 +48,7 @@ export default function CancerDetailPage({ params }: PageProps) {
       } catch (error) {
         console.error('Erreur lors du chargement du cancer:', error);
         setCancer(null);
-      } font-medium {
+      } finally {
         setLoading(false);
       }
     }
@@ -68,7 +68,6 @@ export default function CancerDetailPage({ params }: PageProps) {
     notFound();
   }
 
-  // Formatting helper for symptoms (string or array)
   const symptomsList: string[] = Array.isArray(cancer.symptoms)
     ? cancer.symptoms
     : typeof cancer.symptoms === 'string'
@@ -90,7 +89,7 @@ export default function CancerDetailPage({ params }: PageProps) {
         </div>
       </div>
 
-      {/* En-tête principal / Hero Section */}
+      {/* Hero Section */}
       <section className="w-full bg-[#0f766e] text-white py-14 px-6 sm:px-8 lg:px-12">
         <div className="max-w-7xl mx-auto grid lg:grid-cols-12 gap-10 items-center">
           <div className="lg:col-span-7">
