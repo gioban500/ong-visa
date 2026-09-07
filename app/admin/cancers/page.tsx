@@ -56,6 +56,7 @@ export default function AdminCancers() {
     try {
       const res = await fetch('/api/cancers');
       const data = await res.json();
+      console.log("DONNÉES BRUTES DE L'API :", data); // <--- AJOUTEZ CECI
       setCancersList(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error('Erreur lors du chargement des cancers:', err);
