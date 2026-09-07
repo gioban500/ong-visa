@@ -30,16 +30,30 @@ const initialFormState: CancerData = {
   treatment: '',
 };
 
-// Fonction utilitaire pour extraire la description courte quel que soit le nom de la clé API
+// Extraction de la description courte (inclut shortdescription tout en minuscules)
 const extractShortDesc = (item: any): string => {
   if (!item) return '';
-  return item.shortDescription ?? item.short_description ?? item.shortDesc ?? item.short_desc ?? '';
+  return (
+    item.shortdescription ?? 
+    item.shortDescription ?? 
+    item.short_description ?? 
+    item.descriptionCourte ?? 
+    item.description_courte ?? 
+    item.shortDesc ?? 
+    ''
+  );
 };
 
-// Fonction utilitaire pour extraire les facteurs de risque quel que soit le nom de la clé API
 const extractRiskFactors = (item: any): string => {
   if (!item) return '';
-  return item.riskFactors ?? item.risk_factors ?? item.risk_factor ?? '';
+  return (
+    item.riskFactors ??
+    item.risk_factors ??
+    item.facteursRisque ??
+    item.facteurs_risque ??
+    item.risk_factor ??
+    ''
+  );
 };
 
 export default function AdminCancers() {
@@ -56,7 +70,6 @@ export default function AdminCancers() {
     try {
       const res = await fetch('/api/cancers');
       const data = await res.json();
-      console.log("DONNÉES BRUTES DE L'API :", data); // <--- AJOUTEZ CECI
       setCancersList(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error('Erreur lors du chargement des cancers:', err);
@@ -113,8 +126,10 @@ export default function AdminCancers() {
 
       const payload = {
         ...formData,
+        shortdescription: formData.shortDescription, // Envoi sous le bon nom pour le backend
         shortDescription: formData.shortDescription,
         short_description: formData.shortDescription,
+        descriptionCourte: formData.shortDescription,
         riskFactors: formData.riskFactors,
         risk_factors: formData.riskFactors,
       };
@@ -146,7 +161,6 @@ export default function AdminCancers() {
   const handleEdit = async (cancer: any) => {
     setEditingCancer(cancer);
 
-    // 1. Pré-remplissage immédiat depuis la liste
     const initialShortDesc = extractShortDesc(cancer);
     const initialRisk = extractRiskFactors(cancer);
 
@@ -165,7 +179,6 @@ export default function AdminCancers() {
 
     setIsModalOpen(true);
 
-    // 2. Récupération spécifique des détails complets depuis le backend si le tableau ne renvoie pas tout
     if (cancer.id) {
       try {
         const res = await fetch(`/api/cancers/${cancer.id}`);
@@ -300,7 +313,7 @@ export default function AdminCancers() {
         </div>
       )}
 
-      {/* Modal d'édition complet */}
+      {/* Modal d'édition */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 overflow-y-auto">
           <div className="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto my-4 shadow-2xl">
@@ -314,7 +327,6 @@ export default function AdminCancers() {
             </div>
 
             <form onSubmit={handleSubmit} className="p-6 space-y-6">
-              {/* Informations Générales */}
               <div className="space-y-4">
                 <h3 className="text-md font-bold text-purple-700 border-b pb-2">Informations Générales</h3>
                 
@@ -392,7 +404,6 @@ export default function AdminCancers() {
                 </div>
               </div>
 
-              {/* Contenu Médical Détaillé */}
               <div className="space-y-4 pt-2">
                 <h3 className="text-md font-bold text-purple-700 border-b pb-2">Contenu Médical & Fiche Détaillée</h3>
 
@@ -457,7 +468,6 @@ export default function AdminCancers() {
                 </div>
               </div>
 
-              {/* Boutons d'action */}
               <div className="flex gap-3 pt-4 border-t border-gray-200">
                 <button
                   type="button"
