@@ -68,13 +68,45 @@ export default function CancerDetailPage({ params }: PageProps) {
     notFound();
   }
 
+  // Récupération sécurisée de la description courte (DB lowercase vs TS camelCase)
+  const shortDescription =
+    cancer.shortDescription ||
+    (cancer as unknown as { shortdescription?: string }).shortdescription ||
+    cancer.description;
+
+  // Récupération de la description complète
+  const fullDescription = cancer.description || shortDescription;
+
+  // Extraire les symptômes (supporte les objets ou tableaux)
+  let symptomsList: string[] = [];
   const rawSymptoms = cancer.symptoms as unknown;
-  const prevention = (cancer as unknown as { prevention?: string }).prevention;
-  const symptomsList: string[] = Array.isArray(rawSymptoms)
-    ? (rawSymptoms as string[])
-    : typeof rawSymptoms === 'string'
-    ? rawSymptoms.split('\n').filter((item) => item.trim() !== '')
-    : [];
+
+  if (rawSymptoms) {
+    if (typeof rawSymptoms === 'object' && !Array.isArray(rawSymptoms)) {
+      const typed = rawSymptoms as {
+        early?: string[];
+        advanced?: string[];
+        warningSign?: string[];
+      };
+      symptomsList = [
+        ...(typed.early || []),
+        ...(typed.advanced || []),
+        ...(typed.warningSign || []),
+      ];
+    } else if (Array.isArray(rawSymptoms)) {
+      symptomsList = rawSymptoms as string[];
+    } else if (typeof rawSymptoms === 'string') {
+      symptomsList = rawSymptoms.split('\n').filter((item) => item.trim() !== '');
+    }
+  }
+
+  // Extraire la prévention
+  const primaryPrevention = cancer.screening?.primaryPrevention;
+  const preventionText =
+    Array.isArray(primaryPrevention) && primaryPrevention.length > 0
+      ? primaryPrevention.join('\n')
+      : (cancer as unknown as { prevention?: string }).prevention ||
+        'Un dépistage précoce permet d’augmenter considérablement les chances de guérison. N’hésitez pas à consulter un professionnel de santé.';
 
   return (
     <div className="w-full bg-[#fdfbf7] min-h-screen">
@@ -91,7 +123,7 @@ export default function CancerDetailPage({ params }: PageProps) {
         </div>
       </div>
 
-      {/* Hero Section */}
+      {/* Hero Section - Affiche UNIQUEMENT la description courte */}
       <section className="w-full bg-[#0f766e] text-white py-14 px-6 sm:px-8 lg:px-12">
         <div className="max-w-7xl mx-auto grid lg:grid-cols-12 gap-10 items-center">
           <div className="lg:col-span-7">
@@ -102,7 +134,7 @@ export default function CancerDetailPage({ params }: PageProps) {
               {cancer.name}
             </h1>
             <p className="text-lg text-emerald-50 leading-relaxed font-medium">
-              {cancer.shortDescription || cancer.description}
+              {shortDescription}
             </p>
           </div>
           {cancer.image && (
@@ -119,7 +151,7 @@ export default function CancerDetailPage({ params }: PageProps) {
         </div>
       </section>
 
-      {/* Contenu Détaillé */}
+      {/* Contenu Détaillé - Affiche la vraie description complète */}
       <section className="w-full bg-[#fdfbf7] py-16 px-6 sm:px-8 lg:px-12 text-slate-900">
         <div className="max-w-5xl mx-auto space-y-10">
           
@@ -129,7 +161,7 @@ export default function CancerDetailPage({ params }: PageProps) {
               Présentation Générale
             </h2>
             <p className="text-slate-700 leading-relaxed font-medium text-base whitespace-pre-line">
-              {cancer.description || 'Aucune description détaillée disponible.'}
+              {fullDescription}
             </p>
           </div>
 
@@ -156,7 +188,7 @@ export default function CancerDetailPage({ params }: PageProps) {
               Prévention & Dépistage
             </h2>
             <p className="text-slate-800 leading-relaxed font-medium text-base mb-6 whitespace-pre-line">
-              {prevention || 'Un dépistage précoce permet d’augmenter considérablement les chances de guérison. N’hésitez pas à consulter un professionnel de santé.'}
+              {preventionText}
             </p>
             <Link
               href="/events"
