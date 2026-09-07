@@ -68,10 +68,12 @@ export default function CancerDetailPage({ params }: PageProps) {
     notFound();
   }
 
-  const symptomsList: string[] = Array.isArray(cancer.symptoms)
-    ? cancer.symptoms
-    : typeof cancer.symptoms === 'string'
-    ? cancer.symptoms.split('\n').filter((item) => item.trim() !== '')
+  const rawSymptoms = cancer.symptoms as unknown;
+  const prevention = (cancer as unknown as { prevention?: string }).prevention;
+  const symptomsList: string[] = Array.isArray(rawSymptoms)
+    ? (rawSymptoms as string[])
+    : typeof rawSymptoms === 'string'
+    ? rawSymptoms.split('\n').filter((item) => item.trim() !== '')
     : [];
 
   return (
@@ -154,7 +156,7 @@ export default function CancerDetailPage({ params }: PageProps) {
               Prévention & Dépistage
             </h2>
             <p className="text-slate-800 leading-relaxed font-medium text-base mb-6 whitespace-pre-line">
-              {cancer.prevention || 'Un dépistage précoce permet d’augmenter considérablement les chances de guérison. N’hésitez pas à consulter un professionnel de santé.'}
+              {prevention || 'Un dépistage précoce permet d’augmenter considérablement les chances de guérison. N’hésitez pas à consulter un professionnel de santé.'}
             </p>
             <Link
               href="/events"
