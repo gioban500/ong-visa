@@ -163,7 +163,6 @@ export default async function Home() {
 
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-6xl mx-auto">
-            {/* Titre d'accroche */}
             <Reveal>
               <div className="text-center mb-16">
                 <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/20 text-xs font-bold uppercase tracking-wider mb-3">
@@ -176,7 +175,6 @@ export default async function Home() {
               </div>
             </Reveal>
 
-            {/* Grille de cartes impact */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               <Reveal delay={0} direction="up">
                 <div className="group bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 text-center hover:bg-white/10 hover:border-pink-500/40 transition-all duration-300 transform hover:-translate-y-2 shadow-2xl">
@@ -273,7 +271,7 @@ export default async function Home() {
 
                       <Link
                         href={`/cancers/${cancer.id}`}
-                        className="w-full bg-[#0e5c54] hover:bg-[#0b4741] text-white py-3.5 rounded-2xl font-bold text-sm transition-all text-center block shadow-md shadow-emerald-700/20 hover:shadow-lg hover:shadow-emerald-700/30 hover:scale-[1.02] active:scale-[0.98]"
+                        className="w-full bg-[#0e5c54] hover:bg-[#0b4741] text-white py-3.5 rounded-2xl font-bold text-sm transition-all text-center block shadow-lg shadow-[#e91e63]/25 hover:shadow-xl hover:shadow-[#e91e63]/40 hover:scale-[1.02] active:scale-[0.98]"
                       >
                         En savoir plus
                       </Link>
@@ -427,7 +425,7 @@ export default async function Home() {
 
                         <Link
                           href={`/blog/${evt.slug || evt.id}`}
-                          className="mt-6 w-full bg-[#0e5c54] hover:bg-[#0b4741] text-white py-3.5 rounded-2xl font-bold text-sm transition-all text-center flex items-center justify-center gap-2 shadow-md shadow-emerald-700/20 hover:shadow-lg hover:shadow-emerald-700/30 hover:scale-[1.02] active:scale-[0.98]"
+                          className="mt-6 w-full bg-[#0e5c54] hover:bg-[#0b4741] text-white py-3.5 rounded-2xl font-bold text-sm transition-all text-center flex items-center justify-center gap-2 shadow-lg shadow-[#e91e63]/25 hover:shadow-xl hover:shadow-[#e91e63]/40 hover:scale-[1.02] active:scale-[0.98]"
                         >
                           <span>Détails de l'événement</span>
                           <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />

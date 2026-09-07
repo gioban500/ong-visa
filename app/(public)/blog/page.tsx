@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Search } from 'lucide-react';
+import { Search, ArrowRight, Sparkles } from 'lucide-react';
 import { BlogPost } from '@/types/cancer';
 
 interface EventPost extends BlogPost {
@@ -14,7 +14,7 @@ const MOCK_POSTS: EventPost[] = [
     id: '1',
     title: 'GRANDE CAMPAGNE DE DÉPISTAGE GRATUIT',
     slug: 'campagne-depistage-sein',
-    excerpt: 'Une journée dédiée à la sensibilisation, au contrôle clinique gratuit du sein et au dépistage du col de l\'utérus pour toutes les femmes.',
+    excerpt: "Une journée dédiée à la sensibilisation, au contrôle clinique gratuit du sein et au dépistage du col de l'utérus pour toutes les femmes.",
     content: 'Contenu détaillé de la campagne...',
     image: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=800&q=80',
     author: 'ONG VISA',
@@ -42,7 +42,7 @@ const MOCK_POSTS: EventPost[] = [
     id: '3',
     title: 'CARAVANE DE SENSIBILISATION RÉGIONALE',
     slug: 'caravane-sensibilisation-regionale',
-    excerpt: 'Ateliers itinérants d\'information et séances d\'autopalpation guidées dans les zones rurales.',
+    excerpt: "Ateliers itinérants d'information et séances d'autopalpation guidées dans les zones rurales.",
     content: 'Contenu détaillé de la caravane...',
     image: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=800&q=80',
     author: 'Équipe VISA',
@@ -92,30 +92,31 @@ export default function BlogEventsPage() {
   });
 
   return (
-    <div className="w-full bg-[#f8fafc] min-h-screen pb-24">
-      {/* BANNIÈRE SOMBRE HERO */}
-      <section className="bg-[#0b1329] text-white pt-16 pb-20 px-4 sm:px-6 lg:px-8 text-center shadow-lg">
-        <div className="max-w-4xl mx-auto space-y-4">
-          <span className="text-pink-500 font-extrabold text-xs uppercase tracking-widest block">
-            AGENDA ET MOBILISATION
+    <div className="w-full bg-[#faf9f6] min-h-screen pb-24">
+      {/* BANNIÈRE SOMBRE DYNAMIQUE */}
+      <section className="bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#112647] via-[#071327] to-[#030914] text-white pt-20 pb-24 px-4 sm:px-6 lg:px-8 text-center shadow-xl relative overflow-hidden">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-pink-500/10 rounded-full blur-[100px] pointer-events-none" />
+
+        <div className="max-w-4xl mx-auto space-y-5 relative z-10">
+          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-white/10 text-pink-400 font-extrabold text-xs uppercase tracking-widest">
+            <Sparkles className="w-3.5 h-3.5 text-[#e91e63]" /> Agenda & Mobilisation
           </span>
-          <h1 className="text-4xl sm:text-6xl font-black uppercase tracking-tight text-white">
+          <h1 className="text-4xl sm:text-6xl font-black uppercase tracking-tight text-white leading-tight">
             TOUS NOS ÉVÉNEMENTS
           </h1>
           <p className="text-slate-300 text-sm sm:text-base max-w-2xl mx-auto font-normal leading-relaxed">
             Retrouvez l'ensemble de nos campagnes de dépistage, conférences scientifiques, et activités itinérantes partout au Togo.
           </p>
 
-          {/* Champ de Recherche */}
           <div className="pt-6 max-w-xl mx-auto">
-            <div className="relative flex items-center">
-              <Search className="absolute left-4 w-5 h-5 text-slate-400" />
+            <div className="relative flex items-center group">
+              <Search className="absolute left-4 w-5 h-5 text-slate-400 group-focus-within:text-[#e91e63] transition-colors" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Rechercher un événement ou lieu..."
-                className="w-full pl-12 pr-4 py-3.5 rounded-xl bg-[#17233d] border border-slate-700/60 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#0f766e] text-sm font-medium transition-all"
+                className="w-full pl-12 pr-4 py-4 rounded-2xl bg-[#17233d] border border-slate-700/60 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#e91e63] shadow-lg text-sm font-medium transition-all"
               />
             </div>
           </div>
@@ -125,11 +126,11 @@ export default function BlogEventsPage() {
       {/* GRILLE D'ÉVÉNEMENTS */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {loading ? (
-          <div className="bg-white rounded-3xl p-12 text-center border border-slate-200/80 shadow-sm">
+          <div className="bg-white rounded-3xl p-12 text-center border border-slate-100 shadow-sm">
             <p className="text-slate-500 font-medium text-base animate-pulse">Chargement des événements...</p>
           </div>
         ) : filteredPosts.length === 0 ? (
-          <div className="bg-white rounded-3xl p-12 text-center border border-slate-200/80 shadow-sm space-y-2">
+          <div className="bg-white rounded-3xl p-12 text-center border border-slate-100 shadow-sm space-y-2">
             <p className="text-slate-900 font-bold text-xl">Aucun événement trouvé</p>
             <p className="text-slate-500 text-sm">Essayez de modifier votre recherche.</p>
           </div>
@@ -138,52 +139,47 @@ export default function BlogEventsPage() {
             {filteredPosts.map((post) => (
               <div
                 key={post.id || post.slug}
-                className="bg-white rounded-3xl border border-slate-200/80 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col justify-between"
+                className="bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-2xl hover:border-pink-500/20 transition-all duration-300 overflow-hidden flex flex-col justify-between group transform hover:-translate-y-2"
               >
                 <div>
-                  {/* Image avec Badge Date en superposition */}
                   <div className="relative h-56 w-full bg-slate-100 overflow-hidden">
                     {post.image && (
                       <img 
                         src={post.image} 
                         alt={post.title} 
-                        className="w-full h-full object-cover" 
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out" 
                       />
                     )}
-                    {/* Badge Rose Date */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-60" />
                     {post.publishedDate && (
-                      <div className="absolute top-4 right-4 bg-pink-600 text-white text-[11px] font-bold px-3 py-1.5 rounded-full shadow-md">
+                      <div className="absolute top-4 right-4 bg-[#e91e63] text-white text-xs font-extrabold px-3.5 py-1.5 rounded-full shadow-[0_4px_12px_rgba(233,30,99,0.4)] backdrop-blur-md">
                         {post.publishedDate}
                       </div>
                     )}
                   </div>
 
-                  {/* Contenu de la Carte */}
                   <div className="p-6 space-y-3">
-                    {/* Lieu / Sous-titre */}
-                    <p className="text-[#0f766e] font-extrabold text-[11px] uppercase tracking-wider">
-                      {post.location || post.category || 'TOGO'}
+                    <p className="text-[#0e5c54] font-bold text-xs uppercase tracking-wider flex items-center gap-1">
+                      📍 {post.location || post.category || 'TOGO'}
                     </p>
 
-                    {/* Titre */}
-                    <h3 className="text-lg font-black text-slate-900 uppercase leading-snug">
+                    <h3 className="text-lg font-black text-slate-900 uppercase leading-snug group-hover:text-[#e91e63] transition-colors">
                       {post.title}
                     </h3>
 
-                    {/* Extrait */}
                     <p className="text-xs sm:text-sm text-slate-600 leading-relaxed line-clamp-3">
                       {post.excerpt}
                     </p>
                   </div>
                 </div>
 
-                {/* Bouton d'Action */}
                 <div className="p-6 pt-0">
                   <Link
                     href={`/blog/${post.slug || post.id}`}
-                    className="w-full inline-flex items-center justify-center bg-[#0f766e] hover:bg-[#115e59] text-white font-bold py-3.5 px-4 rounded-xl transition-all text-xs tracking-wide shadow-md shadow-teal-900/10"
+                    className="w-full inline-flex items-center justify-center gap-2 bg-[#0e5c54] hover:bg-[#0b4741] text-white font-bold py-3.5 px-4 rounded-2xl transition-all text-xs uppercase tracking-wider shadow-lg shadow-[#e91e63]/25 hover:shadow-xl hover:shadow-[#e91e63]/40 hover:scale-[1.02] active:scale-[0.98]"
                   >
-                    Voir les détails & Participer
+                    <span>Voir les détails</span>
+                    <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                   </Link>
                 </div>
               </div>
