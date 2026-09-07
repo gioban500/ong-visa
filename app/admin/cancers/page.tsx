@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Plus, Edit, Trash2, Upload, Loader2, RefreshCw, X } from 'lucide-react';
 
 interface CancerData {
@@ -30,6 +30,18 @@ const initialFormState: CancerData = {
   treatment: '',
 };
 
+// Fonction utilitaire pour extraire la description courte quel que soit le nom de la clé API
+const extractShortDesc = (item: any): string => {
+  if (!item) return '';
+  return item.shortDescription ?? item.short_description ?? item.shortDesc ?? item.short_desc ?? '';
+};
+
+// Fonction utilitaire pour extraire les facteurs de risque quel que soit le nom de la clé API
+const extractRiskFactors = (item: any): string => {
+  if (!item) return '';
+  return item.riskFactors ?? item.risk_factors ?? item.risk_factor ?? '';
+};
+
 export default function AdminCancers() {
   const [cancersList, setCancersList] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -40,8 +52,7 @@ export default function AdminCancers() {
 
   const [formData, setFormData] = useState<CancerData>(initialFormState);
 
-  const fetchCancers = async () => {
-    setLoading(true);
+  const loadCancers = useCallback(async () => {
     try {
       const res = await fetch('/api/cancers');
       const data = await res.json();
@@ -51,11 +62,20 @@ export default function AdminCancers() {
     } finally {
       setLoading(false);
     }
+  }, []);
+
+  const handleRefresh = () => {
+    setLoading(true);
+    loadCancers();
   };
 
   useEffect(() => {
-    fetchCancers();
-  }, []);
+    const timeoutId = window.setTimeout(() => {
+      loadCancers();
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [loadCancers]);
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const name = e.target.value;
@@ -90,10 +110,11 @@ export default function AdminCancers() {
       const endpoint = editingCancer ? `/api/cancers/${editingCancer.id}` : '/api/cancers';
       const method = editingCancer ? 'PUT' : 'POST';
 
-      // Inclut camelCase et snake_case pour assurer la compatibilité backend
       const payload = {
         ...formData,
+        shortDescription: formData.shortDescription,
         short_description: formData.shortDescription,
+        riskFactors: formData.riskFactors,
         risk_factors: formData.riskFactors,
       };
 
@@ -105,7 +126,7 @@ export default function AdminCancers() {
 
       if (!res.ok) throw new Error('Erreur réseau');
 
-      await fetchCancers();
+      await loadCancers();
       setIsModalOpen(false);
       resetForm();
     } catch (err) {
@@ -121,28 +142,61 @@ export default function AdminCancers() {
     if (fileRef.current) fileRef.current.value = '';
   };
 
-  const handleEdit = (cancer: any) => {
+  const handleEdit = async (cancer: any) => {
     setEditingCancer(cancer);
+
+    // 1. Pré-remplissage immédiat depuis la liste
+    const initialShortDesc = extractShortDesc(cancer);
+    const initialRisk = extractRiskFactors(cancer);
+
     setFormData({
       name: cancer.name || '',
       slug: cancer.slug || '',
       color: cancer.color || '#EC4899',
       image: cancer.image || '',
-      // Vérification des clés camelCase et snake_case
-      shortDescription: cancer.shortDescription ?? cancer.short_description ?? '',
+      shortDescription: initialShortDesc,
       description: cancer.description || '',
       symptoms: cancer.symptoms || '',
-      riskFactors: cancer.riskFactors ?? cancer.risk_factors ?? '',
+      riskFactors: initialRisk,
       prevention: cancer.prevention || '',
       treatment: cancer.treatment || '',
     });
+
     setIsModalOpen(true);
+
+    // 2. Récupération spécifique des détails complets depuis le backend si le tableau ne renvoie pas tout
+    if (cancer.id) {
+      try {
+        const res = await fetch(`/api/cancers/${cancer.id}`);
+        if (res.ok) {
+          const fullData = await res.json();
+          const fetchedShortDesc = extractShortDesc(fullData) || initialShortDesc;
+          const fetchedRisk = extractRiskFactors(fullData) || initialRisk;
+
+          setFormData(f => ({
+            ...f,
+            name: fullData.name || f.name,
+            slug: fullData.slug || f.slug,
+            color: fullData.color || f.color,
+            image: fullData.image || f.image,
+            shortDescription: fetchedShortDesc,
+            description: fullData.description || f.description,
+            symptoms: fullData.symptoms || f.symptoms,
+            riskFactors: fetchedRisk,
+            prevention: fullData.prevention || f.prevention,
+            treatment: fullData.treatment || f.treatment,
+          }));
+        }
+      } catch (err) {
+        console.error('Erreur lors du chargement des détails complets du cancer:', err);
+      }
+    }
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm('Êtes-vous sûr de vouloir supprimer ce type de cancer ?')) return;
     await fetch(`/api/cancers/${id}`, { method: 'DELETE' });
-    await fetchCancers();
+    await loadCancers();
   };
 
   return (
@@ -153,7 +207,7 @@ export default function AdminCancers() {
           <p className="text-gray-600">Gérez les fiches médicales et les informations ({cancersList.length} entrées)</p>
         </div>
         <div className="flex gap-3">
-          <button onClick={fetchCancers} className="p-3 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors" title="Actualiser">
+          <button onClick={handleRefresh} className="p-3 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors" title="Actualiser">
             <RefreshCw className="w-5 h-5 text-gray-600" />
           </button>
           <button
@@ -204,11 +258,11 @@ export default function AdminCancers() {
                         <div 
                           className="w-full h-full items-center justify-center" 
                           style={{ 
-                            backgroundColor: cancer.color + '20',
+                            backgroundColor: (cancer.color || '#EC4899') + '20',
                             display: cancer.image ? 'none' : 'flex'
                           }}
                         >
-                          <span className="text-xs font-bold" style={{ color: cancer.color }}>
+                          <span className="text-xs font-bold" style={{ color: cancer.color || '#EC4899' }}>
                             {cancer.name?.charAt(0)}
                           </span>
                         </div>
@@ -220,11 +274,11 @@ export default function AdminCancers() {
                     {cancer.slug || '-'}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-600 max-w-xs truncate hidden lg:table-cell">
-                    {cancer.shortDescription ?? cancer.short_description ?? '-'}
+                    {extractShortDesc(cancer) || '-'}
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-full border border-gray-200 shadow-sm" style={{ backgroundColor: cancer.color }} />
+                      <div className="w-6 h-6 rounded-full border border-gray-200 shadow-sm" style={{ backgroundColor: cancer.color || '#EC4899' }} />
                       <span className="text-xs text-gray-500 hidden xl:inline">{cancer.color}</span>
                     </div>
                   </td>
