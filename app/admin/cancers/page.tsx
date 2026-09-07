@@ -90,10 +90,17 @@ export default function AdminCancers() {
       const endpoint = editingCancer ? `/api/cancers/${editingCancer.id}` : '/api/cancers';
       const method = editingCancer ? 'PUT' : 'POST';
 
+      // Inclut camelCase et snake_case pour assurer la compatibilité backend
+      const payload = {
+        ...formData,
+        short_description: formData.shortDescription,
+        risk_factors: formData.riskFactors,
+      };
+
       const res = await fetch(endpoint, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
 
       if (!res.ok) throw new Error('Erreur réseau');
@@ -121,10 +128,11 @@ export default function AdminCancers() {
       slug: cancer.slug || '',
       color: cancer.color || '#EC4899',
       image: cancer.image || '',
-      shortDescription: cancer.shortDescription || '',
+      // Vérification des clés camelCase et snake_case
+      shortDescription: cancer.shortDescription ?? cancer.short_description ?? '',
       description: cancer.description || '',
       symptoms: cancer.symptoms || '',
-      riskFactors: cancer.riskFactors || '',
+      riskFactors: cancer.riskFactors ?? cancer.risk_factors ?? '',
       prevention: cancer.prevention || '',
       treatment: cancer.treatment || '',
     });
@@ -212,7 +220,7 @@ export default function AdminCancers() {
                     {cancer.slug || '-'}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-600 max-w-xs truncate hidden lg:table-cell">
-                    {cancer.shortDescription}
+                    {cancer.shortDescription ?? cancer.short_description ?? '-'}
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2">
