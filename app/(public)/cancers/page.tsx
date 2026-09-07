@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Search, Heart, Shield, ArrowRight } from 'lucide-react';
+import { Search, ArrowRight } from 'lucide-react';
 import { Cancer } from '@/types/cancer';
 
 export default function CancersPage() {
@@ -37,10 +37,22 @@ export default function CancersPage() {
       .replace(/\s+/g, '-')
       .replace(/-+/g, '-');
 
-  const filteredCancers = cancers.filter((cancer) =>
-    cancer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (cancer.shortDescription && cancer.shortDescription.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
+  // Récupération sécurisée de la description courte (DB lowercase vs TS camelCase)
+  const getShortDescription = (cancer: Cancer): string => {
+    return (
+      cancer.shortDescription ||
+      (cancer as unknown as { shortdescription?: string }).shortdescription ||
+      'Consultez la fiche détaillée.'
+    );
+  };
+
+  const filteredCancers = cancers.filter((cancer) => {
+    const desc = getShortDescription(cancer);
+    return (
+      cancer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      desc.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  });
 
   return (
     <div className="w-full bg-[#fdfbf7] min-h-screen pb-24">
@@ -72,7 +84,7 @@ export default function CancersPage() {
         </div>
       </section>
 
-      {/* Grille des cartes avec ombre renforcée et typographie agrandie */}
+      {/* Grille des cartes */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12">
         {loading ? (
           <div className="bg-white rounded-3xl p-12 text-center border border-stone-200/85 shadow-xl">
@@ -85,53 +97,57 @@ export default function CancersPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredCancers.map((cancer, index) => (
-              <div
-                key={cancer.id || index}
-                className="bg-white rounded-3xl border border-stone-200/85 shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden flex flex-col justify-between group"
-              >
-                <div>
-                  <div className="relative w-full h-52 bg-stone-100 overflow-hidden">
-                    {cancer.image ? (
-                      <img
-                        src={cancer.image}
-                        alt={cancer.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
-                    ) : (
-                      <div
-                        className="w-full h-full flex items-center justify-center font-black text-white text-2xl p-4 text-center uppercase"
-                        style={{ backgroundColor: cancer.color || '#0f766e' }}
-                      >
+            {filteredCancers.map((cancer, index) => {
+              const shortDesc = getShortDescription(cancer);
+
+              return (
+                <div
+                  key={cancer.id || index}
+                  className="bg-white rounded-3xl border border-stone-200/85 shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden flex flex-col justify-between group"
+                >
+                  <div>
+                    <div className="relative w-full h-52 bg-stone-100 overflow-hidden">
+                      {cancer.image ? (
+                        <img
+                          src={cancer.image}
+                          alt={cancer.name}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                      ) : (
+                        <div
+                          className="w-full h-full flex items-center justify-center font-black text-white text-2xl p-4 text-center uppercase"
+                          style={{ backgroundColor: cancer.color || '#0f766e' }}
+                        >
+                          {cancer.name}
+                        </div>
+                      )}
+                      <span className="absolute top-4 right-4 bg-white/95 backdrop-blur-md px-3.5 py-1.5 rounded-full text-xs font-black text-stone-900 shadow-md">
+                        Focus {String(index + 1).padStart(2, '0')}
+                      </span>
+                    </div>
+
+                    <div className="p-6 space-y-3.5">
+                      <h2 className="text-2xl font-black text-stone-900 uppercase tracking-tight leading-snug">
                         {cancer.name}
-                      </div>
-                    )}
-                    <span className="absolute top-4 right-4 bg-white/95 backdrop-blur-md px-3.5 py-1.5 rounded-full text-xs font-black text-stone-900 shadow-md">
-                      Focus {String(index + 1).padStart(2, '0')}
-                    </span>
+                      </h2>
+                      <p className="text-stone-600 text-sm sm:text-base line-clamp-3 leading-relaxed">
+                        {shortDesc}
+                      </p>
+                    </div>
                   </div>
 
-                  <div className="p-6 space-y-3.5">
-                    <h2 className="text-2xl font-black text-stone-900 uppercase tracking-tight leading-snug">
-                      {cancer.name}
-                    </h2>
-                    <p className="text-stone-600 text-sm sm:text-base line-clamp-3 leading-relaxed">
-                      {cancer.shortDescription || cancer.description || 'Consultez la fiche détaillée.'}
-                    </p>
+                  <div className="p-6 pt-0">
+                    <Link
+                      href={`/cancers/${cancer.id || slugify(cancer.name)}`}
+                      className="w-full inline-flex items-center justify-center gap-2 bg-[#0f766e] hover:bg-[#115e59] text-white font-bold py-4 px-4 rounded-2xl transition-all text-xs uppercase tracking-wider shadow-md"
+                    >
+                      <span>En savoir plus</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </Link>
                   </div>
                 </div>
-
-                <div className="p-6 pt-0">
-                  <Link
-                    href={`/cancers/${cancer.id || slugify(cancer.name)}`}
-                    className="w-full inline-flex items-center justify-center gap-2 bg-[#0f766e] hover:bg-[#115e59] text-white font-bold py-4 px-4 rounded-2xl transition-all text-xs uppercase tracking-wider shadow-md"
-                  >
-                    <span>En savoir plus</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </Link>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </section>
