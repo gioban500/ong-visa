@@ -114,12 +114,12 @@ export default function Footer() {
               </li>
               <li className="text-sm">
                 <a href="tel:+22890629693" className="hover:text-pink-500 flex items-center gap-2">
-                  <span>📱</span> +228 90 62 96 93 (WhatsApp)
+                   +228 90 62 96 93 (WhatsApp)
                 </a>
               </li>
               <li className="text-sm">
                 <a href="tel:+22897424742" className="hover:text-pink-500 flex items-center gap-2">
-                  <span>📞</span> +228 97 42 47 42
+                  +228 97 42 47 42
                 </a>
               </li>
               <li className="text-sm">
@@ -127,7 +127,7 @@ export default function Footer() {
                   href="mailto:contact@ongvisa.org"
                   className="hover:text-pink-500"
                 >
-                  ✉️ contact@ongvisa.org
+                 contact@ongvisa.org
                 </a>
               </li>
             </ul>

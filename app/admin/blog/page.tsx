@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Plus, Edit, Trash2, Upload, Eye, EyeOff, Loader2, RefreshCw } from 'lucide-react';
+import { Plus, Edit, Trash2, Upload, Loader2, RefreshCw } from 'lucide-react';
 
 interface BlogPost {
   id: string;
@@ -34,7 +34,7 @@ export default function AdminBlog() {
     excerpt: '',
     content: '',
     image: '',
-    author: 'Admin ONG VISA ',
+    author: 'Admin ONG VISA',
     category: 'Actualités',
     tags: [] as string[],
     published: false,
@@ -44,10 +44,15 @@ export default function AdminBlog() {
 
   const fetchPosts = async () => {
     setLoading(true);
-    const res = await fetch('/api/blog');
-    const data = await res.json();
-    setPosts(data);
-    setLoading(false);
+    try {
+      const res = await fetch('/api/blog');
+      const data = await res.json();
+      setPosts(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error('Erreur chargement articles:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => { fetchPosts(); }, []);
@@ -70,14 +75,12 @@ export default function AdminBlog() {
       const readTime = Math.max(1, Math.ceil(wordCount / 200));
       
       let publishedDate = new Date().toISOString();
-      if (formData.category === 'Événements' && formData.publishedDate) {
+      if (formData.publishedDate) {
         try {
           publishedDate = new Date(formData.publishedDate).toISOString();
-        } catch(e) {
+        } catch (e) {
           publishedDate = formData.publishedDate;
         }
-      } else if (editingPost) {
-        publishedDate = formData.publishedDate;
       }
       
       const payload = { 
@@ -87,24 +90,26 @@ export default function AdminBlog() {
         publishedDate
       };
 
-      if (editingPost) {
-        await fetch(`/api/blog/${editingPost.slug}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        });
-      } else {
-        await fetch('/api/blog', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        });
+      const targetIdentifier = editingPost?.id || editingPost?.slug;
+      const url = editingPost ? `/api/blog/${targetIdentifier}` : '/api/blog';
+      const method = editingPost ? 'PUT' : 'POST';
+
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.message || 'Erreur lors de la sauvegarde');
       }
+
       await fetchPosts();
       setIsModalOpen(false);
       resetForm();
-    } catch (err) {
-      alert('Erreur lors de la sauvegarde.');
+    } catch (err: any) {
+      alert(err.message || 'Erreur lors de la sauvegarde.');
     } finally {
       setSaving(false);
     }
@@ -120,32 +125,36 @@ export default function AdminBlog() {
   const handleEdit = (post: BlogPost) => {
     setEditingPost(post);
     setFormData({
-      title: post.title,
-      excerpt: post.excerpt,
-      content: post.content,
-      image: post.image,
-      author: post.author,
-      category: post.category,
-      tags: post.tags,
-      published: post.published,
-      publishedDate: post.publishedDate,
-      readTime: post.readTime
+      title: post.title || '',
+      excerpt: post.excerpt || '',
+      content: post.content || '',
+      image: post.image || '',
+      author: post.author || 'Admin ONG VISA',
+      category: post.category || 'Actualités',
+      tags: post.tags || [],
+      published: post.published ?? false,
+      publishedDate: post.publishedDate ? post.publishedDate.split('T')[0] : '',
+      readTime: post.readTime || 1
     });
-    setTagsInput(post.tags.join(', '));
+    setTagsInput((post.tags || []).join(', '));
     setIsModalOpen(true);
   };
 
-  const handleDelete = async (slug: string) => {
+  const handleDelete = async (post: BlogPost) => {
     if (!confirm('Êtes-vous sûr de vouloir supprimer cet article ?')) return;
-    await fetch(`/api/blog/${slug}`, { method: 'DELETE' });
+    const targetIdentifier = post.id || post.slug;
+    await fetch(`/api/blog/${targetIdentifier}`, { method: 'DELETE' });
     await fetchPosts();
   };
 
   const togglePublish = async (post: BlogPost) => {
-    await fetch(`/api/blog/${post.slug}`, {
+    const targetIdentifier = post.id || post.slug;
+    const payload = { ...post, published: !post.published };
+    
+    await fetch(`/api/blog/${targetIdentifier}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ published: !post.published }),
+      body: JSON.stringify(payload),
     });
     await fetchPosts();
   };
@@ -174,7 +183,6 @@ export default function AdminBlog() {
         </div>
       </div>
 
-      {/* Stats */}
       <div className="grid grid-cols-3 gap-4 mb-6">
         <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100 text-center">
           <p className="text-3xl font-bold text-gray-900">{posts.length}</p>
@@ -232,7 +240,7 @@ export default function AdminBlog() {
                     <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-medium">{post.category}</span>
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-500 hidden md:table-cell">
-                    {new Date(post.publishedDate).toLocaleDateString('fr-FR')}
+                    {post.publishedDate ? new Date(post.publishedDate).toLocaleDateString('fr-FR') : '-'}
                   </td>
                   <td className="px-6 py-4">
                     <button onClick={() => togglePublish(post)} className={`px-3 py-1 rounded-full text-xs font-semibold transition-colors ${
@@ -246,7 +254,7 @@ export default function AdminBlog() {
                       <button onClick={() => handleEdit(post)} className="p-2 text-purple-600 hover:bg-purple-50 rounded-lg transition-colors" title="Modifier">
                         <Edit className="w-4 h-4" />
                       </button>
-                      <button onClick={() => handleDelete(post.slug)} className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Supprimer">
+                      <button onClick={() => handleDelete(post)} className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Supprimer">
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
@@ -258,7 +266,6 @@ export default function AdminBlog() {
         </div>
       )}
 
-      {/* Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center p-4 overflow-y-auto">
           <div className="bg-white rounded-2xl max-w-3xl w-full my-8">
@@ -275,7 +282,7 @@ export default function AdminBlog() {
                   value={formData.title}
                   onChange={(e) => setFormData(f => ({ ...f, title: e.target.value }))}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none"
-                  placeholder="Titre accrocheur de l'article..."
+                  placeholder="Titre accrocheur..."
                   required
                 />
               </div>
@@ -318,7 +325,6 @@ export default function AdminBlog() {
                     <div>
                       <Upload className="w-10 h-10 mx-auto text-gray-400 mb-2" />
                       <p className="text-sm font-medium text-gray-700">Télécharger une image de couverture</p>
-                      <p className="text-xs text-gray-400 mt-1">Résolution recommandée : 1200×630px</p>
                     </div>
                   )}
                 </div>
@@ -330,7 +336,7 @@ export default function AdminBlog() {
                     <label className="block text-sm font-semibold text-gray-700 mb-2">Date de l'événement *</label>
                     <input
                       type="date"
-                      value={formData.publishedDate ? (formData.publishedDate.includes('T') ? formData.publishedDate.split('T')[0] : formData.publishedDate) : ''}
+                      value={formData.publishedDate}
                       onChange={(e) => setFormData(f => ({ ...f, publishedDate: e.target.value }))}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none"
                       required
@@ -351,13 +357,13 @@ export default function AdminBlog() {
               ) : (
                 <>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Extrait / Résumé * <span className="text-gray-400 font-normal">(affiché dans la liste)</span></label>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Extrait / Résumé *</label>
                     <textarea
                       value={formData.excerpt}
                       onChange={(e) => setFormData(f => ({ ...f, excerpt: e.target.value }))}
                       rows={2}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none resize-none"
-                      placeholder="Un résumé bref de l'article (1-2 phrases)..."
+                      placeholder="Un résumé bref..."
                       required
                     />
                   </div>
@@ -372,17 +378,16 @@ export default function AdminBlog() {
                       placeholder="Rédigez votre article ici..."
                       required
                     />
-                    <p className="text-xs text-gray-400 mt-1">{formData.content.split(' ').filter(Boolean).length} mots · ~{Math.max(1, Math.ceil(formData.content.split(' ').filter(Boolean).length / 200))} min de lecture</p>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Tags <span className="text-gray-400 font-normal">(séparés par des virgules)</span></label>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Tags</label>
                     <input
                       type="text"
                       value={tagsInput}
                       onChange={(e) => setTagsInput(e.target.value)}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none"
-                      placeholder="dépistage, prévention, santé..."
+                      placeholder="dépistage, prévention..."
                     />
                   </div>
                 </>
@@ -397,7 +402,7 @@ export default function AdminBlog() {
                   className="w-5 h-5 text-purple-600 rounded"
                 />
                 <label htmlFor="published" className="text-sm font-medium text-gray-700">
-                  Publier immédiatement (sinon enregistré comme brouillon)
+                  Publier immédiatement
                 </label>
               </div>
 
