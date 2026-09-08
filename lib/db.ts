@@ -113,21 +113,21 @@ export async function initDatabase() {
         if (err.code !== '42P07') throw err;
       });
 
-      // Create event registrations table
+      // Create event registrations table (colonnes en snake_case comme dans Neon)
       await client.query(`
         CREATE TABLE IF NOT EXISTS event_registrations (
           id VARCHAR(100) PRIMARY KEY,
           name VARCHAR(255) NOT NULL,
           phone VARCHAR(50) NOT NULL,
-          eventId VARCHAR(255),
-          eventTitle VARCHAR(255),
-          createdAt VARCHAR(50)
+          event_id VARCHAR(255),
+          event_title VARCHAR(255),
+          created_at VARCHAR(50)
         );
       `).catch(err => {
         if (err.code !== '42P07') throw err;
       });
 
-      // Create newsletter subscribers table (sans contrainte UNIQUE sur email)
+      // Create newsletter subscribers table
       await client.query(`
         CREATE TABLE IF NOT EXISTS subscribers (
           id VARCHAR(100) PRIMARY KEY,
@@ -143,7 +143,7 @@ export async function initDatabase() {
         if (err.code !== '42P07') throw err;
       });
 
-      // Migration : Supprimer la contrainte UNIQUE sur l'email si elle existe dans Neon
+      // Migration : Supprimer la contrainte UNIQUE sur l'email si elle existe
       await client.query(`
         ALTER TABLE subscribers DROP CONSTRAINT IF EXISTS subscribers_email_key;
       `).catch(err => console.error('Error dropping unique constraint:', err));
@@ -554,25 +554,36 @@ export async function createEventRegistration(data: { name: string; phone: strin
   await initDatabase();
   const id = Date.now().toString();
   const createdAt = new Date().toISOString();
+
+  // Support des colonnes de la DB Neon (snake_case avec fallback)
   await pool.query(
-    `INSERT INTO event_registrations (id, name, phone, eventId, eventTitle, createdAt)
+    `INSERT INTO event_registrations (id, name, phone, event_id, event_title, created_at)
      VALUES ($1, $2, $3, $4, $5, $6)`,
     [id, data.name.trim(), data.phone.trim(), data.eventId || '', data.eventTitle || 'Événement', createdAt]
-  );
+  ).catch(async () => {
+    // Fallback si la table utilise le format sans underscore (eventid, eventtitle, createdat)
+    await pool.query(
+      `INSERT INTO event_registrations (id, name, phone, eventid, eventtitle, createdat)
+       VALUES ($1, $2, $3, $4, $5, $6)`,
+      [id, data.name.trim(), data.phone.trim(), data.eventId || '', data.eventTitle || 'Événement', createdAt]
+    );
+  });
+
   return { id, ...data, createdAt };
 }
 
 export async function getEventRegistrations() {
   await initDatabase();
   try {
-    const result = await pool.query('SELECT * FROM event_registrations ORDER BY createdAt DESC');
+    const result = await pool.query('SELECT * FROM event_registrations');
+    
     return result.rows.map((r: any) => ({
-      id: r.id,
-      name: r.name,
-      phone: r.phone,
-      eventId: r.eventid || r.eventId,
-      eventTitle: r.eventtitle || r.eventTitle,
-      createdAt: r.createdat || r.createdAt,
+      id: r.id ? String(r.id) : '',
+      name: r.name || '',
+      phone: r.phone || '',
+      eventId: r.event_id || r.eventid || r.eventId || '',
+      eventTitle: r.event_title || r.eventtitle || r.eventTitle || '',
+      createdAt: r.created_at || r.createdat || r.createdAt || '',
     }));
   } catch (error) {
     console.error('DB error (getEventRegistrations):', error);
