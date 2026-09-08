@@ -15,7 +15,8 @@ import {
   ChevronDown,
   Menu,
   X,
-  Mail
+  Mail,
+  Calendar
 } from 'lucide-react';
 
 export default function AdminLayout({
@@ -32,6 +33,7 @@ export default function AdminLayout({
     { href: '/admin/cancers', icon: FileText, label: 'Types de Cancer' },
     { href: '/admin/blog', icon: FileText, label: 'Blog' },
     { href: '/admin/subscribers', icon: Mail, label: 'Liste de diffusion' },
+    { href: '/admin/eventRegistration', icon: Calendar, label: 'Inscriptions Événements' },
     { href: '/admin/settings', icon: Settings, label: 'Paramètres' },
   ];
 

@@ -31,7 +31,7 @@ export default function EventRegistrationsAdminPage() {
   const fetchRegistrations = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/event-registration');
+      const res = await fetch('/api/event-registrations');
       if (res.ok) {
         const data = await res.json();
         setRegistrations(Array.isArray(data) ? data : []);
@@ -52,7 +52,7 @@ export default function EventRegistrationsAdminPage() {
 
     setDeletingId(id);
     try {
-      const res = await fetch(`/api/event-registration/${id}`, {
+      const res = await fetch(`/api/event-registrations/${id}`, {
         method: 'DELETE',
       });
 
