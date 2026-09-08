@@ -45,7 +45,7 @@ export default function AdminBlog() {
   const fetchPosts = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/blog');
+      const res = await fetch('/api/blog', { cache: 'no-store' });
       const data = await res.json();
       setPosts(Array.isArray(data) ? data : []);
     } catch (err) {
@@ -84,13 +84,14 @@ export default function AdminBlog() {
       }
       
       const payload = { 
+        ...(editingPost ? { id: editingPost.id, slug: editingPost.slug } : {}),
         ...formData, 
         tags: formData.category === 'Événements' ? [] : tags, 
         readTime, 
         publishedDate
       };
 
-      const targetIdentifier = editingPost?.id || editingPost?.slug;
+      const targetIdentifier = editingPost?.slug || editingPost?.id;
       const url = editingPost ? `/api/blog/${targetIdentifier}` : '/api/blog';
       const method = editingPost ? 'PUT' : 'POST';
 
@@ -102,7 +103,7 @@ export default function AdminBlog() {
 
       if (!res.ok) {
         const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.message || 'Erreur lors de la sauvegarde');
+        throw new Error(errData.error || errData.message || 'Erreur lors de la sauvegarde');
       }
 
       await fetchPosts();
@@ -142,21 +143,37 @@ export default function AdminBlog() {
 
   const handleDelete = async (post: BlogPost) => {
     if (!confirm('Êtes-vous sûr de vouloir supprimer cet article ?')) return;
-    const targetIdentifier = post.id || post.slug;
-    await fetch(`/api/blog/${targetIdentifier}`, { method: 'DELETE' });
-    await fetchPosts();
+    const targetIdentifier = post.slug || post.id;
+    try {
+      const res = await fetch(`/api/blog/${targetIdentifier}`, { method: 'DELETE' });
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || 'Échec de la suppression');
+      }
+      await fetchPosts();
+    } catch (err: any) {
+      alert(err.message);
+    }
   };
 
   const togglePublish = async (post: BlogPost) => {
-    const targetIdentifier = post.id || post.slug;
+    const targetIdentifier = post.slug || post.id;
     const payload = { ...post, published: !post.published };
     
-    await fetch(`/api/blog/${targetIdentifier}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-    await fetchPosts();
+    try {
+      const res = await fetch(`/api/blog/${targetIdentifier}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || 'Échec de la mise à jour du statut');
+      }
+      await fetchPosts();
+    } catch (err: any) {
+      alert(err.message);
+    }
   };
 
   const published = posts.filter(p => p.published).length;
@@ -217,7 +234,7 @@ export default function AdminBlog() {
             </thead>
             <tbody className="divide-y divide-gray-100">
               {posts.map((post) => (
-                <tr key={post.id} className="hover:bg-gray-50 transition-colors">
+                <tr key={post.id || post.slug} className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
                       <div className="w-14 h-12 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
