@@ -3,6 +3,10 @@
 import { useState } from 'react';
 import { Mail, Phone, MapPin, Clock, Send, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 
+// 1. Imports pour la gestion du téléphone et des drapeaux
+import 'react-phone-number-input/style.css';
+import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input';
+
 export default function ContactPage() {
   const [formData, setFormData] = useState({
     firstName: '',
@@ -21,6 +25,16 @@ export default function ContactPage() {
     setIsSubmitting(true);
     setStatus(null);
 
+    // 2. Validation du numéro de téléphone s'il est renseigné
+    if (formData.phone && !isValidPhoneNumber(formData.phone)) {
+      setStatus({
+        type: 'error',
+        message: 'Le numéro de téléphone saisi n\'est pas valide pour le pays sélectionné.',
+      });
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
       const response = await fetch('/api/subscribers', {
         method: 'POST',
@@ -30,7 +44,7 @@ export default function ContactPage() {
         body: JSON.stringify(formData),
       });
 
-      // Vérifier si le serveur a renvoyé du JSON ou du HTML
+      // Vérifier si le serveur a renvoyé du JSON
       const contentType = response.headers.get('content-type');
       if (!contentType || !contentType.includes('application/json')) {
         throw new Error(`Erreur serveur (${response.status}). La route API n'a pas renvoyé de JSON.`);
@@ -240,18 +254,18 @@ export default function ContactPage() {
                   />
                 </div>
 
+                {/* 3. Nouveau Champ Téléphone Interactif */}
                 <div className="space-y-1.5">
                   <label htmlFor="phone" className="text-xs font-semibold text-slate-700 block">
                     Téléphone
                   </label>
-                  <input
-                    type="tel"
-                    id="phone"
-                    name="phone"
+                  <PhoneInput
+                    international
+                    defaultCountry="TG"
                     value={formData.phone}
-                    onChange={handleChange}
-                    className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e] bg-white"
-                    placeholder="+228 90 00 00 00"
+                    onChange={(val) => setFormData({ ...formData, phone: val || '' })}
+                    className="w-full px-3.5 py-2 rounded-lg border border-slate-200 text-slate-900 text-sm focus-within:ring-2 focus-within:ring-[#0f766e]/20 focus-within:border-[#0f766e] bg-white"
+                    placeholder="90 00 00 00"
                   />
                 </div>
               </div>
