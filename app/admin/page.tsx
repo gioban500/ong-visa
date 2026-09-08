@@ -126,7 +126,7 @@ export default function AdminDashboard() {
       sub: 'Personnes inscrites',
       icon: Calendar,
       bgColor: 'bg-gradient-to-r from-amber-500 to-orange-600',
-      href: '/admin/events',
+      href: '/admin/eventRegistration',
     },
   ];
 
