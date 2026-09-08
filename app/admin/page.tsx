@@ -13,7 +13,8 @@ import {
   ShieldCheck,
   BookOpen,
   Mail,
-  Inbox
+  Inbox,
+  Calendar
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -26,6 +27,7 @@ interface DashboardData {
     publishedPosts: number;
     cancers: number;
     subscribers: number;
+    events?: number;
   };
   recentTestimonials: {
     id: string;
@@ -117,6 +119,14 @@ export default function AdminDashboard() {
       icon: ShieldCheck,
       bgColor: 'bg-gradient-to-r from-rose-500 to-pink-500',
       href: '/admin/cancers',
+    },
+    {
+      label: 'Participants Événements',
+      value: data.stats.events ?? 'Voir',
+      sub: 'Personnes inscrites',
+      icon: Calendar,
+      bgColor: 'bg-gradient-to-r from-amber-500 to-orange-600',
+      href: '/admin/events',
     },
   ];
 
@@ -274,7 +284,7 @@ export default function AdminDashboard() {
                   ))
                 ) : (
                   <div className="text-center py-8 text-gray-500 text-sm">
-                    Pas d'activité récente
+                    Pas de témoignages récents
                   </div>
                 )}
               </div>
@@ -284,7 +294,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* Bottom Section: Quick Actions */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5">
         <Link href="/admin/subscribers" className="block">
           <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-200 hover:shadow-md transition-all">
             <div className="flex items-center gap-3.5">
@@ -339,6 +349,21 @@ export default function AdminDashboard() {
               <div className="min-w-0">
                 <p className="font-bold text-gray-900 text-sm truncate">Types de Cancer</p>
                 <p className="text-xs text-gray-500 truncate">Gérer les fiches</p>
+              </div>
+              <ArrowRight className="w-4 h-4 text-gray-400 ml-auto flex-shrink-0" />
+            </div>
+          </div>
+        </Link>
+
+        <Link href="/admin/events" className="block">
+          <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-200 hover:shadow-md transition-all">
+            <div className="flex items-center gap-3.5">
+              <div className="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                <Calendar className="w-6 h-6 text-amber-600" />
+              </div>
+              <div className="min-w-0">
+                <p className="font-bold text-gray-900 text-sm truncate">Participants Événements</p>
+                <p className="text-xs text-gray-500 truncate">Inscriptions reçues</p>
               </div>
               <ArrowRight className="w-4 h-4 text-gray-400 ml-auto flex-shrink-0" />
             </div>
