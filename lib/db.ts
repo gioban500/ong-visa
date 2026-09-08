@@ -1,12 +1,14 @@
 import { Pool } from 'pg';
 
-// Create a PostgreSQL connection pool
+// Support explicite de POSTGRES_URL et DATABASE_URL
+const connectionString = process.env.POSTGRES_URL || process.env.DATABASE_URL;
+
 const pool = new Pool({
-  connectionString: process.env.POSTGRES_URL,
-  ssl: process.env.POSTGRES_URL?.includes('localhost') 
+  connectionString,
+  ssl: connectionString?.includes('localhost') 
     ? undefined 
     : { 
-        rejectUnauthorized: false // Nécessaire pour Supabase et autres services cloud
+        rejectUnauthorized: false 
       },
 });
 
@@ -17,9 +19,9 @@ export function slugify(str: string): string {
   return String(str)
     .toLowerCase()
     .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '') // retirer les accents (é -> e)
-    .replace(/[^a-z0-9]+/g, '-')     // tout caractère non alphanumérique -> tiret
-    .replace(/^-+|-+$/g, '');        // retirer les tirets en début/fin
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
 }
 
 // Helper: lire un fichier JSON de secours (data/*.json)
@@ -39,16 +41,14 @@ function readJsonFallback(fileName: string, fallback: any = []) {
 export async function initDatabase() {
   if (initialized) return;
   
-  // Si pas de POSTGRES_URL, ne pas initialiser (mode build sans DB)
-  if (!process.env.POSTGRES_URL) {
-    console.log('⚠️  No POSTGRES_URL found - skipping database initialization');
+  if (!connectionString) {
+    console.log('⚠️ No POSTGRES_URL or DATABASE_URL found - skipping database initialization');
     initialized = true;
     return;
   }
   
-  // En mode build Vercel, ne pas se connecter à la DB
   if (process.env.VERCEL && process.env.NEXT_PHASE === 'phase-production-build') {
-    console.log('⚠️  Build phase detected - skipping database initialization');
+    console.log('⚠️ Build phase detected - skipping database initialization');
     initialized = true;
     return;
   }
@@ -127,13 +127,13 @@ export async function initDatabase() {
         if (err.code !== '42P07') throw err;
       });
 
-      // Create newsletter subscribers table
+      // Create newsletter subscribers table (sans contrainte UNIQUE sur email)
       await client.query(`
         CREATE TABLE IF NOT EXISTS subscribers (
           id VARCHAR(100) PRIMARY KEY,
           firstName VARCHAR(255),
           lastName VARCHAR(255),
-          email VARCHAR(255) UNIQUE NOT NULL,
+          email VARCHAR(255) NOT NULL,
           phone VARCHAR(50),
           subject VARCHAR(100),
           message TEXT,
@@ -143,7 +143,12 @@ export async function initDatabase() {
         if (err.code !== '42P07') throw err;
       });
 
-      // Auto-migration : ajouter les colonnes phone, subject, message si elles n'existent pas encore
+      // Migration : Supprimer la contrainte UNIQUE sur l'email si elle existe dans Neon
+      await client.query(`
+        ALTER TABLE subscribers DROP CONSTRAINT IF EXISTS subscribers_email_key;
+      `).catch(err => console.error('Error dropping unique constraint:', err));
+
+      // Auto-migration : ajouter les colonnes phone, subject, message si absentes
       await client.query(`
         ALTER TABLE subscribers 
         ADD COLUMN IF NOT EXISTS phone VARCHAR(50),
@@ -151,7 +156,7 @@ export async function initDatabase() {
         ADD COLUMN IF NOT EXISTS message TEXT;
       `).catch(err => console.error('Error altering subscribers table:', err));
 
-      // Auto-migration : ajouter la colonne hero dans testimonials si elle n'existe pas encore
+      // Auto-migration : hero dans testimonials
       await client.query(`
         ALTER TABLE testimonials 
         ADD COLUMN IF NOT EXISTS hero BOOLEAN DEFAULT FALSE;
@@ -172,16 +177,8 @@ export async function initDatabase() {
 export async function getCancers() {
   await initDatabase();
   
-  if (!process.env.POSTGRES_URL) {
-    const fs = require('fs');
-    const path = require('path');
-    try {
-      const dataPath = path.join(process.cwd(), 'data', 'cancers.json');
-      return JSON.parse(fs.readFileSync(dataPath, 'utf8'));
-    } catch (error) {
-      console.error('Error reading cancers.json:', error);
-      return [];
-    }
+  if (!connectionString) {
+    return readJsonFallback('cancers.json', []);
   }
   
   try {
@@ -203,17 +200,9 @@ export async function getCancers() {
 export async function getCancerById(id: string) {
   await initDatabase();
   
-  if (!process.env.POSTGRES_URL) {
-    const fs = require('fs');
-    const path = require('path');
-    try {
-      const dataPath = path.join(process.cwd(), 'data', 'cancers.json');
-      const data = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
-      return data.find((c: any) => c.id === id) || null;
-    } catch (error) {
-      console.error('Error reading cancers.json:', error);
-      return null;
-    }
+  if (!connectionString) {
+    const data = readJsonFallback('cancers.json', []);
+    return data.find((c: any) => c.id === id) || null;
   }
   
   const decodedId = (() => {
@@ -313,15 +302,8 @@ export async function deleteCancer(id: string) {
 export async function getTestimonials() {
   await initDatabase();
   
-  if (!process.env.POSTGRES_URL) {
-    const fs = require('fs');
-    const path = require('path');
-    try {
-      const dataPath = path.join(process.cwd(), 'data', 'testimonials.json');
-      return JSON.parse(fs.readFileSync(dataPath, 'utf8'));
-    } catch (error) {
-      return [];
-    }
+  if (!connectionString) {
+    return readJsonFallback('testimonials.json', []);
   }
   
   try {
@@ -336,16 +318,9 @@ export async function getTestimonials() {
 export async function getApprovedTestimonials() {
   await initDatabase();
   
-  if (!process.env.POSTGRES_URL) {
-    const fs = require('fs');
-    const path = require('path');
-    try {
-      const dataPath = path.join(process.cwd(), 'data', 'testimonials.json');
-      const data = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
-      return data.filter((t: any) => t.approved !== false);
-    } catch (error) {
-      return [];
-    }
+  if (!connectionString) {
+    const data = readJsonFallback('testimonials.json', []);
+    return data.filter((t: any) => t.approved !== false);
   }
   
   try {
@@ -416,15 +391,8 @@ export async function deleteTestimonial(id: string) {
 export async function getBlogPosts() {
   await initDatabase();
   
-  if (!process.env.POSTGRES_URL) {
-    const fs = require('fs');
-    const path = require('path');
-    try {
-      const dataPath = path.join(process.cwd(), 'data', 'blog.json');
-      return JSON.parse(fs.readFileSync(dataPath, 'utf8'));
-    } catch (error) {
-      return [];
-    }
+  if (!connectionString) {
+    return readJsonFallback('blog.json', []);
   }
   
   try {
@@ -444,16 +412,9 @@ export async function getBlogPosts() {
 export async function getBlogPostBySlug(slug: string) {
   await initDatabase();
   
-  if (!process.env.POSTGRES_URL) {
-    const fs = require('fs');
-    const path = require('path');
-    try {
-      const dataPath = path.join(process.cwd(), 'data', 'blog.json');
-      const data = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
-      return data.find((p: any) => p.slug === slug) || null;
-    } catch (error) {
-      return null;
-    }
+  if (!connectionString) {
+    const data = readJsonFallback('blog.json', []);
+    return data.find((p: any) => p.slug === slug) || null;
   }
   
   try {
@@ -526,7 +487,7 @@ export async function deleteBlogPost(slug: string) {
   await pool.query('DELETE FROM blog_posts WHERE slug = $1', [slug]);
 }
 
-// ============ Newsletter / Liste de diffusion ============
+// ============ Newsletter / Messages / Contacts ============
 export async function createSubscriber(sub: { 
   firstName?: string; 
   lastName?: string; 
@@ -536,17 +497,12 @@ export async function createSubscriber(sub: {
   message?: string;
 }) {
   await initDatabase();
-  const id = Date.now().toString();
+  const id = `sub_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+  const createdAt = new Date().toISOString();
+
   await pool.query(
-    `INSERT INTO subscribers (id, firstName, lastName, email, phone, subject, message, createdAt)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-     ON CONFLICT (email) DO UPDATE SET
-       firstName = EXCLUDED.firstName,
-       lastName = EXCLUDED.lastName,
-       phone = EXCLUDED.phone,
-       subject = EXCLUDED.subject,
-       message = EXCLUDED.message,
-       createdAt = EXCLUDED.createdAt`,
+    `INSERT INTO subscribers (id, firstname, lastname, email, phone, subject, message, createdat)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
     [
       id, 
       sub.firstName || '', 
@@ -555,25 +511,25 @@ export async function createSubscriber(sub: {
       sub.phone || '',
       sub.subject || '',
       sub.message || '',
-      new Date().toISOString()
+      createdAt
     ]
   );
-  return { id, ...sub };
+  return { id, ...sub, createdAt };
 }
 
 export async function getSubscribers() {
   await initDatabase();
   try {
-    const result = await pool.query('SELECT * FROM subscribers ORDER BY createdAt DESC');
+    const result = await pool.query('SELECT * FROM subscribers ORDER BY createdat DESC');
     return result.rows.map((r: any) => ({
       id: r.id,
-      firstName: r.firstname,
-      lastName: r.lastname,
+      firstName: r.firstname || r.firstName,
+      lastName: r.lastname || r.lastName,
       email: r.email,
       phone: r.phone,
       subject: r.subject,
       message: r.message,
-      createdAt: r.createdat,
+      createdAt: r.createdat || r.createdAt,
     }));
   } catch (error) {
     console.error('DB error (getSubscribers):', error);
@@ -586,13 +542,11 @@ export async function deleteSubscriber(id: string) {
   await pool.query('DELETE FROM subscribers WHERE id = $1', [id]);
 }
 
-// Insert initial data if tables are empty
 export async function seedDatabase() {
   await initDatabase();
   console.log('Database ready, no static data seeded.');
 }
 
-// Initialize and seed on module load
 seedDatabase().catch(err => console.error('Error initializing database:', err));
 
 // ============ Event Registrations / Inscriptions Événements ============
@@ -601,7 +555,7 @@ export async function createEventRegistration(data: { name: string; phone: strin
   const id = Date.now().toString();
   const createdAt = new Date().toISOString();
   await pool.query(
-    `INSERT INTO event_registrations (id, name, phone, event_id, event_title, created_at)
+    `INSERT INTO event_registrations (id, name, phone, eventId, eventTitle, createdAt)
      VALUES ($1, $2, $3, $4, $5, $6)`,
     [id, data.name.trim(), data.phone.trim(), data.eventId || '', data.eventTitle || 'Événement', createdAt]
   );
@@ -611,14 +565,14 @@ export async function createEventRegistration(data: { name: string; phone: strin
 export async function getEventRegistrations() {
   await initDatabase();
   try {
-    const result = await pool.query('SELECT * FROM event_registrations ORDER BY created_at DESC');
+    const result = await pool.query('SELECT * FROM event_registrations ORDER BY createdAt DESC');
     return result.rows.map((r: any) => ({
       id: r.id,
       name: r.name,
       phone: r.phone,
-      eventId: r.event_id || r.eventId,
-      eventTitle: r.event_title || r.eventTitle,
-      createdAt: r.created_at || r.createdAt,
+      eventId: r.eventid || r.eventId,
+      eventTitle: r.eventtitle || r.eventTitle,
+      createdAt: r.createdat || r.createdAt,
     }));
   } catch (error) {
     console.error('DB error (getEventRegistrations):', error);
