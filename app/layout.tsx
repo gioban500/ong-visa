@@ -27,6 +27,10 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "ONG VISA" }],
   creator: "ONG VISA",
+  // Ajout pour la validation Google Search Console :
+  verification: {
+    google: "JTnAvF71VQTZICd8UEScZOPx9qvjl1EOlMTq0cYiqu4", // Colle ici la valeur de 'content' (ex: JTnAvF71VQTZIC...)
+  },
   openGraph: {
     type: "website",
     locale: "fr_FR",
