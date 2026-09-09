@@ -6,6 +6,10 @@ import { notFound } from 'next/navigation';
 import { ArrowLeft, CheckCircle, Loader2 } from 'lucide-react';
 import { BlogPost } from '@/types/cancer';
 
+// 1. Imports pour le téléphone avec drapeaux
+import 'react-phone-number-input/style.css';
+import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input';
+
 interface PageProps {
   params: Promise<{ slug: string }>;
 }
@@ -72,7 +76,6 @@ L'événement est entièrement gratuit et ouvert à toutes les femmes de Lomé e
 };
 
 export default function EventDetailPage({ params }: PageProps) {
-  
   const { slug } = use(params);
   const [post, setPost] = useState<EventData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -124,7 +127,13 @@ export default function EventDetailPage({ params }: PageProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!fullName || !phone) return;
+    if (!fullName) return;
+
+    // 2. Validation du numéro de téléphone
+    if (!phone || !isValidPhoneNumber(phone)) {
+      setSubmitError("Le numéro de téléphone saisi n'est pas valide pour le pays sélectionné.");
+      return;
+    }
 
     setIsSubmitting(true);
     setSubmitError(null);
@@ -308,17 +317,18 @@ export default function EventDetailPage({ params }: PageProps) {
                   />
                 </div>
 
+                {/* 3. Champ Téléphone Interactif avec drapeaux */}
                 <div className="space-y-2">
                   <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">
                     TÉLÉPHONE
                   </label>
-                  <input
-                    type="tel"
-                    required
+                  <PhoneInput
+                    international
+                    defaultCountry="TG"
                     value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="ex : +228 90 12 34 56"
-                    className="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-slate-900 text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#0f766e] bg-slate-50/50"
+                    onChange={(val) => setPhone(val || '')}
+                    placeholder="90 00 00 00"
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-slate-900 text-sm focus-within:ring-2 focus-within:ring-[#0f766e] bg-slate-50/50"
                   />
                 </div>
 
