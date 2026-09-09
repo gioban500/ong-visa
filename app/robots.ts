@@ -9,6 +9,5 @@ export default function robots(): MetadataRoute.Robots {
       allow: '/',
       disallow: ['/admin/', '/api/'], // On interdit aux robots d'indexer les routes API et l'admin
     },
-    sitemap: `${baseUrl}/sitemap.xml`,
-  };
+sitemap: `${baseUrl.replace(/\/$/, '')}/sitemap.xml`,  };
 }
