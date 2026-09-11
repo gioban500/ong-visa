@@ -191,7 +191,7 @@ export default function CancerDetailPage({ params }: PageProps) {
               {preventionText}
             </p>
             <Link
-              href="/events"
+              href="/blog"
               className="inline-block bg-[#0f766e] hover:bg-[#115e59] text-white font-bold px-8 py-4 rounded-xl transition text-base shadow-lg shadow-pink-500/35 hover:shadow-pink-500/50 hover:scale-[1.02] active:scale-[0.98]"
             >
               Prendre rendez-vous pour un dépistage gratuit

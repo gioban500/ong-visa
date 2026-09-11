@@ -113,7 +113,7 @@ export default function HeroCarousel({ testimonials }: HeroCarouselProps) {
 
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
               <Link 
-                href="/cancers"
+                href="/blog"
                 className="w-full sm:w-auto bg-[#0f766e] hover:bg-[#115e59] text-white px-6 py-3.5 rounded-xl font-bold text-sm sm:text-base transition shadow-lg shadow-teal-700/20 flex items-center justify-center"
               >
                 Planifier un Dépistage
