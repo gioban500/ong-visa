@@ -124,14 +124,6 @@ export default function AdminDashboard() {
       href: '/admin/blog',
     },
     {
-      label: 'Contacts / Abonnés',
-      value: stats.subscribers ?? 0,
-      sub: 'Messages reçus',
-      icon: Mail,
-      bgColor: 'bg-gradient-to-r from-teal-500 to-emerald-600',
-      href: '/admin/subscribers',
-    },
-    {
       label: 'Types de Cancer',
       value: stats.cancers ?? 0,
       sub: 'Pages gérées',
