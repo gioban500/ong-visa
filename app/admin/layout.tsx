@@ -8,7 +8,6 @@ import {
   LayoutDashboard, 
   FileText, 
   MessageSquare, 
-  Settings, 
   LogOut,
   Search,
   Bell,
@@ -34,7 +33,6 @@ export default function AdminLayout({
     { href: '/admin/blog', icon: FileText, label: 'Blog' },
     { href: '/admin/subscribers', icon: Mail, label: 'Liste de diffusion' },
     { href: '/admin/eventRegistration', icon: Calendar, label: 'Inscriptions Événements' },
-    { href: '/admin/settings', icon: Settings, label: 'Paramètres' },
   ];
 
   return (
