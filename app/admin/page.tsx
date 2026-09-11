@@ -56,14 +56,28 @@ interface DashboardData {
   }[];
 }
 
+const formatDate = (dateString?: string) => {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  if (isNaN(date.getTime()) || date.getTime() === 0) return '';
+  return date.toLocaleDateString('fr-FR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  });
+};
+
 export default function AdminDashboard() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetch('/api/stats')
-      .then(res => res.json())
-      .then(d => { setData(d); setLoading(false); })
+      .then((res) => res.json())
+      .then((d) => { 
+        setData(d); 
+        setLoading(false); 
+      })
       .catch(() => setLoading(false));
   }, []);
 
@@ -75,38 +89,43 @@ export default function AdminDashboard() {
     );
   }
 
-  if (!data) {
-    return <p className="text-red-500">Erreur lors du chargement du tableau de bord.</p>;
+  if (!data || !data.stats) {
+    return <p className="text-red-500 font-medium">Erreur lors du chargement des données du tableau de bord.</p>;
   }
 
-  const approvedPercentage = data.stats.testimonials > 0 
-    ? Math.round((data.stats.approvedTestimonials / data.stats.testimonials) * 100) 
+  const { stats } = data;
+  const recentTestimonials = data.recentTestimonials || [];
+  const recentPosts = data.recentPosts || [];
+  const recentSubscribers = data.recentSubscribers || [];
+
+  const approvedPercentage = stats.testimonials > 0 
+    ? Math.round((stats.approvedTestimonials / stats.testimonials) * 100) 
     : 0;
   
-  const publishedPercentage = data.stats.blogPosts > 0 
-    ? Math.round((data.stats.publishedPosts / data.stats.blogPosts) * 100) 
+  const publishedPercentage = stats.blogPosts > 0 
+    ? Math.round((stats.publishedPosts / stats.blogPosts) * 100) 
     : 0;
 
   const statCards = [
     {
       label: 'Témoignages',
-      value: data.stats.testimonials,
-      sub: `${data.stats.pendingTestimonials} en attente`,
+      value: stats.testimonials ?? 0,
+      sub: `${stats.pendingTestimonials ?? 0} en attente`,
       icon: Users,
       bgColor: 'bg-gradient-to-r from-indigo-600 to-indigo-700',
       href: '/admin/testimonials',
     },
     {
       label: 'Articles Blog',
-      value: data.stats.blogPosts,
-      sub: `${data.stats.publishedPosts} publiés`,
+      value: stats.blogPosts ?? 0,
+      sub: `${stats.publishedPosts ?? 0} publiés`,
       icon: BookOpen,
       bgColor: 'bg-gradient-to-r from-blue-500 to-cyan-500',
       href: '/admin/blog',
     },
     {
       label: 'Contacts / Abonnés',
-      value: data.stats.subscribers ?? 0,
+      value: stats.subscribers ?? 0,
       sub: 'Messages reçus',
       icon: Mail,
       bgColor: 'bg-gradient-to-r from-teal-500 to-emerald-600',
@@ -114,7 +133,7 @@ export default function AdminDashboard() {
     },
     {
       label: 'Types de Cancer',
-      value: data.stats.cancers,
+      value: stats.cancers ?? 0,
       sub: 'Pages gérées',
       icon: ShieldCheck,
       bgColor: 'bg-gradient-to-r from-rose-500 to-pink-500',
@@ -122,7 +141,7 @@ export default function AdminDashboard() {
     },
     {
       label: 'Participants Événements',
-      value: data.stats.events ?? 'Voir',
+      value: stats.events ?? 'Voir',
       sub: 'Personnes inscrites',
       icon: Calendar,
       bgColor: 'bg-gradient-to-r from-amber-500 to-orange-600',
@@ -130,12 +149,13 @@ export default function AdminDashboard() {
     },
   ];
 
+  const hasNoActivity = recentTestimonials.length === 0 && recentPosts.length === 0 && recentSubscribers.length === 0;
+
   return (
     <div className="max-w-7xl mx-auto">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        {/* Left Column: Profile & Recent Activity */}
+        {/* Colonne Gauche : Profil & Activité Récente */}
         <div className="lg:col-span-1 space-y-6">
-          {/* Profile Card */}
           <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-200">
             <div className="flex flex-col items-center text-center mb-4">
               <div className="w-24 h-24 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white text-4xl font-bold shadow-lg mb-4 border-4 border-white">
@@ -159,7 +179,7 @@ export default function AdminDashboard() {
             <div className="space-y-2">
               <h4 className="font-semibold text-gray-800 text-sm">Activité Récente</h4>
               <div className="space-y-2">
-                {data.recentTestimonials.slice(0, 2).map((t) => (
+                {recentTestimonials.slice(0, 2).map((t) => (
                   <div key={t.id} className="flex items-center gap-3 text-sm">
                     <div className="w-6 h-6 bg-purple-100 text-purple-600 rounded flex items-center justify-center flex-shrink-0">
                       {t.approved ? <CheckCircle className="w-4 h-4" /> : <Clock className="w-4 h-4" />}
@@ -168,12 +188,12 @@ export default function AdminDashboard() {
                       <p className="text-gray-700 truncate">
                         {t.approved ? `Témoignage ${t.name} approuvé` : `Nouveau témoignage de ${t.name}`}
                       </p>
-                      <p className="text-xs text-gray-500">{new Date(t.date).toLocaleDateString('fr-FR')}</p>
+                      {t.date && <p className="text-xs text-gray-500">{formatDate(t.date)}</p>}
                     </div>
                   </div>
                 ))}
 
-                {data.recentSubscribers && data.recentSubscribers.slice(0, 1).map((sub) => (
+                {recentSubscribers.slice(0, 1).map((sub) => (
                   <div key={sub.id} className="flex items-center gap-3 text-sm">
                     <div className="w-6 h-6 bg-teal-100 text-teal-600 rounded flex items-center justify-center flex-shrink-0">
                       <Mail className="w-4 h-4" />
@@ -183,13 +203,13 @@ export default function AdminDashboard() {
                         Message de {sub.firstName} {sub.lastName}
                       </p>
                       {sub.createdAt && (
-                        <p className="text-xs text-gray-500">{new Date(sub.createdAt).toLocaleDateString('fr-FR')}</p>
+                        <p className="text-xs text-gray-500">{formatDate(sub.createdAt)}</p>
                       )}
                     </div>
                   </div>
                 ))}
 
-                {data.recentPosts.slice(0, 1).map((post) => (
+                {recentPosts.slice(0, 1).map((post) => (
                   <div key={post.id} className="flex items-center gap-3 text-sm">
                     <div className="w-6 h-6 bg-blue-100 text-blue-600 rounded flex items-center justify-center flex-shrink-0">
                       <FileText className="w-4 h-4" />
@@ -198,12 +218,14 @@ export default function AdminDashboard() {
                       <p className="text-gray-700 truncate">
                         {post.published ? `Article "${post.title}" publié` : `Nouvel article "${post.title}"`}
                       </p>
-                      <p className="text-xs text-gray-500">{new Date(post.publishedDate).toLocaleDateString('fr-FR')}</p>
+                      {post.publishedDate && (
+                        <p className="text-xs text-gray-500">{formatDate(post.publishedDate)}</p>
+                      )}
                     </div>
                   </div>
                 ))}
 
-                {data.recentTestimonials.length === 0 && data.recentPosts.length === 0 && (!data.recentSubscribers || data.recentSubscribers.length === 0) && (
+                {hasNoActivity && (
                   <p className="text-sm text-gray-500 text-center py-2">Pas d'activité récente</p>
                 )}
               </div>
@@ -211,18 +233,13 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Right Column: Main Content */}
+        {/* Colonne Droite : Cartes de Stats & Graphiques */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Stats Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             {statCards.map((stat) => {
               const Icon = stat.icon;
               return (
-                <Link 
-                  key={stat.label} 
-                  href={stat.href} 
-                  className="block"
-                >
+                <Link key={stat.label} href={stat.href} className="block">
                   <div className={`${stat.bgColor} text-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all flex items-center justify-between`}>
                     <div>
                       <h4 className="text-sm opacity-90 font-medium">{stat.label}</h4>
@@ -238,9 +255,8 @@ export default function AdminDashboard() {
             })}
           </div>
 
-          {/* Charts & Recent Items */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Activity Chart */}
+            {/* Graphique */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex gap-4 text-sm font-medium text-gray-500">
@@ -249,7 +265,6 @@ export default function AdminDashboard() {
                 </div>
               </div>
 
-              {/* Placeholder Chart */}
               <div className="h-52 bg-gradient-to-b from-indigo-50 to-white rounded-xl border border-dashed border-gray-300 flex items-center justify-center">
                 <div className="text-center text-gray-400">
                   <BarChart3 className="w-12 h-12 mx-auto mb-2 opacity-50" />
@@ -258,16 +273,16 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            {/* Recent Items */}
+            {/* Témoignages récents */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
               <h3 className="text-lg font-bold text-gray-900 mb-4">Témoignages récents</h3>
               
               <div className="space-y-4">
-                {data.recentTestimonials.length > 0 ? (
-                  data.recentTestimonials.slice(0, 3).map((t) => (
+                {recentTestimonials.length > 0 ? (
+                  recentTestimonials.slice(0, 3).map((t) => (
                     <div key={t.id} className="flex items-center gap-4 p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
                       <div className="w-10 h-10 bg-gradient-to-br from-purple-400 to-pink-500 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0">
-                        {t.name.charAt(0)}
+                        {t.name ? t.name.charAt(0) : '?'}
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="font-semibold text-gray-900 text-sm">{t.name}</p>
@@ -293,7 +308,7 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* Bottom Section: Quick Actions */}
+      {/* Raccourcis Bas de Page */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5">
         <Link href="/admin/subscribers" className="block">
           <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-200 hover:shadow-md transition-all">
@@ -355,7 +370,7 @@ export default function AdminDashboard() {
           </div>
         </Link>
 
-        <Link href="/admin/events" className="block">
+        <Link href="/admin/eventRegistration" className="block">
           <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-200 hover:shadow-md transition-all">
             <div className="flex items-center gap-3.5">
               <div className="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center flex-shrink-0">
