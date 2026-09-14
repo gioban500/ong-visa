@@ -443,39 +443,39 @@ export default async function Home() {
       {/* ============ TÉMOIGNAGES SECTION ============ */}
       <TestimonialSection testimonials={testimonials as any} />
 
-     {/* ============ BANNIÈRE BANNER CALL TO ACTION ============ */}
-<section className="py-20 bg-gradient-to-br from-[#e91e63] via-[#d81b60] to-[#880e4f] text-white relative overflow-hidden">
-  <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl pointer-events-none" />
-  <div className="container mx-auto px-4 text-center relative z-10">
-    <Reveal>
-      <div className="max-w-3xl mx-auto space-y-6">
-        <span className="inline-block px-4 py-1.5 bg-white/20 text-[#008080] rounded-full text-xs font-bold uppercase tracking-widest backdrop-blur-md">
-          ENSEMBLE CONTRE LE CANCER
-        </span>
-        <h2 className="text-3xl sm:text-5xl font-black uppercase tracking-tight leading-tight text-[#008080]">
-          VOTRE SOUTIEN PEUT SAUVER DES VIES
-        </h2>
-        <p className="text-[#008080] text-sm sm:text-base max-w-xl mx-auto leading-relaxed">
-          Chaque don nous permet d'offrir des dépistages gratuits aux femmes les plus vulnérables et de multiplier nos campagnes de sensibilisation.
-        </p>
-        <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
-          <Link
-            href="/contact"
-            className="w-full sm:w-auto px-8 py-4 bg-white text-[#008080] rounded-2xl font-black text-sm uppercase tracking-wider transition-all hover:bg-slate-100 shadow-xl hover:scale-105 active:scale-95"
-          >
-            Faire un don
-          </Link>
-          <Link
-            href="/contact"
-            className="w-full sm:w-auto px-8 py-4 bg-transparent border-2 border-white text-white rounded-2xl font-black text-sm uppercase tracking-wider transition-all hover:bg-white/10 hover:scale-105 active:scale-95"
-          >
-            Devenir bénévole
-          </Link>
+      {/* ============ BANNIÈRE BANNER CALL TO ACTION ============ */}
+      <section className="py-20 bg-gradient-to-br from-[#e91e63] via-[#d81b60] to-[#880e4f] text-white relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="container mx-auto px-4 text-center relative z-10">
+          <Reveal>
+            <div className="max-w-3xl mx-auto space-y-6">
+              <span className="inline-block px-4 py-1.5 bg-white/20 rounded-full text-xs font-bold uppercase tracking-widest backdrop-blur-md">
+                ENSEMBLE CONTRE LE CANCER
+              </span>
+              <h2 className="text-3xl sm:text-5xl font-black uppercase tracking-tight leading-tight">
+                VOTRE SOUTIEN PEUT SAUVER DES VIES
+              </h2>
+              <p className="text-pink-100 text-sm sm:text-base max-w-xl mx-auto leading-relaxed">
+                Chaque don nous permet d'offrir des dépistages gratuits aux femmes les plus vulnérables et de multiplier nos campagnes de sensibilisation.
+              </p>
+              <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
+                <Link
+                  href="/contact"
+                  className="w-full sm:w-auto px-8 py-4 bg-white text-[#e91e63] rounded-2xl font-black text-sm uppercase tracking-wider transition-all hover:bg-slate-100 shadow-xl hover:scale-105 active:scale-95"
+                >
+                  Faire un don
+                </Link>
+                <Link
+                  href="/contact"
+                  className="w-full sm:w-auto px-8 py-4 bg-transparent border-2 border-white text-white rounded-2xl font-black text-sm uppercase tracking-wider transition-all hover:bg-white/10 hover:scale-105 active:scale-95"
+                >
+                  Devenir bénévole
+                </Link>
+              </div>
+            </div>
+          </Reveal>
         </div>
-      </div>
-    </Reveal>
-  </div>
-</section>
+      </section>
     </div>
   );
 }
