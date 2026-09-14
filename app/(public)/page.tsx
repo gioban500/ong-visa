@@ -220,69 +220,69 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* ============ NOS FOCUS CANCERS SECTION ============ */}
-      <section className="py-24 bg-[#faf9f6] relative">
-        <div className="container mx-auto px-4">
-          <div className="max-w-6xl mx-auto">
-            <Reveal>
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-14 gap-4 border-b border-slate-200/60 pb-6">
+{/* ============ NOS FOCUS CANCERS SECTION ============ */}
+<section className="py-24 bg-[#faf9f6] relative">
+  <div className="container mx-auto px-4">
+    <div className="max-w-6xl mx-auto">
+      <Reveal>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-14 gap-4 border-b border-slate-200/60 pb-6">
+          <div>
+            <h2 className="text-3xl sm:text-4xl font-black text-[#001731] tracking-wide uppercase">
+              NOS FOCUS CANCERS
+            </h2>
+            <p className="text-slate-500 text-sm mt-1">S'informer pour mieux se protéger au quotidien</p>
+          </div>
+          <Link
+            href="/cancers"
+            className="group text-[#008080] hover:text-[#006666] font-bold flex items-center gap-1.5 text-sm sm:text-base transition-all"
+          >
+            <span>Voir toutes les informations</span>
+            <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+          </Link>
+        </div>
+      </Reveal>
+
+      <div className="grid md:grid-cols-3 gap-8">
+        {(cancers.length > 0 ? cancers.slice(0, 3) : defaultCancers).map((cancer, i) => (
+          <Reveal key={cancer.id} delay={i * 150} direction="up">
+            <div className="group bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl border border-slate-100 hover:border-[#008080]/20 h-full flex flex-col transition-all duration-300 transform hover:-translate-y-2">
+              <div className="relative h-60 w-full overflow-hidden bg-slate-100">
+                <Image
+                  src={cancer.image || `/images/cancers/${cancer.id}.jpg`}
+                  alt={cancer.name}
+                  fill
+                  className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <span className="absolute top-4 right-4 bg-[#e91e63] text-white text-xs font-extrabold px-3.5 py-1.5 rounded-full shadow-[0_4px_14px_rgba(233,30,99,0.4)] animate-pulse">
+                  Focus 0{i + 1}
+                </span>
+              </div>
+
+              <div className="p-7 flex-1 flex flex-col justify-between text-center">
                 <div>
-                  <h2 className="text-3xl sm:text-4xl font-black text-[#001731] tracking-wide uppercase">
-                    NOS FOCUS CANCERS
-                  </h2>
-                  <p className="text-slate-500 text-sm mt-1">S'informer pour mieux se protéger au quotidien</p>
+                  <h3 className="text-lg font-black text-[#001731] mb-3 uppercase tracking-tight group-hover:text-[#008080] transition-colors">
+                    {cancer.name}
+                  </h3>
+                  <p className="text-slate-600 text-xs sm:text-sm leading-relaxed mb-6">
+                    {('shortDescription' in cancer && cancer.shortDescription) || cancer.description}
+                  </p>
                 </div>
+
                 <Link
-                  href="/cancers"
-                  className="group text-[#0e5c54] hover:text-[#0b4741] font-bold flex items-center gap-1.5 text-sm sm:text-base transition-all"
+                  href={`/cancers/${cancer.id}`}
+                  className="w-full bg-[#008080] hover:bg-[#006666] text-white py-3.5 rounded-2xl font-bold text-sm transition-all text-center block shadow-lg shadow-[#008080]/25 hover:shadow-xl hover:shadow-[#008080]/40 hover:scale-[1.02] active:scale-[0.98]"
                 >
-                  <span>Voir toutes les informations</span>
-                  <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                  En savoir plus
                 </Link>
               </div>
-            </Reveal>
-
-            <div className="grid md:grid-cols-3 gap-8">
-              {(cancers.length > 0 ? cancers.slice(0, 3) : defaultCancers).map((cancer, i) => (
-                <Reveal key={cancer.id} delay={i * 150} direction="up">
-                  <div className="group bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl border border-slate-100 hover:border-pink-500/20 h-full flex flex-col transition-all duration-300 transform hover:-translate-y-2">
-                    <div className="relative h-60 w-full overflow-hidden bg-slate-100">
-                      <Image
-                        src={cancer.image || `/images/cancers/${cancer.id}.jpg`}
-                        alt={cancer.name}
-                        fill
-                        className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                      <span className="absolute top-4 right-4 bg-[#e91e63] text-white text-xs font-extrabold px-3.5 py-1.5 rounded-full shadow-[0_4px_14px_rgba(233,30,99,0.4)] animate-pulse">
-                        Focus 0{i + 1}
-                      </span>
-                    </div>
-
-                    <div className="p-7 flex-1 flex flex-col justify-between text-center">
-                      <div>
-                        <h3 className="text-lg font-black text-[#001731] mb-3 uppercase tracking-tight group-hover:text-[#0e5c54] transition-colors">
-                          {cancer.name}
-                        </h3>
-                        <p className="text-slate-600 text-xs sm:text-sm leading-relaxed mb-6">
-                          {('shortDescription' in cancer && cancer.shortDescription) || cancer.description}
-                        </p>
-                      </div>
-
-                      <Link
-                        href={`/cancers/${cancer.id}`}
-                        className="w-full bg-[#0e5c54] hover:bg-[#0b4741] text-white py-3.5 rounded-2xl font-bold text-sm transition-all text-center block shadow-lg shadow-[#e91e63]/25 hover:shadow-xl hover:shadow-[#e91e63]/40 hover:scale-[1.02] active:scale-[0.98]"
-                      >
-                        En savoir plus
-                      </Link>
-                    </div>
-                  </div>
-                </Reveal>
-              ))}
             </div>
-          </div>
-        </div>
-      </section>
+          </Reveal>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>
 
       {/* ============ ÉVÉNEMENTS SECTION ============ */}
       <section className="py-24 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#112647] via-[#071327] to-[#030914] text-white relative overflow-hidden">
