@@ -476,3 +476,6 @@ export default async function Home() {
     </Reveal>
   </div>
 </section>
+    </div>
+  );
+}
