@@ -15,7 +15,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   try {
     const res = await fetch(`${siteUrl}/api/blog/${slug}`, {
-      next: { revalidate: 3600 },
+      next: { revalidate: false }, // Désactive la revalidation pour cette requête
     });
 
     if (res.ok) {

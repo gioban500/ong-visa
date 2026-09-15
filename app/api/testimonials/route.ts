@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { getTestimonials, createTestimonial } from '@/lib/db';
 
 export async function GET() {
@@ -16,8 +17,12 @@ export async function POST(request: Request) {
     const body = await request.json();
     const testimonial = await createTestimonial({
       ...body,
-      id: body.id || Date.now().toString()
+      id: body.id || Date.now().toString(),
     });
+
+    revalidatePath('/');
+    revalidatePath('/temoignages');
+
     return NextResponse.json(testimonial);
   } catch (error) {
     console.error(error);

@@ -1,5 +1,9 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { getCancers, createCancer, slugify } from '@/lib/db';
+
+// Bloque tout rafraîchissement automatique
+export const revalidate = false;
 
 export async function GET() {
   try {
@@ -18,6 +22,11 @@ export async function POST(request: Request) {
       ...body,
       id: body.id || slugify(body.name)
     });
+
+    // Régénère uniquement les pages impactées après la création
+    revalidatePath('/cancers');
+    revalidatePath('/');
+
     return NextResponse.json(cancer);
   } catch (error) {
     console.error(error);

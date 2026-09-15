@@ -1,5 +1,9 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { getBlogPosts, createBlogPost, slugify } from '@/lib/db';
+
+// Bloque le rafraîchissement automatique par intervalle
+export const revalidate = false;
 
 export async function GET() {
   try {
@@ -24,6 +28,11 @@ export async function POST(request: Request) {
       id: body.id || Date.now().toString(),
       slug: body.slug || slugify(body.title)
     });
+
+    // Déclenche la mise à jour UNIQUE à la création
+    revalidatePath('/blog');
+    revalidatePath('/');
+
     return NextResponse.json(post);
   } catch (error) {
     console.error(error);

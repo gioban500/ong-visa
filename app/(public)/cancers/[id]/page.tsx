@@ -1,6 +1,8 @@
 import { Metadata } from 'next';
 import CancerClient from './CancerClient';
 
+export const revalidate = false;
+
 export * from './CancerClient';
 
 type Props = {
@@ -14,7 +16,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   try {
     const res = await fetch(`${siteUrl}/api/cancers/${cleanId}`, {
-      next: { revalidate: 3600 },
+      next: { revalidate: false }, // Désactive la revalidation pour cette requête
     });
 
     if (res.ok) {
