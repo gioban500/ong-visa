@@ -1,8 +1,18 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Fraunces, Work_Sans } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"] });
+const fraunces = Fraunces({
+  subsets: ["latin"],
+  variable: "--font-fraunces",
+  display: "swap",
+});
+
+const workSans = Work_Sans({
+  subsets: ["latin"],
+  variable: "--font-work-sans",
+  display: "swap",
+});
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://ong-visa.vercel.app";
 
@@ -67,8 +77,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr" data-scroll-behavior="smooth">
-      <body className={`${inter.className} antialiased`}>{children}</body>
+    <html lang="fr" data-scroll-behavior="smooth" className={`${workSans.variable} ${fraunces.variable}`}>
+      <body className="antialiased min-h-screen bg-[#FAF6F0] text-[#2A2521] font-sans">
+        {children}
+      </body>
     </html>
   );
 }

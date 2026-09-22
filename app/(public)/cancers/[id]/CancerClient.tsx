@@ -3,7 +3,7 @@
 import React, { use, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, CheckCircle2 } from 'lucide-react';
 import { Cancer } from '@/types/cancer';
 
 interface PageProps {
@@ -58,8 +58,10 @@ export default function CancerDetailPage({ params }: PageProps) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0f766e] text-white flex items-center justify-center">
-        <p className="text-base font-medium">Chargement des informations...</p>
+      <div className="min-h-screen bg-[#FAF6F0] text-[#2A2521] flex items-center justify-center">
+        <p className="text-base font-medium animate-pulse text-[#756B60]">
+          Chargement de la fiche médicale...
+        </p>
       </div>
     );
   }
@@ -68,16 +70,13 @@ export default function CancerDetailPage({ params }: PageProps) {
     notFound();
   }
 
-  // Récupération sécurisée de la description courte (DB lowercase vs TS camelCase)
   const shortDescription =
     cancer.shortDescription ||
     (cancer as unknown as { shortdescription?: string }).shortdescription ||
     cancer.description;
 
-  // Récupération de la description complète
   const fullDescription = cancer.description || shortDescription;
 
-  // Extraire les symptômes (supporte les objets ou tableaux)
   let symptomsList: string[] = [];
   const rawSymptoms = cancer.symptoms as unknown;
 
@@ -100,7 +99,6 @@ export default function CancerDetailPage({ params }: PageProps) {
     }
   }
 
-  // Extraire la prévention
   const primaryPrevention = cancer.screening?.primaryPrevention;
   const preventionText =
     Array.isArray(primaryPrevention) && primaryPrevention.length > 0
@@ -109,13 +107,13 @@ export default function CancerDetailPage({ params }: PageProps) {
         'Un dépistage précoce permet d’augmenter considérablement les chances de guérison. N’hésitez pas à consulter un professionnel de santé.';
 
   return (
-    <div className="w-full bg-[#fdfbf7] min-h-screen">
+    <div className="w-full bg-[#FAF6F0] min-h-screen pb-20">
       {/* Barre de retour supérieure */}
-      <div className="w-full bg-slate-900 py-4 px-6 sm:px-8 lg:px-12 border-b border-slate-800">
-        <div className="max-w-7xl mx-auto">
+      <div className="w-full bg-[#123E3B] py-3.5 px-4 sm:px-7 border-b border-white/10">
+        <div className="max-w-[1180px] mx-auto">
           <Link
             href="/cancers"
-            className="text-slate-300 hover:text-white font-bold text-sm flex items-center gap-2 transition inline-flex"
+            className="text-[#D3E2DF] hover:text-white font-medium text-xs sm:text-sm flex items-center gap-2 transition-colors inline-flex"
           >
             <ArrowLeft className="w-4 h-4" />
             Retour à la liste des cancers
@@ -123,23 +121,23 @@ export default function CancerDetailPage({ params }: PageProps) {
         </div>
       </div>
 
-      {/* Hero Section - Affiche UNIQUEMENT la description courte */}
-      <section className="w-full bg-[#0f766e] text-white py-14 px-6 sm:px-8 lg:px-12">
-        <div className="max-w-7xl mx-auto grid lg:grid-cols-12 gap-10 items-center">
-          <div className="lg:col-span-7">
-            <span className="bg-pink-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider inline-block">
-              FOCUS - DÉPISTAGE & PRÉVENTION
+      {/* Hero Section */}
+      <section className="w-full bg-[#123E3B] text-white py-12 md:py-16 px-4 sm:px-7 border-b border-white/10">
+        <div className="max-w-[1180px] mx-auto grid lg:grid-cols-12 gap-8 items-center">
+          <div className="lg:col-span-7 space-y-3.5">
+            <span className="bg-[#9E2F55] text-white text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider inline-block">
+              Focus Médical · Prévention & Dépistage
             </span>
-            <h1 className="text-3xl sm:text-5xl font-black uppercase tracking-tight mt-4 mb-6 leading-tight">
+            <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl font-semibold text-white leading-tight">
               {cancer.name}
             </h1>
-            <p className="text-lg text-emerald-50 leading-relaxed font-medium">
+            <p className="text-base sm:text-lg text-[#D3E2DF] leading-relaxed max-w-2xl">
               {shortDescription}
             </p>
           </div>
           {cancer.image && (
             <div className="lg:col-span-5">
-              <div className="w-full h-72 rounded-3xl overflow-hidden shadow-2xl border-4 border-white/20">
+              <div className="w-full h-64 sm:h-72 rounded-[4px] overflow-hidden shadow-md border border-white/20 bg-[#F5EFE6]">
                 <img
                   src={cancer.image}
                   alt={cancer.name}
@@ -151,53 +149,59 @@ export default function CancerDetailPage({ params }: PageProps) {
         </div>
       </section>
 
-      {/* Contenu Détaillé - Affiche la vraie description complète */}
-      <section className="w-full bg-[#fdfbf7] py-16 px-6 sm:px-8 lg:px-12 text-slate-900">
-        <div className="max-w-5xl mx-auto space-y-10">
-          
-          {/* PRESENTATION GENERALE */}
-          <div className="bg-white p-8 rounded-3xl border border-stone-200/80 shadow-sm">
-            <h2 className="text-2xl font-black text-[#0f766e] uppercase mb-4">
-              Présentation Générale
+      {/* Contenu Détaillé */}
+      <section className="max-w-[1180px] mx-auto px-4 sm:px-7 py-12 text-[#2A2521]">
+        <div className="max-w-4xl mx-auto space-y-8">
+          {/* Présentation Générale */}
+          <div className="bg-white p-6 sm:p-8 rounded-[4px] border border-[#E2D7C7] border-t-4 border-t-[#1F5A56] shadow-sm">
+            <h2 className="font-serif text-2xl font-semibold text-[#123E3B] mb-3">
+              Présentation & Épidémiologie
             </h2>
-            <p className="text-slate-700 leading-relaxed font-medium text-base whitespace-pre-line">
+            <p className="text-[#514A43] leading-relaxed text-[15px] whitespace-pre-line">
               {fullDescription}
             </p>
           </div>
 
-          {/* SYMPTÔMES A SURVEILLER */}
+          {/* Symptômes à Surveiller */}
           {symptomsList.length > 0 && (
-            <div className="bg-white p-8 rounded-3xl border border-stone-200/80 shadow-sm">
-              <h2 className="text-2xl font-black text-pink-600 uppercase mb-6 flex items-center gap-2">
-                Signes & Symptômes à Surveiller
+            <div className="bg-white p-6 sm:p-8 rounded-[4px] border border-[#E2D7C7] border-t-4 border-t-[#9E2F55] shadow-sm">
+              <h2 className="font-serif text-2xl font-semibold text-[#9E2F55] mb-4 flex items-center gap-2">
+                Signes d'appel & Symptômes à observer
               </h2>
-              <ul className="space-y-4">
+              <ul className="space-y-3">
                 {symptomsList.map((symptom, idx) => (
-                  <li key={idx} className="flex items-start gap-3 text-slate-700 font-semibold text-base">
-                    <span className="text-pink-600 text-lg">✦</span>
-                    {symptom.replace(/^[•-]\s*/, '')}
+                  <li key={idx} className="flex items-start gap-3 text-[#514A43] text-sm sm:text-[15px] leading-relaxed">
+                    <CheckCircle2 className="w-4 h-4 text-[#9E2F55] shrink-0 mt-1" />
+                    <span>{symptom.replace(/^[•-]\s*/, '')}</span>
                   </li>
                 ))}
               </ul>
             </div>
           )}
 
-          {/* PRÉVENTION ET DÉPISTAGE */}
-          <div className="bg-emerald-50 p-8 rounded-3xl border border-emerald-200 shadow-sm">
-            <h2 className="text-2xl font-black text-[#0f766e] uppercase mb-4 flex items-center gap-2">
-              Prévention & Dépistage
+          {/* Prévention et Dépistage */}
+          <div className="bg-[#EBF3F1] p-6 sm:p-8 rounded-[4px] border border-[#1F5A56]/20 shadow-sm space-y-4">
+            <h2 className="font-serif text-2xl font-semibold text-[#123E3B]">
+              Prévention & Recommandations au Togo
             </h2>
-            <p className="text-slate-800 leading-relaxed font-medium text-base mb-6 whitespace-pre-line">
+            <p className="text-[#514A43] leading-relaxed text-[15px] whitespace-pre-line">
               {preventionText}
             </p>
-            <Link
-              href="/blog"
-              className="inline-block bg-[#0f766e] hover:bg-[#115e59] text-white font-bold px-8 py-4 rounded-xl transition text-base shadow-lg shadow-pink-500/35 hover:shadow-pink-500/50 hover:scale-[1.02] active:scale-[0.98]"
-            >
-              Prendre rendez-vous pour un dépistage gratuit
-            </Link>
+            <div className="pt-2 flex flex-wrap gap-3">
+              <Link
+                href="/#centres"
+                className="inline-block bg-[#1F5A56] hover:bg-[#123E3B] text-white font-semibold px-6 py-3 rounded-[4px] transition text-sm shadow-sm"
+              >
+                Trouver un centre de dépistage partenaire
+              </Link>
+              <Link
+                href="/#ecoute"
+                className="inline-block bg-white hover:bg-[#FAF6F0] text-[#123E3B] border border-[#E2D7C7] font-semibold px-6 py-3 rounded-[4px] transition text-sm"
+              >
+                Poser une question à notre équipe
+              </Link>
+            </div>
           </div>
-
         </div>
       </section>
     </div>

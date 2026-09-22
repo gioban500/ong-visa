@@ -1,64 +1,165 @@
+'use client';
+
+import Link from 'next/link';
+
+interface CenterItem {
+  title: string;
+  services: string;
+  location: string;
+  badge: string;
+}
+
+const centers: CenterItem[] = [
+  {
+    title: "Centre d'Imagerie & CHU Sylvanus Olympio",
+    services: 'Mammographie numérique, sénologie, frottis & échographie',
+    location: '📍 Quartier Tokoin, Lomé (Consultations du lundi au vendredi)',
+    badge: 'Partenaire ONG VISA',
+  },
+  {
+    title: 'Cliniques Itinérantes ONG VISA',
+    services: 'Dépistage mobile gratuit, autopalpation & frottis VIA-VILI',
+    location: '📍 Tournées périurbaines (Maritime, Plateaux, Kara, Savanes)',
+    badge: 'Campagnes hebdomadaires',
+  },
+  {
+    title: 'Dispensaires & Maisons Sage-Femme',
+    services: 'Examen clinique pelvien, palpation & écoute bienveillante',
+    location: '📍 Quartiers Bè, Adidogomé, Agoè-Nyivé (accueil sans RDV)',
+    badge: 'Accueil direct',
+  },
+];
+
 export default function LocalCenters() {
   return (
-    <section id="acces" className="py-16 border-b border-[#E1D6C6]">
-      <div className="max-w-[1120px] mx-auto px-7">
-        <div className="max-w-2xl mb-9">
-          <h2 className="font-serif text-3xl text-[#2A2521] mb-2">Où consulter et réaliser ses dépistages à Lomé</h2>
-          <p className="text-[#6B6155]">
+    <section id="centres" style={{ padding: '64px 0', borderBottom: '1px solid var(--line)' }}>
+      <div className="wrap">
+        {/* En-tête */}
+        <div style={{ maxWidth: 720, marginBottom: 36 }}>
+          <span className="section-kicker">Proximité &amp; Réseau solidaire</span>
+          <h2 className="section-title">Où consulter et réaliser ses dépistages au Togo</h2>
+          <p className="section-intro">
             Centres de santé partenaires et points d'accueil accompagnés par l'ONG VISA.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="border border-[#E1D6C6] rounded p-5 bg-[#F2EBDE]">
-            <h3 className="font-serif text-base text-[#2A2521] font-semibold mb-1">
-              Centre de Dépistage & D'Imagerie — Tokoin
-            </h3>
-            <div className="text-xs text-[#6B6155] mb-2">
-              Mammographie, frottis cervical, échographies
+        {/* Grille des 3 centres */}
+        <div
+          style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0,1fr))', gap: 20, marginBottom: 40 }}
+          className="centres-grid"
+        >
+          {centers.map((c, idx) => (
+            <div
+              key={idx}
+              style={{
+                background: 'var(--surface)',
+                border: '1px solid var(--line)',
+                borderRadius: 'var(--radius-sm)',
+                padding: 24,
+                boxShadow: 'var(--shadow-sm)',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+              }}
+            >
+              <div>
+                <h3
+                  style={{
+                    fontFamily: 'var(--font-fraunces), Fraunces, serif',
+                    fontSize: 18,
+                    marginBottom: 6,
+                    color: 'var(--ink)',
+                    fontWeight: 600,
+                  }}
+                >
+                  {c.title}
+                </h3>
+                <div style={{ fontSize: 13, color: 'var(--teal)', fontWeight: 600, marginBottom: 10 }}>
+                  {c.services}
+                </div>
+                <div style={{ fontSize: 13.5, color: 'var(--ink-secondary)', marginBottom: 14, lineHeight: 1.5 }}>
+                  {c.location}
+                </div>
+              </div>
+              <span
+                style={{
+                  fontSize: 11.5,
+                  fontWeight: 600,
+                  color: 'var(--clay)',
+                  background: 'var(--clay-soft)',
+                  padding: '3px 8px',
+                  borderRadius: 'var(--radius-full)',
+                  alignSelf: 'flex-start',
+                }}
+              >
+                {c.badge}
+              </span>
             </div>
-            <p className="text-xs text-[#2A2521]">Quartier Tokoin, Lomé</p>
-            <div className="text-[11px] text-[#7A2143] italic mt-2">Partenaire ONG VISA</div>
-          </div>
-
-          <div className="border border-[#E1D6C6] rounded p-5 bg-[#F2EBDE]">
-            <h3 className="font-serif text-base text-[#2A2521] font-semibold mb-1">
-              Unité d'Orientation Onco-Digestive & Générales — Bè
-            </h3>
-            <div className="text-xs text-[#6B6155] mb-2">
-              Bilans généraux, kits immunologiques, consultation
-            </div>
-            <p className="text-xs text-[#2A2521]">Quartier Bè, Lomé</p>
-            <div className="text-[11px] text-[#7A2143] italic mt-2">Partenaire ONG VISA</div>
-          </div>
-
-          <div className="border border-[#E1D6C6] rounded p-5 bg-[#F2EBDE]">
-            <h3 className="font-serif text-base text-[#2A2521] font-semibold mb-1">
-              Ligne d'Écoute Directe
-            </h3>
-            <div className="text-xs text-[#6B6155] mb-2">
-              Conseils, prise de rendez-vous et orientation
-            </div>
-            <p className="text-xs font-semibold text-[#1F5A56]">+228 90 00 00 00</p>
-            <div className="text-[11px] text-[#7A2143] italic mt-2">Ligne directe ONG VISA</div>
-          </div>
+          ))}
         </div>
 
-        <div className="flex flex-wrap gap-3.5 mt-7">
-          <a
-            href="#compagnon"
-            className="bg-[#1F5A56] hover:bg-[#123E3B] text-white px-5 py-2.5 rounded font-semibold text-sm transition"
-          >
-            Commencer mon suivi
-          </a>
-          <a
-            href="#temoignages"
-            className="border border-[#1F5A56] text-[#123E3B] hover:bg-[#F2EBDE] px-5 py-2.5 rounded font-semibold text-sm transition"
-          >
-            Lire les témoignages
-          </a>
+        {/* Bannière don */}
+        <div
+          id="don"
+          style={{
+            background: 'var(--clay)',
+            color: '#fff',
+            borderRadius: 'var(--radius-sm)',
+            padding: '32px 36px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 24,
+            flexWrap: 'wrap',
+          }}
+        >
+          <div>
+            <span
+              style={{
+                display: 'inline-block',
+                background: 'rgba(255,255,255,0.2)',
+                color: '#fff',
+                padding: '2px 10px',
+                borderRadius: 'var(--radius-full)',
+                fontSize: 12,
+                fontWeight: 600,
+                marginBottom: 6,
+              }}
+            >
+              Campagne Solidaire ONG VISA
+            </span>
+            <h3
+              style={{
+                fontFamily: 'var(--font-fraunces), Fraunces, serif',
+                fontSize: 22,
+                color: '#fff',
+                marginBottom: 6,
+                fontWeight: 500,
+              }}
+            >
+              Chaque don permet de dépister et sauver des vies
+            </h3>
+            <p style={{ color: '#F8D6E1', fontSize: 14.5, maxWidth: '52ch', margin: 0, lineHeight: 1.6 }}>
+              Grâce à votre soutien, l'ONG VISA finance les réactifs de dépistage par acide acétique et transporte les
+              femmes isolées vers les centres d'imagerie.
+            </p>
+          </div>
+          <div style={{ display: 'flex', gap: 10 }}>
+            <Link href="/donation" className="btn btn-white">
+              Faire un don solidaire
+            </Link>
+            <Link href="#ecoute" className="btn btn-outline" style={{ color: '#fff', borderColor: 'rgba(255,255,255,0.6)' }}>
+              Devenir bénévole
+            </Link>
+          </div>
         </div>
       </div>
+
+      <style>{`
+        @media (max-width: 1023px) {
+          .centres-grid { grid-template-columns: 1fr !important; }
+        }
+      `}</style>
     </section>
   );
 }

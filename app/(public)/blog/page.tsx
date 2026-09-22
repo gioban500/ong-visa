@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Search, ArrowRight } from 'lucide-react';
+import { Search, ArrowRight, Calendar, MapPin, Clock } from 'lucide-react';
 import { BlogPost } from '@/types/cancer';
 
 interface EventPost extends BlogPost {
@@ -12,7 +12,7 @@ interface EventPost extends BlogPost {
 const MOCK_POSTS: EventPost[] = [
   {
     id: '1',
-    title: 'GRANDE CAMPAGNE DE DÉPISTAGE GRATUIT',
+    title: 'Grande Campagne de Dépistage Gratuit',
     slug: 'campagne-depistage-sein',
     excerpt: "Une journée dédiée à la sensibilisation, au contrôle clinique gratuit du sein et au dépistage du col de l'utérus pour toutes les femmes.",
     content: 'Contenu détaillé de la campagne...',
@@ -21,12 +21,12 @@ const MOCK_POSTS: EventPost[] = [
     publishedDate: '15 octobre 2026',
     readTime: 5,
     category: 'Événement',
-    location: 'LOMÉ, TOGO',
-    tags: ['Dépistage', 'Lomé']
+    location: 'Lomé, Togo',
+    tags: ['Dépistage', 'Lomé'],
   },
   {
     id: '2',
-    title: 'CONFÉRENCE SANTÉ & PRÉVENTION',
+    title: 'Conférence Santé & Prévention Gynécologique',
     slug: 'conference-prevention-col-uterus',
     excerpt: 'Échanges avec des professionnels de santé sur les avancées de la prise en charge des cancers féminins au Togo.',
     content: 'Contenu détaillé de la conférence...',
@@ -35,23 +35,23 @@ const MOCK_POSTS: EventPost[] = [
     publishedDate: '28 novembre 2026',
     readTime: 4,
     category: 'Conférence',
-    location: 'PALAIS DES CONGRÈS, LOMÉ',
-    tags: ['Santé', 'Prévention']
+    location: 'Palais des Congrès, Lomé',
+    tags: ['Santé', 'Prévention'],
   },
   {
     id: '3',
-    title: 'CARAVANE DE SENSIBILISATION RÉGIONALE',
+    title: 'Caravane de Sensibilisation Régionale',
     slug: 'caravane-sensibilisation-regionale',
-    excerpt: "Ateliers itinérants d'information et séances d'autopalpation guidées dans les zones rurales.",
+    excerpt: "Ateliers itinérants d'information et séances d'autopalpation guidées dans les zones périurbaines et rurales.",
     content: 'Contenu détaillé de la caravane...',
     image: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=800&q=80',
     author: 'Équipe VISA',
     publishedDate: '12 décembre 2026',
     readTime: 3,
     category: 'Sensibilisation',
-    location: 'RÉGION MARITIME',
-    tags: ['Caravane', 'Prévention']
-  }
+    location: 'Région Maritime',
+    tags: ['Caravane', 'Prévention'],
+  },
 ];
 
 export default function BlogEventsPage() {
@@ -92,93 +92,117 @@ export default function BlogEventsPage() {
   });
 
   return (
-    <div className="w-full bg-[#faf9f6] min-h-screen pb-24">
-      {/* BANNIÈRE ORIGINALE BLEU NUIT UNIFORME */}
-      <section className="bg-[#0f172a] text-white pt-16 pb-20 px-4 sm:px-6 lg:px-8 text-center shadow-md">
-        <div className="max-w-4xl mx-auto space-y-5">
-          <h1 className="text-4xl sm:text-6xl font-black uppercase tracking-tight text-white leading-tight">
-            TOUS NOS ÉVÉNEMENTS
+    <div className="w-full bg-[#FAF6F0] min-h-screen pb-24">
+      {/* Banner Héro */}
+      <section className="bg-[#123E3B] text-white pt-14 pb-18 px-4 sm:px-7 text-center border-b border-white/10">
+        <div className="max-w-4xl mx-auto space-y-4">
+          <span className="text-xs font-bold uppercase tracking-wider text-[#ffb1c3] block">
+            Actions communautaires & Rencontres
+          </span>
+          <h1 className="font-serif text-3xl sm:text-5xl font-semibold text-white leading-tight">
+            Événements & Campagnes de Sensibilisation
           </h1>
-          <p className="text-slate-300 text-sm sm:text-base max-w-2xl mx-auto font-normal leading-relaxed">
-            Retrouvez l'ensemble de nos campagnes de dépistage, conférences scientifiques, et activités itinérantes partout au Togo.
+          <p className="text-[#D3E2DF] text-sm sm:text-base max-w-2xl mx-auto leading-relaxed">
+            Retrouvez l'ensemble de nos campagnes de dépistage, conférences médicales et tournées foraines partout au Togo.
           </p>
 
-          <div className="pt-6 max-w-xl mx-auto">
+          <div className="pt-4 max-w-xl mx-auto">
             <div className="relative flex items-center group">
-              <Search className="absolute left-4 w-5 h-5 text-slate-400 group-focus-within:text-[#e91e63] transition-colors" />
+              <Search className="absolute left-4 w-5 h-5 text-stone-400 group-focus-within:text-[#9E2F55] transition-colors" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Rechercher un événement ou lieu..."
-                className="w-full pl-12 pr-4 py-4 rounded-2xl bg-[#1e293b] border border-slate-700/60 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#e91e63] shadow-lg text-sm font-medium transition-all"
+                placeholder="Rechercher un événement, thème ou localité..."
+                className="w-full pl-12 pr-4 py-3.5 rounded-full bg-white text-[#2A2521] placeholder-[#756B60] focus:outline-none focus:ring-2 focus:ring-[#9E2F55] border border-[#E2D7C7] shadow-sm text-sm font-medium transition-all"
               />
             </div>
           </div>
         </div>
       </section>
 
-      {/* GRILLE D'ÉVÉNEMENTS AVEC ANIMATIONS */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      {/* Grille d'événements */}
+      <section className="max-w-[1180px] mx-auto px-4 sm:px-7 py-12">
         {loading ? (
-          <div className="bg-white rounded-3xl p-12 text-center border border-slate-100 shadow-sm">
-            <p className="text-slate-500 font-medium text-base animate-pulse">Chargement des événements...</p>
+          <div className="bg-white rounded-[4px] p-12 text-center border border-[#E2D7C7] shadow-sm">
+            <p className="text-[#756B60] font-medium text-base animate-pulse">
+              Chargement des événements...
+            </p>
           </div>
         ) : filteredPosts.length === 0 ? (
-          <div className="bg-white rounded-3xl p-12 text-center border border-slate-100 shadow-sm space-y-2">
-            <p className="text-slate-900 font-bold text-xl">Aucun événement trouvé</p>
-            <p className="text-slate-500 text-sm">Essayez de modifier votre recherche.</p>
+          <div className="bg-white rounded-[4px] p-12 text-center border border-[#E2D7C7] shadow-sm space-y-2">
+            <p className="font-serif text-[#2A2521] font-semibold text-xl">Aucun événement trouvé</p>
+            <p className="text-[#756B60] text-sm">Essayez de modifier votre recherche.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredPosts.map((post) => (
-              <div
-                key={post.id || post.slug}
-                className="bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-2xl hover:border-pink-500/20 transition-all duration-300 overflow-hidden flex flex-col justify-between group transform hover:-translate-y-2"
-              >
-                <div>
-                  <div className="relative h-56 w-full bg-slate-100 overflow-hidden">
-                    {post.image && (
-                      <img 
-                        src={post.image} 
-                        alt={post.title} 
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out" 
-                      />
-                    )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-60" />
-                    {post.publishedDate && (
-                      <div className="absolute top-4 right-4 bg-[#e91e63] text-white text-xs font-extrabold px-3.5 py-1.5 rounded-full shadow-[0_4px_12px_rgba(233,30,99,0.4)] backdrop-blur-md">
-                        {post.publishedDate}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredPosts.map((post, index) => {
+              const isEven = index % 2 === 0;
+
+              return (
+                <div
+                  key={post.id || post.slug}
+                  className={`bg-white rounded-[4px] border border-[#E2D7C7] shadow-sm hover:shadow-md transition-all overflow-hidden flex flex-col justify-between group ${
+                    isEven ? 'border-t-4 border-t-[#9E2F55]' : 'border-t-4 border-t-[#1F5A56]'
+                  }`}
+                >
+                  <div>
+                    <div className="relative h-52 w-full bg-[#F5EFE6] overflow-hidden">
+                      {post.image && (
+                        <img
+                          src={post.image}
+                          alt={post.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                      )}
+                      <span
+                        className={`absolute top-3.5 right-3.5 text-white text-[11px] font-bold px-3 py-1 rounded-full shadow-sm ${
+                          isEven ? 'bg-[#9E2F55]' : 'bg-[#1F5A56]'
+                        }`}
+                      >
+                        {post.category || 'Campagne'}
+                      </span>
+                    </div>
+
+                    <div className="p-5 sm:p-6 space-y-3">
+                      <div className="flex flex-wrap items-center gap-3 text-xs text-[#756B60]">
+                        {post.publishedDate && (
+                          <span className="flex items-center gap-1 font-medium">
+                            <Calendar className="w-3.5 h-3.5 text-[#1F5A56]" />
+                            {post.publishedDate}
+                          </span>
+                        )}
+                        {post.location && (
+                          <span className="flex items-center gap-1 font-medium">
+                            <MapPin className="w-3.5 h-3.5 text-[#9E2F55]" />
+                            {post.location}
+                          </span>
+                        )}
                       </div>
-                    )}
+
+                      <h2 className="font-serif text-lg font-semibold text-[#2A2521] leading-snug group-hover:text-[#123E3B] transition-colors">
+                        {post.title}
+                      </h2>
+                      <p className="text-[#514A43] text-[13.5px] leading-relaxed line-clamp-3">
+                        {post.excerpt}
+                      </p>
+                    </div>
                   </div>
 
-                  <div className="p-6 space-y-3">
-                    <p className="text-[#0e5c54] font-bold text-xs uppercase tracking-wider flex items-center gap-1">
-                      📍 {post.location || post.category || 'TOGO'}
-                    </p>
-
-                    <h3 className="text-lg font-black text-slate-900 uppercase leading-snug group-hover:text-[#e91e63] transition-colors">
-                      {post.title}
-                    </h3>
-
-                    <p className="text-xs sm:text-sm text-slate-600 leading-relaxed line-clamp-3">
-                      {post.excerpt}
-                    </p>
+                  <div className="p-5 sm:p-6 pt-0">
+                    <Link
+                      href={`/blog/${post.slug || post.id}`}
+                      className={`w-full inline-flex items-center justify-center gap-2 text-white font-semibold py-3 px-4 rounded-[4px] transition-all text-xs tracking-wide shadow-sm hover:opacity-95 ${
+                        isEven ? 'bg-[#9E2F55] hover:bg-[#7A2143]' : 'bg-[#1F5A56] hover:bg-[#123E3B]'
+                      }`}
+                    >
+                      <span>Participer / Détails</span>
+                      <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                    </Link>
                   </div>
                 </div>
-
-                <div className="p-6 pt-0">
-                  <Link
-                    href={`/blog/${post.slug || post.id}`}
-                    className="w-full inline-flex items-center justify-center gap-2 bg-[#0e5c54] hover:bg-[#0b4741] text-white font-bold py-3.5 px-4 rounded-2xl transition-all text-xs uppercase tracking-wider shadow-lg shadow-[#e91e63]/25 hover:shadow-xl hover:shadow-[#e91e63]/40 hover:scale-[1.02] active:scale-[0.98]"
-                  >
-                    <span>Voir les détails</span>
-                    <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-                  </Link>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </section>

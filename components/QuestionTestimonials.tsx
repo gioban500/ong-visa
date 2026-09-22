@@ -1,85 +1,121 @@
 'use client';
 
-import { useState } from 'react';
-
 interface Testimonial {
-  id: number;
-  category: string;
+  badge: string;
   question: string;
-  who: string;
   answer: string;
+  meta: string;
 }
 
 const testimonials: Testimonial[] = [
   {
-    id: 1,
-    category: "Sein",
-    question: "Est-ce que la mammographie fait mal ?",
-    who: "Akosiwa, 42 ans",
-    answer: "Une pression ferme durant quelques secondes par cliché. L'examen est rapide et le malaise éventuel s'arrête dès que la compression relâche."
+    badge: 'Sein · Mammographie',
+    question: 'Est-ce que la mammographie fait mal ?',
+    answer:
+      "« Une brève pression pendant quelques secondes par cliché, pas une douleur tenace. La manipulatrice au CHU m'a expliqué chaque geste avec douceur. J'ai eu bien plus d'appréhension avant d'entrer que pendant l'examen lui-même. »",
+    meta: 'Akosiwa, 42 ans · Lomé (Dépistage de contrôle)',
   },
   {
-    id: 2,
-    category: "Gynécologie",
-    question: "Un frottis anormal signifie-t-il automatiquement un cancer ?",
-    who: "Koffi, 35 ans (accompagnateur)",
-    answer: "Non, absolument pas. Un frottis anormal détecte le plus souvent de simples lésions bénignes ou des virus (HPV) que l'on peut surveiller ou traiter avant qu'ils ne posent problème."
+    badge: "Col de l'Utérus & HPV",
+    question: 'Un frottis anormal signifie-t-il un cancer ?',
+    answer:
+      "« Absolument pas ! Mon frottis a révélé des lésions légères dues au virus HPV. La sage-femme m'a rassurée : un traitement local simple a suffi pour tout éliminer avant même que cela ne devienne dangereux. »",
+    meta: 'Delphine, 34 ans · Atakpamé (Dépistage col)',
   },
   {
-    id: 3,
-    category: "Colorectal / Digestif",
-    question: "Comment se passe le test de dépistage à domicile ?",
-    who: "Edem, 54 ans",
-    answer: "C'est un kit très simple et propre à utiliser chez soi pour prélever un échantillon de selles. On l'envoie ensuite par la poste ou au centre partenaire."
-  }
+    badge: 'Ovaires & Pelvis',
+    question: 'Quels ont été les signes pour mes ovaires ?',
+    answer:
+      "« Des ballonnements et une sensation de pesanteur pelvienne qui persistaient depuis plus d'un mois. En consultant rapidement, l'échographie a permis une prise en charge précoce et très rassurante avec l'ONG VISA. »",
+    meta: 'Ama, 51 ans · Kpalimé (Vigilance & écoute du corps)',
+  },
 ];
 
 export default function QuestionTestimonials() {
-  const [openIds, setOpenIds] = useState<number[]>([]);
-
-  const toggleTestimonial = (id: number) => {
-    setOpenIds((prev) =>
-      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
-    );
-  };
-
   return (
-    <section id="temoignages" className="py-16 border-b border-[#E1D6C6]">
-      <div className="max-w-[1120px] mx-auto px-7">
-        <div className="max-w-2xl mb-9">
-          <h2 className="font-serif text-3xl text-[#2A2521] mb-2">Des réponses concrètes à vos questions</h2>
-          <p className="text-[#6B6155]">Retours d'expérience et explications pratiques selon la thématique.</p>
+    <section
+      id="temoignages"
+      style={{ padding: '64px 0', background: 'var(--bg-subtle)', borderBottom: '1px solid var(--line)' }}
+    >
+      <div className="wrap">
+        {/* En-tête */}
+        <div style={{ maxWidth: 720, marginBottom: 36 }}>
+          <span className="section-kicker">Voix de sororité &amp; de résilience</span>
+          <h2 className="section-title">Des réponses concrètes à vos questions</h2>
+          <p className="section-intro">
+            Retours d'expérience et explications pratiques selon les situations vécues sur le terrain.
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {testimonials.map((item) => {
-            const isOpen = openIds.includes(item.id);
-            return (
-              <div key={item.id} className="bg-white border border-[#E1D6C6] rounded p-5">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-[#1F5A56] bg-[#E4EEEC] px-2 py-0.5 rounded">
-                  {item.category}
-                </span>
-                <button
-                  onClick={() => toggleTestimonial(item.id)}
-                  className="text-left w-full font-serif text-base text-[#2A2521] my-2 focus:outline-none"
+        {/* Grille 3 colonnes */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0,1fr))', gap: 20 }} className="testim-grid">
+          {testimonials.map((t, i) => (
+            <div
+              key={i}
+              style={{
+                background: 'var(--surface)',
+                border: '1px solid var(--line)',
+                borderRadius: 'var(--radius-sm)',
+                padding: 24,
+                boxShadow: 'var(--shadow-sm)',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+              }}
+            >
+              <div>
+                <span
+                  style={{
+                    fontSize: 10.5,
+                    fontWeight: 700,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.6px',
+                    color: 'var(--teal)',
+                    background: 'var(--teal-light)',
+                    padding: '2px 8px',
+                    borderRadius: 'var(--radius-full)',
+                    display: 'inline-block',
+                    marginBottom: 12,
+                  }}
                 >
-                  <span className="block font-medium">{item.question}</span>
-                  <span className="block text-xs font-sans font-semibold text-[#7A2143] mt-1.5">
-                    {isOpen ? '– masquer' : '+ lire la réponse'}
-                  </span>
-                </button>
-                <div className="text-xs text-[#6B6155] mb-2">{item.who}</div>
-
-                {isOpen && (
-                  <div className="pt-3 border-t border-[#E1D6C6] text-sm text-[#6B6155] leading-relaxed">
-                    {item.answer}
-                  </div>
-                )}
+                  {t.badge}
+                </span>
+                <h3
+                  style={{
+                    fontSize: 17,
+                    fontWeight: 600,
+                    color: 'var(--ink)',
+                    marginBottom: 12,
+                    lineHeight: 1.35,
+                    fontFamily: 'var(--font-fraunces), Fraunces, serif',
+                  }}
+                >
+                  {t.question}
+                </h3>
+                <div
+                  style={{
+                    fontSize: 14,
+                    color: 'var(--ink-secondary)',
+                    lineHeight: 1.6,
+                    marginBottom: 16,
+                    borderTop: '1px solid var(--line)',
+                    paddingTop: 12,
+                  }}
+                >
+                  {t.answer}
+                </div>
               </div>
-            );
-          })}
+              <div style={{ fontSize: 12, color: 'var(--ink-soft)', fontWeight: 500 }}>{t.meta}</div>
+            </div>
+          ))}
         </div>
       </div>
+
+      <style>{`
+        @media (max-width: 1023px) {
+          .testim-grid { grid-template-columns: 1fr !important; }
+        }
+      `}</style>
     </section>
   );
 }
