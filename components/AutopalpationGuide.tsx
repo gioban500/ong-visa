@@ -86,7 +86,7 @@ export default function AutopalpationGuide() {
             }}
           >
             <img
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuD8hays5fZvtA3iZpxvS45fgVNAQbFRRstR-6c1Gj7WRWfQ9SuoVf96xdw-llnqcuekBKsDaBaDtq5RJsiAfafIa4U50I9Sv-RFlgfriBQdb1jVzCmkuWPXIKnMMRvc5t3smWI4FKbmtSkacfYDnFP9QJDEGSpKI_0JZ4e2iR893G5gfT_KL4BVe0J_g-nlre5W-SPfydjA9nYcTmFYVswduQMwt3QydggpZYWBSLji4dJ6iR03ibYUX"
+              src="/images/autopalpation-guide.png"
               alt="Octobre rose : Guide officiel de l'auto-palpation des seins pas à pas"
               style={{
                 width: '100%',
