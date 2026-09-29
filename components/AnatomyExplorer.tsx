@@ -168,7 +168,7 @@ export default function AnatomyExplorer() {
             >
               <div style={{ position: 'relative', maxWidth: 260, width: '100%', margin: '0 auto' }}>
                 <img
-                  src="https://lh3.googleusercontent.com/aida/AEtjO1VvyqSMwzbYdFFxcj19F_kUnXMi2eF14PeChiPQBgSGKnEWtadgtah8b6QYKmVhupYpHOPhTUaYvKkz4LpkvjsgXYY0IPg9y53pShZfKah-0U9HnUdUbissE74_ezVx_OjcoxhYqK42o5mn2hVil_-82acr__iDVL-P6QGFfMsEgG3VBnBLFhaPaoz6hMorEa1syzNKfEpT6u_BoTb1vZZcv3aMbYQzFYHLKjf9MuFR"
+                  src="/images/anathomie.png"
                   alt="Schéma anatomique silhouette féminine éducative"
                   style={{ width: '100%', height: 'auto', display: 'block', borderRadius: 4 }}
                 />

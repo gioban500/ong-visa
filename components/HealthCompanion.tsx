@@ -133,7 +133,7 @@ export default function HealthCompanion() {
                   id="calcPatho"
                   value={patho}
                   onChange={(e) => setPatho(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-[4px] bg-white/12 border border-white/25 text-white text-sm focus:outline-none focus:border-[#ffb1c3]"
+                  className="w-full px-3.5 py-2.5 rounded-[4px] bg-white border border-[#D3E2DF] text-[#2A2521] text-sm focus:outline-none focus:border-[#ffb1c3] focus:ring-2 focus:ring-[#ffb1c3]/40"
                 >
                   <option value="sein" className="text-black">Cancer du Sein</option>
                   <option value="col" className="text-black">Col de l'Utérus & HPV</option>
@@ -154,7 +154,7 @@ export default function HealthCompanion() {
                   value={age}
                   onChange={(e) => setAge(e.target.value)}
                   placeholder="Ex. 42"
-                  className="w-full px-3.5 py-2.5 rounded-[4px] bg-white/12 border border-white/25 text-white text-sm placeholder-white/50 focus:outline-none focus:border-[#ffb1c3]"
+                  className="w-full px-3.5 py-2.5 rounded-[4px] bg-white border border-[#D3E2DF] text-[#2A2521] text-sm placeholder:text-[#756B60] focus:outline-none focus:border-[#ffb1c3] focus:ring-2 focus:ring-[#ffb1c3]/40"
                 />
               </div>
 
@@ -223,7 +223,7 @@ export default function HealthCompanion() {
                 }
               }}
               placeholder="Ex. Tension mammaire remarquée le 14, sans rougeur..."
-              className="flex-1 min-w-[260px] px-3.5 py-2.5 rounded-[4px] bg-white/10 border border-white/20 text-white placeholder-white/50 text-sm focus:outline-none focus:border-[#ffb1c3]"
+              className="flex-1 min-w-[260px] px-3.5 py-2.5 rounded-[4px] bg-white border border-[#D3E2DF] text-[#2A2521] placeholder:text-[#756B60] text-sm focus:outline-none focus:border-[#ffb1c3] focus:ring-2 focus:ring-[#ffb1c3]/40"
             />
             <button
               onClick={handleAddJournal}
