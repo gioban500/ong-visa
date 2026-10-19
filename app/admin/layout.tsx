@@ -1,13 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { 
   LayoutDashboard, 
-  FileText, 
-  MessageSquare, 
   LogOut,
   Search,
   Bell,
@@ -15,7 +13,8 @@ import {
   Menu,
   X,
   Mail,
-  Calendar
+  MapPin,
+  BookOpen
 } from 'lucide-react';
 
 export default function AdminLayout({
@@ -25,14 +24,48 @@ export default function AdminLayout({
 }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const pathname = usePathname();
+  const router = useRouter();
+  const [adminEmail, setAdminEmail] = useState('');
+  const isLoginPage = pathname === '/admin/login';
+
+  useEffect(() => {
+    if (isLoginPage) return;
+
+    let current = true;
+    fetch('/api/admin/session', { cache: 'no-store' })
+      .then(async (response) => {
+        if (!response.ok) {
+          router.replace('/admin/login');
+          return;
+        }
+        const data = await response.json();
+        if (current) setAdminEmail(data.admin.email);
+      })
+      .catch((error: unknown) => {
+        console.error('Admin session check failed:', error);
+        router.replace('/admin/login');
+      });
+
+    return () => {
+      current = false;
+    };
+  }, [isLoginPage, pathname, router]);
+
+  if (isLoginPage) return <>{children}</>;
+
+  if (!adminEmail) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="animate-spin w-10 h-10 border-4 border-purple-600 border-t-transparent rounded-full" />
+      </div>
+    );
+  }
 
   const navItems = [
     { href: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
-    { href: '/admin/testimonials', icon: MessageSquare, label: 'Témoignages' },
-    { href: '/admin/cancers', icon: FileText, label: 'Types de Cancer' },
-    { href: '/admin/blog', icon: FileText, label: 'Blog' },
-    { href: '/admin/subscribers', icon: Mail, label: 'Liste de diffusion' },
-    { href: '/admin/eventRegistration', icon: Calendar, label: 'Inscriptions Événements' },
+    { href: '/admin/messages', icon: Mail, label: 'Messages reçus' },
+    { href: '/admin/centers', icon: MapPin, label: 'Centres de dépistage' },
+    { href: '/admin/site-content', icon: BookOpen, label: 'Sections du site' },
   ];
 
   return (
@@ -85,12 +118,13 @@ export default function AdminLayout({
         {/* Logout */}
         <div className="p-4 border-t border-purple-700">
           <button 
-            onClick={() => {
-              // Supprimer les données de session
-              localStorage.removeItem('admin_logged_in');
-              localStorage.removeItem('admin_username');
-              // Rediriger vers la page de login
-              window.location.href = '/admin/login';
+            onClick={async () => {
+              try {
+                await fetch('/api/admin/logout', { method: 'POST' });
+              } finally {
+                setAdminEmail('');
+              }
+              router.replace('/admin/login');
             }}
             className="flex items-center gap-3 px-5 py-3 rounded-xl text-purple-100 hover:bg-purple-700/50 transition-all w-full"
           >
@@ -139,7 +173,7 @@ export default function AdminLayout({
                   A
                 </div>
                 <div className="hidden md:block">
-                  <p className="text-sm font-semibold text-gray-900">Admin</p>
+                  <p className="text-sm font-semibold text-gray-900">{adminEmail}</p>
                   <p className="text-xs text-gray-500">Administrateur</p>
                 </div>
                 <ChevronDown className="w-4 h-4 text-gray-400 hidden md:block" />

@@ -2,6 +2,7 @@
 
 import React, { use, useEffect, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { ArrowLeft, CheckCircle2 } from 'lucide-react';
 import { Cancer } from '@/types/cancer';
@@ -138,10 +139,13 @@ export default function CancerDetailPage({ params }: PageProps) {
           {cancer.image && (
             <div className="lg:col-span-5">
               <div className="w-full h-64 sm:h-72 rounded-[4px] overflow-hidden shadow-md border border-white/20 bg-[#F5EFE6]">
-                <img
+                <Image
                   src={cancer.image}
                   alt={cancer.name}
-                  className="w-full h-full object-cover"
+                  fill
+                  unoptimized
+                  sizes="(max-width: 1024px) 100vw, 42vw"
+                  className="object-cover"
                 />
               </div>
             </div>
@@ -166,7 +170,7 @@ export default function CancerDetailPage({ params }: PageProps) {
           {symptomsList.length > 0 && (
             <div className="bg-white p-6 sm:p-8 rounded-[4px] border border-[#E2D7C7] border-t-4 border-t-[#9E2F55] shadow-sm">
               <h2 className="font-serif text-2xl font-semibold text-[#9E2F55] mb-4 flex items-center gap-2">
-                Signes d'appel & Symptômes à observer
+                Signes d&apos;appel & Symptômes à observer
               </h2>
               <ul className="space-y-3">
                 {symptomsList.map((symptom, idx) => (

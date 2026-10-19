@@ -1,39 +1,33 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 
 interface AccItem {
-  num: number;
+  id: string;
   title: string;
   body: string;
+  position: number;
 }
 
-const items: AccItem[] = [
-  {
-    num: 1,
-    title: "L'attente des résultats et le délai",
-    body: "Recevoir un compte-rendu après plusieurs jours est habituel et ne présage en rien de la gravité. Ce délai correspond au temps technique de lecture, à la double analyse des clichés par deux radiologues ou à la fixation des prélèvements en laboratoire.",
-  },
-  {
-    num: 2,
-    title: 'Un examen complémentaire est demandé',
-    body: "C'est la situation la plus fréquente. Une échographie mammaire ciblée, un frottis de contrôle ou une colposcopie ne signifient pas la présence d'un cancer : ils permettent simplement de préciser la nature exacte de l'image vue au dépistage initial.",
-  },
-  {
-    num: 3,
-    title: 'Consultation et échange avec le soignant',
-    body: "Le médecin traitant ou la sage-femme vous expose les conclusions. Notez toutes vos interrogations sur un carnet avant le rendez-vous. N'hésitez pas à venir accompagnée d'une personne de confiance pour vous sentir soutenue.",
-  },
-  {
-    num: 4,
-    title: "Si un traitement s'impose : un parcours collégial",
-    body: "Si une anomalie avérée nécessite des soins, la décision n'est jamais prise par un soignant isolé, mais lors d'une Réunion de Concertation Pluridisciplinaire (RCP). Les traitements actuels offrent d'excellents taux de guérison et l'ONG VISA vous accompagne à chaque étape.",
-  },
-];
-
 export default function AbnormalResultSteps() {
-  const [openIndex, setOpenIndex] = useState(0);
+  const [items, setItems] = useState<AccItem[]>([]);
+  const [openId, setOpenId] = useState('');
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    fetch('/api/site-content', { cache: 'no-store' })
+      .then(async (response) => {
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Impossible de charger cette section.');
+        const resultSteps = Array.isArray(data.resultSteps) ? data.resultSteps as AccItem[] : [];
+        setItems(resultSteps);
+        setOpenId(resultSteps[0]?.id || '');
+      })
+      .catch((loadError: unknown) => {
+        setError(loadError instanceof Error ? loadError.message : 'Impossible de charger cette section.');
+      });
+  }, []);
 
   return (
     <section id="apres-resultat" style={{ padding: '64px 0', borderBottom: '1px solid var(--line)' }}>
@@ -56,7 +50,7 @@ export default function AbnormalResultSteps() {
               Résultat atypique ou anormal : et après ?
             </h2>
             <p style={{ fontSize: 15, color: 'var(--ink-secondary)', lineHeight: 1.6, marginBottom: 20 }}>
-              Comprendre le déroulement des examens de contrôle permet d'aborder la suite plus sereinement, quel que soit le
+              Comprendre le déroulement des examens de contrôle permet d&apos;aborder la suite plus sereinement, quel que soit le
               type de dépistage effectué.
             </p>
 
@@ -83,23 +77,24 @@ export default function AbnormalResultSteps() {
                 8 anomalies sur 10 sont bénignes
               </strong>
               <p style={{ fontSize: 13, margin: 0, color: 'var(--ink-secondary)', lineHeight: 1.5 }}>
-                La grande majorité des images nécessitant un contrôle complémentaire s'avèrent être de simples kystes
+                La grande majorité des images nécessitant un contrôle complémentaire s&apos;avèrent être de simples kystes
                 liquides ou des modifications bénignes sans danger.
               </p>
             </div>
 
             <Link href="#ecoute" className="btn btn-clay" style={{ width: '100%', justifyContent: 'center' }}>
-              Échanger avec notre équipe d'écoute
+              Échanger avec notre équipe d&apos;écoute
             </Link>
           </div>
 
           {/* Accordéon */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            {items.map((item, i) => {
-              const isOpen = openIndex === i;
+            {error && <p role="alert" className="rounded-lg bg-red-50 p-4 text-red-700">{error}</p>}
+            {!error && items.map((item, i) => {
+              const isOpen = openId === item.id;
               return (
                 <div
-                  key={item.num}
+                  key={item.id}
                   className="acc-item"
                   data-open={String(isOpen)}
                   style={{
@@ -111,7 +106,7 @@ export default function AbnormalResultSteps() {
                   }}
                 >
                   <button
-                    onClick={() => setOpenIndex(isOpen ? -1 : i)}
+                    onClick={() => setOpenId(isOpen ? '' : item.id)}
                     style={{
                       width: '100%',
                       padding: '18px 20px',
@@ -144,7 +139,7 @@ export default function AbnormalResultSteps() {
                           transition: 'var(--transition)',
                         }}
                       >
-                        {item.num}
+                        {i + 1}
                       </span>
                       <span
                         style={{

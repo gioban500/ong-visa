@@ -1,37 +1,31 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+
 interface Testimonial {
+  id: string;
   badge: string;
   question: string;
   answer: string;
   meta: string;
 }
 
-const testimonials: Testimonial[] = [
-  {
-    badge: 'Sein · Mammographie',
-    question: 'Est-ce que la mammographie fait mal ?',
-    answer:
-      "« Une brève pression pendant quelques secondes par cliché, pas une douleur tenace. La manipulatrice au CHU m'a expliqué chaque geste avec douceur. J'ai eu bien plus d'appréhension avant d'entrer que pendant l'examen lui-même. »",
-    meta: 'Akosiwa, 42 ans · Lomé (Dépistage de contrôle)',
-  },
-  {
-    badge: "Col de l'Utérus & HPV",
-    question: 'Un frottis anormal signifie-t-il un cancer ?',
-    answer:
-      "« Absolument pas ! Mon frottis a révélé des lésions légères dues au virus HPV. La sage-femme m'a rassurée : un traitement local simple a suffi pour tout éliminer avant même que cela ne devienne dangereux. »",
-    meta: 'Delphine, 34 ans · Atakpamé (Dépistage col)',
-  },
-  {
-    badge: 'Ovaires & Pelvis',
-    question: 'Quels ont été les signes pour mes ovaires ?',
-    answer:
-      "« Des ballonnements et une sensation de pesanteur pelvienne qui persistaient depuis plus d'un mois. En consultant rapidement, l'échographie a permis une prise en charge précoce et très rassurante avec l'ONG VISA. »",
-    meta: 'Ama, 51 ans · Kpalimé (Vigilance & écoute du corps)',
-  },
-];
-
 export default function QuestionTestimonials() {
+  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    fetch('/api/site-content', { cache: 'no-store' })
+      .then(async (response) => {
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Impossible de charger les réponses.');
+        setTestimonials(Array.isArray(data.questionResponses) ? data.questionResponses : []);
+      })
+      .catch((loadError: unknown) => {
+        setError(loadError instanceof Error ? loadError.message : 'Impossible de charger les réponses.');
+      });
+  }, []);
+
   return (
     <section
       id="temoignages"
@@ -43,15 +37,15 @@ export default function QuestionTestimonials() {
           <span className="section-kicker">Voix de sororité &amp; de résilience</span>
           <h2 className="section-title">Des réponses concrètes à vos questions</h2>
           <p className="section-intro">
-            Retours d'expérience et explications pratiques selon les situations vécues sur le terrain.
+            Retours d&apos;expérience et explications pratiques selon les situations vécues sur le terrain.
           </p>
         </div>
 
         {/* Grille 3 colonnes */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0,1fr))', gap: 20 }} className="testim-grid">
-          {testimonials.map((t, i) => (
+          {testimonials.map((t) => (
             <div
-              key={i}
+              key={t.id}
               style={{
                 background: 'var(--surface)',
                 border: '1px solid var(--line)',
@@ -108,6 +102,10 @@ export default function QuestionTestimonials() {
               <div style={{ fontSize: 12, color: 'var(--ink-soft)', fontWeight: 500 }}>{t.meta}</div>
             </div>
           ))}
+          {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
+          {!error && testimonials.length === 0 && (
+            <p role="status" className="text-sm">Aucune réponse n’est actuellement publiée.</p>
+          )}
         </div>
       </div>
 

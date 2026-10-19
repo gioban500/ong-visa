@@ -8,6 +8,16 @@ interface JournalEntry {
   text: string;
 }
 
+const isJournalEntry = (value: unknown): value is JournalEntry =>
+  typeof value === 'object'
+  && value !== null
+  && 'id' in value
+  && typeof value.id === 'string'
+  && 'date' in value
+  && typeof value.date === 'string'
+  && 'text' in value
+  && typeof value.text === 'string';
+
 export default function HealthCompanion() {
   const [patho, setPatho] = useState('sein');
   const [age, setAge] = useState('');
@@ -31,12 +41,21 @@ export default function HealthCompanion() {
 
   // Charger depuis localStorage côté client si disponible
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem('visa_journal_entries');
-      if (saved) {
-        setJournalEntries(JSON.parse(saved));
+    const timeoutId = window.setTimeout(() => {
+      try {
+        const saved = localStorage.getItem('visa_journal_entries');
+        if (!saved) return;
+
+        const entries: unknown = JSON.parse(saved);
+        if (Array.isArray(entries) && entries.every(isJournalEntry)) {
+          setJournalEntries(entries);
+        }
+      } catch (error) {
+        console.error('Erreur lors du chargement du carnet de suivi:', error);
       }
-    } catch {}
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
   }, []);
 
   const handleCompute = () => {
@@ -136,7 +155,7 @@ export default function HealthCompanion() {
                   className="w-full px-3.5 py-2.5 rounded-[4px] bg-white border border-[#D3E2DF] text-[#2A2521] text-sm focus:outline-none focus:border-[#ffb1c3] focus:ring-2 focus:ring-[#ffb1c3]/40"
                 >
                   <option value="sein" className="text-black">Cancer du Sein</option>
-                  <option value="col" className="text-black">Col de l'Utérus & HPV</option>
+                  <option value="col" className="text-black">Col de l&apos;Utérus & HPV</option>
                   <option value="ovaires" className="text-black">Ovaires & Pelvis</option>
                   <option value="tous" className="text-black">Tous les dépistages féminins</option>
                 </select>
@@ -166,7 +185,7 @@ export default function HealthCompanion() {
                   className="mt-0.5 accent-[#9E2F55] w-4 h-4 rounded cursor-pointer"
                 />
                 <span>
-                  Antécédents familiaux directs (mère, sœur, tante atteinte d'un cancer féminin).
+                  Antécédents familiaux directs (mère, sœur, tante atteinte d&apos;un cancer féminin).
                 </span>
               </label>
 
@@ -197,7 +216,7 @@ export default function HealthCompanion() {
               </ul>
             </div>
             <p className="text-[12px] text-[#A3C4BE] pt-4 border-t border-white/10 mt-4 m-0">
-              * Données fournies à titre indicatif selon les directives de l'OMS et de la Société de Gynécologie du Togo.
+              * Données fournies à titre indicatif selon les directives de l&apos;OMS et de la Société de Gynécologie du Togo.
             </p>
           </div>
         </div>

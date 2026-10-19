@@ -1,4 +1,5 @@
 import { MetadataRoute } from 'next';
+import { getBlogPosts, getCancers } from '@/lib/db';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://ong-visa.vercel.app';
@@ -25,36 +26,36 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
-  // 2. Ajout dynamique des articles du blog si l'API répond
+  // 2. Ajout dynamique des articles du blog
   try {
-    const blogRes = await fetch(`${baseUrl}/api/blog`, { next: { revalidate: 3600 } });
-    if (blogRes.ok) {
-      const posts = await blogRes.json();
-      const blogUrls: MetadataRoute.Sitemap = posts.map((post: { slug: string; updatedAt?: string }) => ({
+    const posts = await getBlogPosts();
+    const blogUrls: MetadataRoute.Sitemap = posts.flatMap(post => {
+      if (typeof post.slug !== 'string' || !post.slug) return [];
+      return [{
         url: `${baseUrl}/blog/${post.slug}`,
-        lastModified: post.updatedAt ? new Date(post.updatedAt) : new Date(),
+        lastModified: typeof post.updatedAt === 'string' ? new Date(post.updatedAt) : new Date(),
         changeFrequency: 'weekly',
         priority: 0.7,
-      }));
-      routes.push(...blogUrls);
-    }
+      }];
+    });
+    routes.push(...blogUrls);
   } catch (error) {
     console.error('Erreur génération sitemap blog:', error);
   }
 
-  // 3. Ajout dynamique des fiches cancers si l'API répond
+  // 3. Ajout dynamique des fiches cancers
   try {
-    const cancerRes = await fetch(`${baseUrl}/api/cancers`, { next: { revalidate: 3600 } });
-    if (cancerRes.ok) {
-      const cancers = await cancerRes.json();
-      const cancerUrls: MetadataRoute.Sitemap = cancers.map((cancer: { id: string | number; updatedAt?: string }) => ({
+    const cancers = await getCancers();
+    const cancerUrls: MetadataRoute.Sitemap = cancers.flatMap(cancer => {
+      if (typeof cancer.id !== 'string' && typeof cancer.id !== 'number') return [];
+      return [{
         url: `${baseUrl}/cancers/${cancer.id}`,
-        lastModified: cancer.updatedAt ? new Date(cancer.updatedAt) : new Date(),
+        lastModified: typeof cancer.updatedAt === 'string' ? new Date(cancer.updatedAt) : new Date(),
         changeFrequency: 'monthly',
         priority: 0.7,
-      }));
-      routes.push(...cancerUrls);
-    }
+      }];
+    });
+    routes.push(...cancerUrls);
   } catch (error) {
     console.error('Erreur génération sitemap cancers:', error);
   }

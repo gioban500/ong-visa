@@ -1,99 +1,53 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
-
-type ZoneKey = 'sein' | 'col' | 'ovaires' | 'endometre' | 'ganglions';
+import Image from 'next/image';
 
 interface ZoneDetail {
+  id: string;
+  slug: string;
   category: string;
   title: string;
   summary: string;
   signs: string;
   exams: string;
   togo: string;
-  btnText: string;
-  btnLink: string;
+  buttonText: string;
+  buttonLink: string;
+  position: number;
 }
 
-const zoneData: Record<ZoneKey, ZoneDetail> = {
-  sein: {
-    category: 'Gynécologie / Sénologie',
-    title: 'Sein & Aisselles',
-    summary:
-      "Recherche de nodules fermes indolores, écoulements anormaux par le mamelon ou rétractions de la peau. L'observation régulière du corps permet de repérer un changement récent et d'intervenir précocement.",
-    signs:
-      "Apparition d'une petite boule dure non douloureuse, épaississement localisé de la peau (aspect peau d'orange), rétraction du mamelon ou ganglion inhabituel sous l'aisselle.",
-    exams:
-      'Autopalpation mensuelle dès 25 ans. Examen clinique annuel par sage-femme ou médecin. Mammographie numérique tous les 2 ans entre 45-50 ans et 74 ans (plus précoce si antécédents familiaux).',
-    togo:
-      "Séances de sensibilisation communautaire, apprentissage guidé de l'autopalpation dans les marchés et dispensaires, et orientation vers les plateaux d'imagerie de Lomé et des chefs-lieux de région.",
-    btnText: "Apprendre les gestes d'autopalpation",
-    btnLink: '#autopalpation',
-  },
-  col: {
-    category: 'Gynécologie',
-    title: "Col de l'utérus & HPV",
-    summary:
-      "Le cancer du col de l'utérus se développe très lentement à partir de lésions précancéreuses causées par le papillomavirus (HPV). Un dépistage précoce permet d'agir des années avant le stade de cancer.",
-    signs:
-      'Saignements inhabituels après les rapports sexuels ou entre les cycles menstruels, pertes vaginales anormales persistantes, douleurs pelviennes inexpliquées.',
-    exams:
-      'Test HPV ou frottis cervico-utérin tous les 3 à 5 ans de 25 à 65 ans. Méthode visuelle VIA-VILI (acide acétique / lugol) très accessible en centre de santé.',
-    togo:
-      "Campagnes de dépistage mobile VIA-VILI organisées par l'ONG VISA dans les dispensaires de quartier et sensibilisation active à la vaccination des jeunes filles.",
-    btnText: 'Voir les étapes après un dépistage',
-    btnLink: '#apres-resultat',
-  },
-  ovaires: {
-    category: 'Gynécologie',
-    title: 'Ovaires & Pelvis',
-    summary:
-      "Les ovaires ne bénéficient pas d'un dépistage systématique par imagerie de masse. La meilleure approche repose sur l'attention bienveillante portée aux signaux chroniques inhabituels.",
-    signs:
-      'Ballonnements abdominaux permanents, sensation de pesanteur pelvienne, satiété rapide inexpliquée aux repas, besoins urinaires pressants et répétés durant plus de 3 semaines.',
-    exams:
-      'Échographie pelvienne endovaginale prescrite par le soignant et dosage sanguin du marqueur CA-125 en cas de suspicion clinique.',
-    togo:
-      'Formation des agents de santé communautaire pour orienter rapidement les femmes présentant ces symptômes persistants vers les services gynécologiques de référence.',
-    btnText: 'Écrire confidentiellement à une soignante',
-    btnLink: '#ecoute',
-  },
-  endometre: {
-    category: 'Utérus',
-    title: 'Endomètre & Corps utérin',
-    summary:
-      "L'endomètre est la muqueuse qui tapisse l'intérieur de l'utérus. La vigilance concerne particulièrement toute reprise de saignements après la ménopause.",
-    signs:
-      'Tout saignement gynécologique apparaissant après la ménopause (même minime ou rosé), ou des règles anormalement abondantes et irrégulières en période de périménopause.',
-    exams:
-      "Échographie pelvienne par voie vaginale pour mesurer l'épaisseur de l'endomètre, complétée si nécessaire par une biopsie ambulatoire douce en consultation.",
-    togo:
-      'Prise en charge et orientation au CHU Sylvanus Olympio et dans les polycliniques partenaires pour une exploration rapide.',
-    btnText: 'Consulter un centre partenaire',
-    btnLink: '#centres',
-  },
-  ganglions: {
-    category: 'Prévention globale',
-    title: 'Signes généraux & Ganglions',
-    summary:
-      "La surveillance de l'état général et du système lymphatique (aisselles, clavicules, aines) participe à un suivi gynécologique rigoureux et complet.",
-    signs:
-      "Perte de poids involontaire, fatigue marquée inexpliquée, sueurs nocturnes abondantes ou présence d'un ganglion gonflé et ferme durant plus de 3 à 4 semaines.",
-    exams:
-      'Palpation médicale complète des aires ganglionnaires lors du bilan annuel, complétée au besoin par un bilan sanguin général et une échographie ganglionnaire.',
-    togo:
-      "Consultations de médecine générale et d'orientation intégrées aux caravanes de santé de l'ONG VISA.",
-    btnText: "Prendre contact avec l'équipe",
-    btnLink: '#ecoute',
-  },
-};
-
-const zoneKeys: ZoneKey[] = ['sein', 'col', 'ovaires', 'endometre', 'ganglions'];
+const mapPinPositions = [
+  { top: '36%', left: '44%' },
+  { top: '84%', left: '50%' },
+  { top: '72%', left: '34%' },
+  { top: '76%', left: '66%' },
+  { top: '61%', left: '50%' },
+];
 
 export default function AnatomyExplorer() {
-  const [activeKey, setActiveKey] = useState<ZoneKey>('sein');
-  const zone = zoneData[activeKey];
+  const [topics, setTopics] = useState<ZoneDetail[]>([]);
+  const [activeId, setActiveId] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    fetch('/api/site-content', { cache: 'no-store' })
+      .then(async (response) => {
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Impossible de charger les sujets.');
+        const loadedTopics = Array.isArray(data.topics) ? data.topics as ZoneDetail[] : [];
+        setTopics(loadedTopics);
+        setActiveId(loadedTopics[0]?.id || '');
+      })
+      .catch((loadError: unknown) => {
+        setError(loadError instanceof Error ? loadError.message : 'Impossible de charger les sujets.');
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
+  const zone = topics.find((topic) => topic.id === activeId);
 
   return (
     <section id="cancers-surveilles" style={{ padding: '64px 0', borderBottom: '1px solid var(--line)' }}>
@@ -103,7 +57,7 @@ export default function AnatomyExplorer() {
           <span className="section-kicker">Pédagogie médicale simplifiée</span>
           <h2 className="section-title">Mieux comprendre chaque zone sans jargon</h2>
           <p className="section-intro">
-            Cliquez sur un organe ou une catégorie pour afficher les signes d'alerte spécifiques et les examens de contrôle
+            Cliquez sur un organe ou une catégorie pour afficher les signes d&apos;alerte spécifiques et les examens de contrôle
             associés.
           </p>
         </div>
@@ -115,12 +69,12 @@ export default function AnatomyExplorer() {
           {/* Colonne gauche */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {zoneKeys.map((key) => {
-                const isActive = activeKey === key;
+              {topics.map((topic) => {
+                const isActive = activeId === topic.id;
                 return (
                   <button
-                    key={key}
-                    onClick={() => setActiveKey(key)}
+                    key={topic.id}
+                    onClick={() => setActiveId(topic.id)}
                     style={{
                       textAlign: 'left',
                       background: isActive ? 'var(--teal-light)' : 'var(--surface)',
@@ -145,9 +99,9 @@ export default function AnatomyExplorer() {
                         color: isActive ? 'var(--teal-deep)' : 'var(--ink-soft)',
                       }}
                     >
-                      {zoneData[key].category}
+                      {topic.category}
                     </span>
-                    <span style={{ fontSize: 14.5, fontWeight: 600, color: 'var(--ink)' }}>{zoneData[key].title}</span>
+                    <span style={{ fontSize: 14.5, fontWeight: 600, color: 'var(--ink)' }}>{topic.title}</span>
                   </button>
                 );
               })}
@@ -167,28 +121,25 @@ export default function AnatomyExplorer() {
               }}
             >
               <div style={{ position: 'relative', maxWidth: 260, width: '100%', margin: '0 auto' }}>
-                <img
+                <Image
                   src="/images/anathomie.png"
                   alt="Schéma anatomique silhouette féminine éducative"
+                  width={800}
+                  height={1100}
                   style={{ width: '100%', height: 'auto', display: 'block', borderRadius: 4 }}
                 />
-                {([
-                  { key: 'sein', top: '36%', left: '44%', num: 1 },
-                  { key: 'col', top: '84%', left: '50%', num: 2 },
-                  { key: 'ovaires', top: '72%', left: '34%', num: 3 },
-                  { key: 'endometre', top: '76%', left: '66%', num: 4 },
-                ] as { key: ZoneKey; top: string; left: string; num: number }[]).map((pin) => (
+                {topics.slice(0, mapPinPositions.length).map((topic, index) => (
                   <button
-                    key={pin.key}
-                    onClick={() => setActiveKey(pin.key)}
+                    key={topic.id}
+                    onClick={() => setActiveId(topic.id)}
                     style={{
                       position: 'absolute',
-                      top: pin.top,
-                      left: pin.left,
+                      top: mapPinPositions[index].top,
+                      left: mapPinPositions[index].left,
                       width: 24,
                       height: 24,
                       borderRadius: '50%',
-                      background: activeKey === pin.key ? 'var(--clay)' : 'var(--teal)',
+                      background: activeId === topic.id ? 'var(--clay)' : 'var(--teal)',
                       color: '#fff',
                       fontSize: 11,
                       fontWeight: 700,
@@ -200,12 +151,12 @@ export default function AnatomyExplorer() {
                       alignItems: 'center',
                       justifyContent: 'center',
                       fontFamily: 'inherit',
-                      transform: activeKey === pin.key
+                      transform: activeId === topic.id
                         ? 'translate(-50%, -50%) scale(1.2)'
                         : 'translate(-50%, -50%)',
                     }}
                   >
-                    {pin.num}
+                    {index + 1}
                   </button>
                 ))}
               </div>
@@ -214,7 +165,10 @@ export default function AnatomyExplorer() {
           </div>
 
           {/* Colonne droite — panneau médical */}
-          <div
+          {loading && <p role="status">Chargement des sujets…</p>}
+          {error && <p role="alert" className="text-red-700">{error}</p>}
+          {!loading && !error && !zone && <p>Aucun sujet n’est actuellement publié.</p>}
+          {zone && <div
             style={{
               background: 'var(--surface)',
               border: '1px solid var(--line)',
@@ -260,7 +214,7 @@ export default function AnatomyExplorer() {
                     <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
                     <polyline points="22 4 12 14.01 9 11.01" />
                   </svg>
-                  Signes d'appel à observer (sans panique)
+                  Signes d&apos;appel à observer (sans panique)
                 </h4>
                 <p style={{ fontSize: 13.5, margin: 0, color: 'var(--ink-secondary)', lineHeight: 1.5 }}>{zone.signs}</p>
               </div>
@@ -296,17 +250,17 @@ export default function AnatomyExplorer() {
                     <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
                     <circle cx="12" cy="10" r="3" />
                   </svg>
-                  Au Togo avec l'ONG VISA
+                  Au Togo avec l&apos;ONG VISA
                 </h4>
                 <p style={{ fontSize: 13.5, margin: 0, color: 'var(--ink-secondary)', lineHeight: 1.5 }}>{zone.togo}</p>
               </div>
             </div>
 
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-              <Link href={zone.btnLink} className="btn btn-clay">{zone.btnText}</Link>
-              <Link href="#centres" className="btn btn-outline">Voir les centres d'imagerie</Link>
+              <Link href={zone.buttonLink} className="btn btn-clay">{zone.buttonText}</Link>
+              <Link href="#centres" className="btn btn-outline">Voir les centres d&apos;imagerie</Link>
             </div>
-          </div>
+          </div>}
         </div>
       </div>
 

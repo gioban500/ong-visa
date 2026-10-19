@@ -13,7 +13,7 @@ export default function StickyActionBar() {
       <div className="max-w-[1180px] mx-auto px-4 sm:px-7 flex flex-wrap items-center justify-between gap-3">
         <div className="text-[13.5px] font-semibold text-[#2A2521] flex items-center gap-2">
           <span className="text-[#9E2F55] text-sm animate-pulse">●</span>
-          <span>Besoin d'aide maintenant ou d'une question sur un dépistage ?</span>
+          <span>Besoin d&apos;aide maintenant ou d&apos;une question sur un dépistage ?</span>
         </div>
 
         <div className="flex items-center gap-2 sm:gap-2.5">

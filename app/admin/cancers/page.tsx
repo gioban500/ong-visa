@@ -1,7 +1,16 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
+import Image from 'next/image';
 import { Plus, Edit, Trash2, Upload, Loader2, RefreshCw, X } from 'lucide-react';
+
+type CancerRecord = Record<string, unknown> & {
+  id: string;
+  name: string;
+  slug?: string;
+  color?: string;
+  image?: string;
+};
 
 interface CancerData {
   id?: string;
@@ -17,6 +26,20 @@ interface CancerData {
   treatment: string;
 }
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null;
+
+const isCancerRecord = (value: unknown): value is CancerRecord =>
+  isRecord(value) && typeof value.id === 'string' && typeof value.name === 'string';
+
+const toFormText = (value: unknown): string => {
+  if (typeof value === 'string') return value;
+  if (typeof value === 'number' || typeof value === 'boolean') return String(value);
+  if (Array.isArray(value)) return value.map(toFormText).filter(Boolean).join('\n');
+  if (isRecord(value)) return JSON.stringify(value, null, 2) ?? '';
+  return '';
+};
+
 const initialFormState: CancerData = {
   name: '',
   slug: '',
@@ -31,9 +54,9 @@ const initialFormState: CancerData = {
 };
 
 // Extraction de la description courte (inclut shortdescription tout en minuscules)
-const extractShortDesc = (item: any): string => {
+const extractShortDesc = (item: CancerRecord | null | undefined): string => {
   if (!item) return '';
-  return (
+  return toFormText(
     item.shortdescription ?? 
     item.shortDescription ?? 
     item.short_description ?? 
@@ -44,9 +67,9 @@ const extractShortDesc = (item: any): string => {
   );
 };
 
-const extractRiskFactors = (item: any): string => {
+const extractRiskFactors = (item: CancerRecord | null | undefined): string => {
   if (!item) return '';
-  return (
+  return toFormText(
     item.riskFactors ??
     item.risk_factors ??
     item.facteursRisque ??
@@ -57,11 +80,11 @@ const extractRiskFactors = (item: any): string => {
 };
 
 export default function AdminCancers() {
-  const [cancersList, setCancersList] = useState<any[]>([]);
+  const [cancersList, setCancersList] = useState<CancerRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingCancer, setEditingCancer] = useState<any | null>(null);
+  const [editingCancer, setEditingCancer] = useState<CancerRecord | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const [formData, setFormData] = useState<CancerData>(initialFormState);
@@ -69,10 +92,11 @@ export default function AdminCancers() {
   const loadCancers = useCallback(async () => {
     try {
       const res = await fetch('/api/cancers');
-      const data = await res.json();
-      setCancersList(Array.isArray(data) ? data : []);
-    } catch (err) {
-      console.error('Erreur lors du chargement des cancers:', err);
+      if (!res.ok) throw new Error('Échec du chargement des cancers.');
+      const data: unknown = await res.json();
+      setCancersList(Array.isArray(data) ? data.filter(isCancerRecord) : []);
+    } catch (error) {
+      console.error('Erreur lors du chargement des cancers:', error);
     } finally {
       setLoading(false);
     }
@@ -145,7 +169,7 @@ export default function AdminCancers() {
       await loadCancers();
       setIsModalOpen(false);
       resetForm();
-    } catch (err) {
+    } catch {
       alert('Erreur lors de la sauvegarde.');
     } finally {
       setSaving(false);
@@ -158,23 +182,23 @@ export default function AdminCancers() {
     if (fileRef.current) fileRef.current.value = '';
   };
 
-  const handleEdit = async (cancer: any) => {
+  const handleEdit = async (cancer: CancerRecord) => {
     setEditingCancer(cancer);
 
     const initialShortDesc = extractShortDesc(cancer);
     const initialRisk = extractRiskFactors(cancer);
 
     setFormData({
-      name: cancer.name || '',
+      name: toFormText(cancer.name),
       slug: cancer.slug || '',
       color: cancer.color || '#EC4899',
       image: cancer.image || '',
       shortDescription: initialShortDesc,
-      description: cancer.description || '',
-      symptoms: cancer.symptoms || '',
+      description: toFormText(cancer.description),
+      symptoms: toFormText(cancer.symptoms),
       riskFactors: initialRisk,
-      prevention: cancer.prevention || '',
-      treatment: cancer.treatment || '',
+      prevention: toFormText(cancer.prevention),
+      treatment: toFormText(cancer.treatment),
     });
 
     setIsModalOpen(true);
@@ -183,22 +207,24 @@ export default function AdminCancers() {
       try {
         const res = await fetch(`/api/cancers/${cancer.id}`);
         if (res.ok) {
-          const fullData = await res.json();
+          const data: unknown = await res.json();
+          if (!isCancerRecord(data)) throw new Error('Réponse invalide lors du chargement de la fiche.');
+          const fullData = data;
           const fetchedShortDesc = extractShortDesc(fullData) || initialShortDesc;
           const fetchedRisk = extractRiskFactors(fullData) || initialRisk;
 
           setFormData(f => ({
             ...f,
-            name: fullData.name || f.name,
-            slug: fullData.slug || f.slug,
-            color: fullData.color || f.color,
-            image: fullData.image || f.image,
+            name: toFormText(fullData.name) || f.name,
+            slug: toFormText(fullData.slug) || f.slug,
+            color: toFormText(fullData.color) || f.color,
+            image: toFormText(fullData.image) || f.image,
             shortDescription: fetchedShortDesc,
-            description: fullData.description || f.description,
-            symptoms: fullData.symptoms || f.symptoms,
+            description: toFormText(fullData.description) || f.description,
+            symptoms: toFormText(fullData.symptoms) || f.symptoms,
             riskFactors: fetchedRisk,
-            prevention: fullData.prevention || f.prevention,
-            treatment: fullData.treatment || f.treatment,
+            prevention: toFormText(fullData.prevention) || f.prevention,
+            treatment: toFormText(fullData.treatment) || f.treatment,
           }));
         }
       } catch (err) {
@@ -254,12 +280,15 @@ export default function AdminCancers() {
                 <tr key={cancer.id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-4">
-                      <div className="w-14 h-12 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+                      <div className="relative w-14 h-12 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
                         {cancer.image ? (
-                          <img 
+                          <Image
                             src={cancer.image} 
                             alt={cancer.name} 
-                            className="w-full h-full object-cover" 
+                            fill
+                            unoptimized
+                            sizes="56px"
+                            className="object-cover"
                             onError={(e) => {
                               const target = e.target as HTMLImageElement;
                               target.style.display = 'none';
@@ -370,7 +399,7 @@ export default function AdminCancers() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1">Photo d'illustration</label>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Photo d&apos;illustration</label>
                     <div
                       className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-pink-500 cursor-pointer transition-colors"
                       onClick={() => fileRef.current?.click()}
@@ -378,7 +407,7 @@ export default function AdminCancers() {
                       <input ref={fileRef} type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
                       {formData.image ? (
                         <div className="flex items-center justify-center gap-3">
-                          <img src={formData.image} alt="Aperçu" className="h-12 w-12 rounded-md object-cover" />
+                          <Image src={formData.image} alt="Aperçu" width={48} height={48} unoptimized className="h-12 w-12 rounded-md object-cover" />
                           <span className="text-xs text-pink-600 font-medium">Changer la photo</span>
                         </div>
                       ) : (

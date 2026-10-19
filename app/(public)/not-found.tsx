@@ -16,7 +16,7 @@ export default function NotFound() {
           Page Non Trouvée
         </h2>
         <p className="text-xl text-gray-700 mb-8">
-          Désolé, la page que vous recherchez n'existe pas ou a été déplacée.
+          Désolé, la page que vous recherchez n&apos;existe pas ou a été déplacée.
         </p>
 
         <div className="flex flex-wrap justify-center gap-4">
@@ -25,7 +25,7 @@ export default function NotFound() {
             className="inline-flex items-center gap-2 bg-gradient-to-r from-pink-600 to-purple-600 text-white px-8 py-4 rounded-full font-semibold hover:shadow-xl transition-all hover:scale-105"
           >
             <Home className="w-5 h-5" />
-            Retour à l'Accueil
+            Retour à l&apos;Accueil
           </Link>
           <Link
             href="/cancers"
@@ -56,7 +56,7 @@ export default function NotFound() {
             className="p-4 bg-white rounded-xl hover:shadow-lg transition-shadow"
           >
             <h3 className="font-bold text-gray-900 mb-1">Contact</h3>
-            <p className="text-sm text-gray-600">Besoin d'aide ?</p>
+            <p className="text-sm text-gray-600">Besoin d&apos;aide ?</p>
           </Link>
         </div>
       </div>

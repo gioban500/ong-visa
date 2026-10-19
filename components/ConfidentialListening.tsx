@@ -19,28 +19,25 @@ export default function ConfidentialListening() {
     setErrorMessage('');
 
     try {
-      // Préparer un email synthétique ou réel pour l'API subscribers
       const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.contact.trim());
-      const email = isEmail
-        ? formData.contact.trim()
-        : `wa_${formData.contact.replace(/\D/g, '') || 'contact'}@ong-visa.local`;
-
       const payload = {
-        firstName: formData.name.trim() || 'Anonyme',
-        email,
-        phone: !isEmail ? formData.contact.trim() : '',
+        name: formData.name.trim(),
+        email: isEmail ? formData.contact.trim() : '',
+        phone: isEmail ? '' : formData.contact.trim(),
         subject: formData.subject,
         message: formData.message,
+        source: 'listening',
       };
 
-      const res = await fetch('/api/subscribers', {
+      const res = await fetch('/api/contact-messages', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
 
       if (!res.ok) {
-        throw new Error("Impossible d'enregistrer votre message.");
+        const data = await res.json();
+        throw new Error(data.error || "Impossible d'enregistrer votre message.");
       }
 
       setSubmitted(true);
@@ -50,9 +47,8 @@ export default function ConfidentialListening() {
         contact: '',
         message: '',
       });
-    } catch {
-      // Même en cas de coupure réseau, rassurer l'utilisateur
-      setSubmitted(true);
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "Impossible d'enregistrer votre message.");
     } finally {
       setSubmitting(false);
     }
@@ -63,9 +59,9 @@ export default function ConfidentialListening() {
       <div className="wrap">
         <div style={{ maxWidth: 720, marginBottom: 36 }}>
           <span className="section-kicker">Présence &amp; Bienveillance</span>
-          <h2 className="section-title">Un espace d'écoute et de soutien</h2>
+          <h2 className="section-title">Un espace d&apos;écoute et de soutien</h2>
           <p className="section-intro">
-            Quelle que soit votre inquiétude ou votre situation, l'ONG VISA met à votre disposition des interlocuteurs attentifs et formés.
+            Quelle que soit votre inquiétude ou votre situation, l&apos;ONG VISA met à votre disposition des interlocuteurs attentifs et formés.
           </p>
         </div>
 
@@ -77,7 +73,7 @@ export default function ConfidentialListening() {
                 Anonyme & Gratuit
               </span>
               <h3 className="font-serif text-2xl font-semibold text-white mb-3">
-                Ligne d'écoute ONG VISA
+                Ligne d&apos;écoute ONG VISA
               </h3>
               <p className="text-[#D3E2DF] text-[14.5px] leading-relaxed mb-6 max-w-[42ch]">
                 Anonyme, gratuite et ouverte à toute personne concernée ou à ses proches. Nos écoutantes et sages-femmes vous répondent en français, éwé ou mina.
@@ -105,7 +101,7 @@ export default function ConfidentialListening() {
               Poser une question en privé
             </h3>
             <p className="text-sm text-[#514A43] mb-5">
-              Envoyez-nous un message en toute confidentialité. Aucune donnée n'est publiée.
+              Envoyez-nous un message en toute confidentialité. Aucune donnée n&apos;est publiée.
             </p>
 
             {submitted ? (

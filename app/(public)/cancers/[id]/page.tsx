@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import CancerClient from './CancerClient';
+import { getCancerById } from '@/lib/db';
 
 export const revalidate = false;
 
@@ -12,22 +13,23 @@ type Props = {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
   const cleanId = decodeURIComponent(id);
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://ong-visa.vercel.app';
 
   try {
-    const res = await fetch(`${siteUrl}/api/cancers/${cleanId}`, {
-      next: { revalidate: false }, // Désactive la revalidation pour cette requête
-    });
-
-    if (res.ok) {
-      const cancer = await res.json();
+    const cancer = await getCancerById(cleanId);
+    if (cancer) {
+      const name = typeof cancer.name === 'string' ? cancer.name : 'Cancer';
+      const description = typeof cancer.shortDescription === 'string'
+        ? cancer.shortDescription
+        : typeof cancer.description === 'string'
+          ? cancer.description
+          : undefined;
       return {
-        title: `Comprendre le ${cancer.name || 'Cancer'}`,
-        description: cancer.shortDescription || cancer.description,
+        title: `Comprendre le ${name}`,
+        description,
       };
     }
-  } catch (e) {
-    console.error(e);
+  } catch (error) {
+    console.error('Erreur lors de la génération des métadonnées des cancers:', error);
   }
 
   return {

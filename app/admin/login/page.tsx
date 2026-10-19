@@ -2,12 +2,13 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { Lock, User } from 'lucide-react';
 
 export default function AdminLogin() {
   const router = useRouter();
   const [formData, setFormData] = useState({
-    username: '',
+    email: '',
     password: '',
   });
   const [error, setError] = useState('');
@@ -18,17 +19,21 @@ export default function AdminLogin() {
     setError('');
     setLoading(true);
 
-    // Simulation de connexion (à remplacer par une vraie authentification)
-    // Credentials par défaut pour la démo
-    if (formData.username === 'admin' && formData.password === 'visadam2024') {
-      // Stocker le token de session
-      localStorage.setItem('admin_logged_in', 'true');
-      localStorage.setItem('admin_username', formData.username);
-      
-      // Rediriger vers le dashboard
-      router.push('/admin');
-    } else {
-      setError('Identifiants incorrects');
+    try {
+      const response = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        setError(data.error || 'Connexion impossible.');
+        return;
+      }
+      router.replace('/admin');
+    } catch {
+      setError('Le serveur est indisponible. Réessayez plus tard.');
+    } finally {
       setLoading(false);
     }
   };
@@ -53,18 +58,19 @@ export default function AdminLogin() {
             {/* Username */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Nom d'utilisateur
+                Adresse e-mail
               </label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
-                  type="text"
-                  value={formData.username}
+                  type="email"
+                  value={formData.email}
                   onChange={(e) =>
-                    setFormData({ ...formData, username: e.target.value })
+                    setFormData({ ...formData, email: e.target.value })
                   }
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
-                  placeholder="admin"
+                  placeholder="admin@ong-visa.org"
+                  autoComplete="username"
                   required
                 />
               </div>
@@ -85,6 +91,7 @@ export default function AdminLogin() {
                   }
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
                   placeholder="••••••••"
+                  autoComplete="current-password"
                   required
                 />
               </div>
@@ -113,12 +120,12 @@ export default function AdminLogin() {
 
         {/* Back to Site */}
         <div className="text-center mt-6">
-          <a
+          <Link
             href="/"
             className="text-gray-600 hover:text-pink-600 text-sm font-medium"
           >
             ← Retour au site
-          </a>
+          </Link>
         </div>
       </div>
     </div>

@@ -1,70 +1,18 @@
-# Guide des Images
+# Images du site
 
-## Structure des dossiers
+Les images statiques publiques sont stockées dans ce dossier et référencées par leur chemin web à partir de la racine.
 
-```
-public/
-  ├── logo.png                    # Logo principal VISA DAM (à remplacer)
-  └── images/
-      └── cancers/                # Images des différents types de cancer
-```
+## Images utilisées actuellement
 
-## Comment ajouter des images pour les cancers
+- `anathomie.png` : schéma illustratif de la section des sujets de santé.
+- `autopalpation-guide.png` : infographie affichée dans le guide d’auto-observation.
 
-### 1. Nommer vos fichiers d'image
+Exemple dans un composant :
 
-Les noms de fichiers doivent correspondre aux chemins définis dans `data/cancers.json`.
-
-Exemple dans `cancers.json` :
-```json
-{
-  "id": "breast-cancer",
-  "image": "/images/cancers/breast-cancer.jpg",
-  ...
-}
+```tsx
+<img src="/images/anathomie.png" alt="Schéma anatomique éducatif" />
 ```
 
-Le fichier doit être placé à : `public/images/cancers/breast-cancer.jpg`
+Le logo partagé par l’en-tête public et l’administration est `public/logo.png`, en dehors de ce dossier.
 
-### 2. Formats supportés
-
-- JPG/JPEG (recommandé pour les photos)
-- PNG (recommandé pour les illustrations)
-- WebP (meilleure compression)
-
-### 3. Taille recommandée
-
-- **Largeur minimale** : 800px
-- **Ratio** : 16:9 (par exemple 1280x720 ou 1920x1080)
-- **Poids** : Optimisez vos images pour qu'elles ne dépassent pas 500KB
-
-### 4. Liste des images à ajouter
-
-Basé sur `data/cancers.json`, vous devez ajouter ces images :
-
-- ✅ `/images/cancers/breast-cancer.jpg` - Cancer du Sein
-- ✅ `/images/cancers/lung-cancer.jpg` - Cancer du Poumon
-- ✅ `/images/cancers/cervical-cancer.jpg` - Cancer du Col de l'Utérus
-- ✅ `/images/cancers/prostate-cancer.jpg` - Cancer de la Prostate
-- ✅ `/images/cancers/colorectal-cancer.jpg` - Cancer Colorectal
-- ✅ `/images/cancers/liver-cancer.jpg` - Cancer du Foie
-- ... (selon vos données)
-
-### 5. Si une image n'est pas disponible
-
-Si vous n'avez pas d'image pour un cancer, le site affichera automatiquement :
-- Un fond coloré avec le nom du cancer
-- Pas d'erreur ne sera générée
-
-### 6. Optimisation des images
-
-Avant d'ajouter vos images, utilisez un outil d'optimisation comme :
-- TinyPNG (https://tinypng.com/)
-- Squoosh (https://squoosh.app/)
-- ImageOptim (pour Mac)
-
-## Logo principal
-
-Le logo VISA DAM doit être placé à : `public/logo.png`
-
-**Attention** : Le fichier actuel est vide (0 bytes). Remplacez-le par votre vrai logo !
+N’ajoutez pas ici de données médicales nominatives ni d’images de patientes sans autorisation explicite. Pour remplacer une illustration, conservez son chemin ou mettez à jour les références dans les composants qui l’utilisent.

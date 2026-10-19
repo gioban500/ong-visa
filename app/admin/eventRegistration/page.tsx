@@ -1,15 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { 
-  Calendar, 
-  User, 
-  Phone, 
-  Trash2, 
-  Search, 
-  RefreshCw, 
-  Tag, 
-  CheckCircle2,
+import {
+  Calendar,
+  Phone,
+  Trash2,
+  Search,
+  RefreshCw,
+  Tag,
   Clock
 } from 'lucide-react';
 
@@ -44,7 +42,8 @@ export default function EventRegistrationsAdminPage() {
   };
 
   useEffect(() => {
-    fetchRegistrations();
+    const timeoutId = window.setTimeout(() => { void fetchRegistrations(); }, 0);
+    return () => window.clearTimeout(timeoutId);
   }, []);
 
   const handleDelete = async (id: string) => {
@@ -85,7 +84,7 @@ export default function EventRegistrationsAdminPage() {
             Inscriptions aux Événements
           </h1>
           <p className="text-sm text-gray-500 mt-1">
-            Gérez les participants inscrits via les formulaires d'événements.
+            Gérez les participants inscrits via les formulaires d&apos;événements.
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -136,7 +135,7 @@ export default function EventRegistrationsAdminPage() {
                   <th className="py-4 px-6">Participant</th>
                   <th className="py-4 px-6">Téléphone</th>
                   <th className="py-4 px-6">Événement concerné</th>
-                  <th className="py-4 px-6">Date d'inscription</th>
+                  <th className="py-4 px-6">Date d&apos;inscription</th>
                   <th className="py-4 px-6 text-right">Actions</th>
                 </tr>
               </thead>

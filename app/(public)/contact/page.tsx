@@ -36,7 +36,7 @@ export default function ContactPage() {
     }
 
     try {
-      const response = await fetch('/api/subscribers', {
+      const response = await fetch('/api/contact-messages', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -58,7 +58,7 @@ export default function ContactPage() {
 
       setStatus({
         type: 'success',
-        message: 'Vos informations ont été enregistrées avec succès !',
+        message: 'Votre demande a été transmise à l’équipe de l’ONG VISA.',
       });
 
       setFormData({
@@ -69,10 +69,10 @@ export default function ContactPage() {
         subject: '',
         message: '',
       });
-    } catch (err: any) {
+    } catch (err: unknown) {
       setStatus({
         type: 'error',
-        message: err.message || 'Impossible de traiter votre demande.',
+        message: err instanceof Error ? err.message : 'Impossible de traiter votre demande.',
       });
     } finally {
       setIsSubmitting(false);
@@ -114,7 +114,7 @@ export default function ContactPage() {
                 Nos Coordonnées
               </h2>
               <p className="text-xs text-slate-500 mt-1">
-                N'hésitez pas à nous contacter ou à nous rendre visite à Lomé.
+                N&apos;hésitez pas à nous contacter ou à nous rendre visite à Lomé.
               </p>
             </div>
 
@@ -163,7 +163,7 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <h3 className="font-semibold text-slate-900 text-xs uppercase tracking-wide">
-                    Horaires d'ouverture
+                    Horaires d&apos;ouverture
                   </h3>
                   <p className="text-slate-600 mt-0.5 text-xs">
                     Lundi - Vendredi : 8h00 - 17h00<br />
@@ -178,10 +178,10 @@ export default function ContactPage() {
           <div className="lg:col-span-7 bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-200/80 space-y-6">
             <div>
               <h2 className="text-lg font-bold text-slate-900">
-                S'inscrire / Nous contacter
+                Nous contacter
               </h2>
               <p className="text-xs text-slate-500 mt-1">
-                Remplissez vos informations pour rejoindre notre communauté et recevoir nos actualités.
+                Envoyez une demande à l&apos;équipe de l&apos;ONG VISA.
               </p>
             </div>
 
@@ -278,6 +278,7 @@ export default function ContactPage() {
                   type="text"
                   id="subject"
                   name="subject"
+                  required
                   value={formData.subject}
                   onChange={handleChange}
                   className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e] bg-white"
@@ -293,6 +294,7 @@ export default function ContactPage() {
                   id="message"
                   name="message"
                   rows={4}
+                  required
                   value={formData.message}
                   onChange={handleChange}
                   className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e] bg-white resize-none"

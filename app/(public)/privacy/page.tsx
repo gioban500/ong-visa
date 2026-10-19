@@ -23,7 +23,7 @@ export default function PrivacyPage() {
                 1. Introduction
               </h2>
               <p className="text-gray-700 leading-relaxed mb-6">
-                L'ONG VISA (ci-après "nous", "notre") s'engage à protéger la
+                L&apos;ONG VISA (ci-après &quot;nous&quot;, &quot;notre&quot;) s&apos;engage à protéger la
                 confidentialité des données personnelles de ses utilisateurs. Cette
                 politique de confidentialité explique comment nous collectons,
                 utilisons et protégeons vos informations conformément au Règlement
@@ -37,7 +37,7 @@ export default function PrivacyPage() {
                 Nous collectons les types de données suivants :
               </p>
               <ul className="list-disc pl-6 text-gray-700 space-y-2 mb-6">
-                <li>Informations d'identification (nom, prénom, email)</li>
+                <li>Informations d&apos;identification (nom, prénom, email)</li>
                 <li>Données de navigation (cookies, adresse IP)</li>
                 <li>Informations volontairement fournies via les formulaires</li>
                 <li>Données de donation (montant, fréquence)</li>
@@ -65,7 +65,7 @@ export default function PrivacyPage() {
               </p>
               <ul className="list-disc pl-6 text-gray-700 space-y-2 mb-6">
                 <li>Votre consentement explicite</li>
-                <li>L'exécution d'un contrat (dons, services)</li>
+                <li>L&apos;exécution d&apos;un contrat (dons, services)</li>
                 <li>Nos obligations légales</li>
                 <li>Notre intérêt légitime (amélioration des services)</li>
               </ul>
@@ -87,12 +87,12 @@ export default function PrivacyPage() {
                 Conformément au RGPD, vous disposez des droits suivants :
               </p>
               <ul className="list-disc pl-6 text-gray-700 space-y-2 mb-6">
-                <li>Droit d'accès à vos données personnelles</li>
+                <li>Droit d&apos;accès à vos données personnelles</li>
                 <li>Droit de rectification des données inexactes</li>
-                <li>Droit à l'effacement ("droit à l'oubli")</li>
+                <li>Droit à l&apos;effacement (&quot;droit à l&apos;oubli&quot;)</li>
                 <li>Droit à la limitation du traitement</li>
                 <li>Droit à la portabilité de vos données</li>
-                <li>Droit d'opposition au traitement</li>
+                <li>Droit d&apos;opposition au traitement</li>
                 <li>Droit de retirer votre consentement à tout moment</li>
               </ul>
 
@@ -104,7 +104,7 @@ export default function PrivacyPage() {
                 appropriées pour protéger vos données contre tout accès non
                 autorisé, altération, divulgation ou destruction. Cela inclut le
                 chiffrement SSL/TLS, des sauvegardes régulières et des contrôles
-                d'accès stricts.
+                d&apos;accès stricts.
               </p>
 
               <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4 mt-8">

@@ -17,7 +17,7 @@ export default function Footer() {
               ONG VISA · Cancers Féminins
             </h4>
             <p className="text-[13px] text-[#B5CCC8] leading-relaxed mb-4">
-              Organisation humanitaire dédiée à la sensibilisation, au dépistage précoce et à l'accompagnement solidaire face aux cancers gynécologiques au Togo et en Afrique de l'Ouest.
+              Organisation humanitaire dédiée à la sensibilisation, au dépistage précoce et à l&apos;accompagnement solidaire face aux cancers gynécologiques au Togo et en Afrique de l&apos;Ouest.
             </p>
             <div className="flex gap-2.5">
               <a
@@ -64,7 +64,7 @@ export default function Footer() {
             <ul className="space-y-2 text-[13.5px]">
               <li>
                 <Link href="/#hero" className="hover:text-white transition-colors">
-                  Accueil & Vue d'ensemble
+                  Accueil & Vue d&apos;ensemble
                 </Link>
               </li>
               <li>
@@ -74,7 +74,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link href="/#autopalpation" className="hover:text-white transition-colors">
-                  Guide d'autopalpation
+                  Guide d&apos;autopalpation
                 </Link>
               </li>
               <li>
@@ -102,7 +102,7 @@ export default function Footer() {
             </h4>
             <ul className="space-y-2 text-[13.5px]">
               <li>
-                Ligne d'écoute : <strong className="text-white font-semibold">+228 90 00 00 00</strong>
+                Ligne d&apos;écoute : <strong className="text-white font-semibold">+228 90 00 00 00</strong>
               </li>
               <li>
                 WhatsApp : <span className="text-white">+228 90 62 96 93</span>

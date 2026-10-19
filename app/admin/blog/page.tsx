@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import Image from 'next/image';
 import { Plus, Edit, Trash2, Upload, Loader2, RefreshCw } from 'lucide-react';
 
 interface BlogPost {
@@ -55,7 +56,10 @@ export default function AdminBlog() {
     }
   };
 
-  useEffect(() => { fetchPosts(); }, []);
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => { void fetchPosts(); }, 0);
+    return () => window.clearTimeout(timeoutId);
+  }, []);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -78,7 +82,7 @@ export default function AdminBlog() {
       if (formData.publishedDate) {
         try {
           publishedDate = new Date(formData.publishedDate).toISOString();
-        } catch (e) {
+        } catch {
           publishedDate = formData.publishedDate;
         }
       }
@@ -109,8 +113,8 @@ export default function AdminBlog() {
       await fetchPosts();
       setIsModalOpen(false);
       resetForm();
-    } catch (err: any) {
-      alert(err.message || 'Erreur lors de la sauvegarde.');
+    } catch (error: unknown) {
+      alert(error instanceof Error ? error.message : 'Erreur lors de la sauvegarde.');
     } finally {
       setSaving(false);
     }
@@ -151,8 +155,8 @@ export default function AdminBlog() {
         throw new Error(errData.error || 'Échec de la suppression');
       }
       await fetchPosts();
-    } catch (err: any) {
-      alert(err.message);
+    } catch (error: unknown) {
+      alert(error instanceof Error ? error.message : 'Échec de la suppression.');
     }
   };
 
@@ -171,8 +175,8 @@ export default function AdminBlog() {
         throw new Error(errData.error || 'Échec de la mise à jour du statut');
       }
       await fetchPosts();
-    } catch (err: any) {
-      alert(err.message);
+    } catch (error: unknown) {
+      alert(error instanceof Error ? error.message : 'Échec de la mise à jour du statut.');
     }
   };
 
@@ -237,9 +241,9 @@ export default function AdminBlog() {
                 <tr key={post.id || post.slug} className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-14 h-12 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+                      <div className="relative w-14 h-12 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
                         {post.image ? (
-                          <img src={post.image} alt={post.title} className="w-full h-full object-cover" />
+                          <Image src={post.image} alt={post.title} fill unoptimized sizes="56px" className="object-cover" />
                         ) : (
                           <div className="w-full h-full bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center">
                             <span className="text-purple-400 text-lg">📝</span>
@@ -335,7 +339,7 @@ export default function AdminBlog() {
                   <input ref={fileRef} type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
                   {formData.image ? (
                     <div>
-                      <img src={formData.image} alt="Aperçu" className="max-h-48 mx-auto rounded-lg mb-2 object-cover" />
+                      <Image src={formData.image} alt="Aperçu" width={800} height={480} unoptimized className="max-h-48 w-auto max-w-full mx-auto rounded-lg mb-2 object-cover" />
                       <p className="text-sm text-purple-600 font-medium">Cliquer pour changer</p>
                     </div>
                   ) : (
@@ -350,7 +354,7 @@ export default function AdminBlog() {
               {formData.category === 'Événements' ? (
                 <>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Date de l'événement *</label>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Date de l&apos;événement *</label>
                     <input
                       type="date"
                       value={formData.publishedDate}

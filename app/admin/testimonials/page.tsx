@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import Image from 'next/image';
 import { Plus, Edit, Trash2, Upload, Loader2, RefreshCw, Star } from 'lucide-react';
 
 interface Testimonial {
@@ -75,7 +76,7 @@ export default function AdminTestimonials() {
       await fetchTestimonials();
       setIsModalOpen(false);
       resetForm();
-    } catch (err) {
+    } catch {
       alert('Erreur lors de la sauvegarde.');
     } finally {
       setSaving(false);
@@ -171,7 +172,7 @@ export default function AdminTestimonials() {
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
                       {t.image ? (
-                        <img src={t.image} alt={t.name} className="w-10 h-10 rounded-full object-cover flex-shrink-0" />
+                        <Image src={t.image} alt={t.name} width={40} height={40} unoptimized className="w-10 h-10 rounded-full object-cover flex-shrink-0" />
                       ) : (
                         <div className="w-10 h-10 rounded-full bg-gradient-to-br from-pink-400 to-purple-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
                           {t.name.charAt(0)}
@@ -252,7 +253,7 @@ export default function AdminTestimonials() {
                   <input ref={fileRef} type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
                   {formData.image ? (
                     <div>
-                      <img src={formData.image} alt="Aperçu" className="max-h-40 mx-auto rounded-lg mb-2 object-cover" />
+                      <Image src={formData.image} alt="Aperçu" width={640} height={480} unoptimized className="max-h-40 w-auto max-w-full mx-auto rounded-lg mb-2 object-cover" />
                       <p className="text-sm text-pink-600 font-medium">Changer la photo</p>
                     </div>
                   ) : (

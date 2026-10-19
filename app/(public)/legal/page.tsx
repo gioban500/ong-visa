@@ -36,7 +36,7 @@ export default function LegalPage() {
                 2. Directeur de Publication
               </h2>
               <p className="text-gray-700 leading-relaxed mb-6">
-                Directeur de l'ONG VISA
+                Directeur de l&apos;ONG VISA
               </p>
 
               <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4 mt-8">
@@ -44,7 +44,7 @@ export default function LegalPage() {
               </h2>
               <div className="bg-gray-50 rounded-lg p-6 mb-6">
                 <p className="text-gray-800 leading-relaxed">
-                  <strong>Hébergeur :</strong> [Nom de l'hébergeur]<br />
+                  <strong>Hébergeur :</strong> [Nom de l&apos;hébergeur]<br />
                   Adresse : [Adresse complète]<br />
                   Téléphone : [Numéro de téléphone]
                 </p>
@@ -54,18 +54,18 @@ export default function LegalPage() {
                 4. Propriété Intellectuelle
               </h2>
               <p className="text-gray-700 leading-relaxed mb-6">
-                L'ensemble du contenu de ce site (textes, images, vidéos, logos,
-                graphismes) est la propriété exclusive de l'ONG VISA, sauf
+                L&apos;ensemble du contenu de ce site (textes, images, vidéos, logos,
+                graphismes) est la propriété exclusive de l&apos;ONG VISA, sauf
                 mention contraire. Toute reproduction, distribution, modification,
                 adaptation ou publication de ces éléments est strictement interdite
-                sans l'autorisation écrite préalable de l'ONG VISA.
+                sans l&apos;autorisation écrite préalable de l&apos;ONG VISA.
               </p>
 
               <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4 mt-8">
                 5. Crédits
               </h2>
               <p className="text-gray-700 leading-relaxed mb-6">
-                Conception et développement : [Nom de l'agence/développeur]<br />
+                Conception et développement : [Nom de l&apos;agence/développeur]<br />
                 Photographies : [Sources des images]<br />
                 Icônes : Lucide React
               </p>
@@ -74,10 +74,10 @@ export default function LegalPage() {
                 6. Responsabilité
               </h2>
               <p className="text-gray-700 leading-relaxed mb-6">
-                L'ONG VISA s'efforce de fournir des informations aussi précises
+                L&apos;ONG VISA s&apos;efforce de fournir des informations aussi précises
                 que possible sur ce site. Toutefois, elle ne peut garantir
-                l'exactitude, la complétude et l'actualité des informations
-                diffusées. L'ONG VISA décline toute responsabilité :
+                l&apos;exactitude, la complétude et l&apos;actualité des informations
+                diffusées. L&apos;ONG VISA décline toute responsabilité :
               </p>
               <ul className="list-disc pl-6 text-gray-700 space-y-2 mb-6">
                 <li>
@@ -85,12 +85,12 @@ export default function LegalPage() {
                   informations disponibles sur le site
                 </li>
                 <li>
-                  Pour tout dommage résultant d'une intrusion frauduleuse d'un
+                  Pour tout dommage résultant d&apos;une intrusion frauduleuse d&apos;un
                   tiers ayant entraîné une modification des informations
                 </li>
                 <li>
                   Pour tout dommage direct ou indirect causé au matériel de
-                  l'utilisateur lors de l'accès au site
+                  l&apos;utilisateur lors de l&apos;accès au site
                 </li>
                 <li>
                   Pour tout dommage résultant du contenu des sites liés ou
@@ -110,7 +110,7 @@ export default function LegalPage() {
                   traitement. Consultez toujours un médecin qualifié pour toute
                   question concernant votre santé ou un traitement médical. Ne
                   négligez jamais un avis médical professionnel ou ne tardez pas à
-                  le demander en raison d'informations que vous auriez lues sur ce
+                  le demander en raison d&apos;informations que vous auriez lues sur ce
                   site.
                 </p>
               </div>
@@ -119,9 +119,9 @@ export default function LegalPage() {
                 8. Liens Hypertextes
               </h2>
               <p className="text-gray-700 leading-relaxed mb-6">
-                Le site peut contenir des liens vers d'autres sites. L'ONG VISA
-                n'exerce aucun contrôle sur ces sites et décline toute
-                responsabilité quant à leur contenu. L'existence d'un lien vers un
+                Le site peut contenir des liens vers d&apos;autres sites. L&apos;ONG VISA
+                n&apos;exerce aucun contrôle sur ces sites et décline toute
+                responsabilité quant à leur contenu. L&apos;existence d&apos;un lien vers un
                 autre site ne constitue pas une validation de ce site ou de son
                 contenu.
               </p>
@@ -131,7 +131,7 @@ export default function LegalPage() {
               </h2>
               <p className="text-gray-700 leading-relaxed mb-6">
                 Le présent site et les présentes mentions légales sont régis par le
-                droit applicable au Togo. Tout litige relatif à l'utilisation du site sera
+                droit applicable au Togo. Tout litige relatif à l&apos;utilisation du site sera
                 soumis à la compétence exclusive des tribunaux compétents.
               </p>
 

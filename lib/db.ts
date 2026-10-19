@@ -1,14 +1,72 @@
 import { Pool } from 'pg';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
+type LegacyRecord = Record<string, unknown>;
+
+interface CancerInput {
+  id: string;
+  name: string;
+  color?: string | null;
+  image?: string | null;
+  shortDescription?: string | null;
+  description?: string | null;
+  epidemiology?: string | null;
+  riskPopulation?: string | null;
+  riskFactors?: unknown;
+  symptoms?: unknown;
+  screening?: unknown;
+  testimonials?: unknown;
+  resources?: unknown;
+}
+
+type CancerUpdates = Partial<Omit<CancerInput, 'id'>>;
+
+interface TestimonialInput {
+  id: string;
+  name: string;
+  image?: string | null;
+  story: string;
+  cancerType?: string | null;
+  date?: string | null;
+  approved?: boolean | null;
+  hero?: boolean | null;
+}
+
+type TestimonialUpdates = Partial<Omit<TestimonialInput, 'id'>>;
+
+interface BlogPostInput {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt?: string | null;
+  content: string;
+  image?: string | null;
+  author?: string | null;
+  publishedDate?: string | null;
+  readTime?: number | null;
+  category?: string | null;
+  tags?: string[];
+  published?: boolean | null;
+}
+
+type BlogPostUpdates = Partial<Omit<BlogPostInput, 'id'>>;
 
 // Support explicite de POSTGRES_URL et DATABASE_URL
-const connectionString = process.env.POSTGRES_URL || process.env.DATABASE_URL;
+const configuredConnectionString = process.env.POSTGRES_URL || process.env.DATABASE_URL;
+const connectionString = configuredConnectionString?.includes('localhost')
+  ? configuredConnectionString
+  : configuredConnectionString?.replace(
+    /([?&])sslmode=(?:prefer|require|verify-ca)(?=&|$)/i,
+    '$1sslmode=verify-full'
+  );
 
 const pool = new Pool({
   connectionString,
   ssl: connectionString?.includes('localhost') 
     ? undefined 
     : { 
-        rejectUnauthorized: false 
+        rejectUnauthorized: true
       },
 });
 
@@ -25,12 +83,10 @@ export function slugify(str: string): string {
 }
 
 // Helper: lire un fichier JSON de secours (data/*.json)
-function readJsonFallback(fileName: string, fallback: any = []) {
-  const fs = require('fs');
-  const path = require('path');
+function readJsonFallback<T>(fileName: string, fallback: T): T {
   try {
-    const dataPath = path.join(process.cwd(), 'data', fileName);
-    return JSON.parse(fs.readFileSync(dataPath, 'utf8'));
+    const dataPath = join(process.cwd(), 'data', fileName);
+    return JSON.parse(readFileSync(dataPath, 'utf8')) as T;
   } catch (error) {
     console.error(`Error reading ${fileName}:`, error);
     return fallback;
@@ -47,7 +103,7 @@ export async function initDatabase() {
     return;
   }
   
-  if (process.env.VERCEL && process.env.NEXT_PHASE === 'phase-production-build') {
+  if (process.env.NEXT_PHASE === 'phase-production-build') {
     console.log('⚠️ Build phase detected - skipping database initialization');
     initialized = true;
     return;
@@ -73,9 +129,7 @@ export async function initDatabase() {
           testimonials JSONB,
           resources JSONB
         );
-      `).catch(err => {
-        if (err.code !== '42P07') throw err;
-      });
+      `);
 
       // Create testimonials table
       await client.query(`
@@ -89,9 +143,7 @@ export async function initDatabase() {
           approved BOOLEAN DEFAULT TRUE,
           hero BOOLEAN DEFAULT FALSE
         );
-      `).catch(err => {
-        if (err.code !== '42P07') throw err;
-      });
+      `);
 
       // Create blog posts table
       await client.query(`
@@ -109,9 +161,7 @@ export async function initDatabase() {
           tags JSONB,
           published BOOLEAN DEFAULT TRUE
         );
-      `).catch(err => {
-        if (err.code !== '42P07') throw err;
-      });
+      `);
 
       // Create event registrations table (colonnes en snake_case comme dans Neon)
       await client.query(`
@@ -123,9 +173,7 @@ export async function initDatabase() {
           event_title VARCHAR(255),
           created_at VARCHAR(50)
         );
-      `).catch(err => {
-        if (err.code !== '42P07') throw err;
-      });
+      `);
 
       // Create newsletter subscribers table
       await client.query(`
@@ -139,14 +187,12 @@ export async function initDatabase() {
           message TEXT,
           createdAt VARCHAR(50)
         );
-      `).catch(err => {
-        if (err.code !== '42P07') throw err;
-      });
+      `);
 
       // Migration : Supprimer la contrainte UNIQUE sur l'email si elle existe
       await client.query(`
         ALTER TABLE subscribers DROP CONSTRAINT IF EXISTS subscribers_email_key;
-      `).catch(err => console.error('Error dropping unique constraint:', err));
+      `);
 
       // Auto-migration : ajouter les colonnes phone, subject, message si absentes
       await client.query(`
@@ -154,13 +200,13 @@ export async function initDatabase() {
         ADD COLUMN IF NOT EXISTS phone VARCHAR(50),
         ADD COLUMN IF NOT EXISTS subject VARCHAR(100),
         ADD COLUMN IF NOT EXISTS message TEXT;
-      `).catch(err => console.error('Error altering subscribers table:', err));
+      `);
 
       // Auto-migration : hero dans testimonials
       await client.query(`
         ALTER TABLE testimonials 
         ADD COLUMN IF NOT EXISTS hero BOOLEAN DEFAULT FALSE;
-      `).catch(err => console.error('Error altering testimonials table:', err));
+      `);
 
       initialized = true;
       console.log('Database initialized successfully');
@@ -168,17 +214,17 @@ export async function initDatabase() {
       client.release();
     }
   } catch (error) {
-    console.log('Database initialization completed (tables may already exist or connection unavailable)');
-    initialized = true;
+    console.error('Database initialization failed:', error);
+    throw error;
   }
 }
 
 // Cancers operations
-export async function getCancers() {
+export async function getCancers(): Promise<LegacyRecord[]> {
   await initDatabase();
   
   if (!connectionString) {
-    return readJsonFallback('cancers.json', []);
+    return readJsonFallback<LegacyRecord[]>('cancers.json', []);
   }
   
   try {
@@ -193,16 +239,16 @@ export async function getCancers() {
     }));
   } catch (error) {
     console.error('DB error (getCancers), falling back to JSON:', error);
-    return readJsonFallback('cancers.json', []);
+    return readJsonFallback<LegacyRecord[]>('cancers.json', []);
   }
 }
 
-export async function getCancerById(id: string) {
+export async function getCancerById(id: string): Promise<LegacyRecord | null> {
   await initDatabase();
   
   if (!connectionString) {
-    const data = readJsonFallback('cancers.json', []);
-    return data.find((c: any) => c.id === id) || null;
+    const data = readJsonFallback<LegacyRecord[]>('cancers.json', []);
+    return data.find(cancer => cancer.id === id) || null;
   }
   
   const decodedId = (() => {
@@ -210,7 +256,7 @@ export async function getCancerById(id: string) {
   })();
   const wantedSlug = slugify(decodedId);
 
-  const format = (row: any) => ({
+  const format = (row: LegacyRecord) => ({
     ...row,
     riskFactors: row.riskfactors || { modifiable: [], nonModifiable: [] },
     symptoms: row.symptoms || { early: [], advanced: [], warningSign: [] },
@@ -225,21 +271,21 @@ export async function getCancerById(id: string) {
 
     const all = await pool.query('SELECT * FROM cancers');
     const match = all.rows.find(
-      (row: any) => slugify(row.id) === wantedSlug || slugify(row.name) === wantedSlug
+      row => slugify(String(row.id ?? '')) === wantedSlug || slugify(String(row.name ?? '')) === wantedSlug
     );
     return match ? format(match) : null;
   } catch (error) {
     console.error('DB error (getCancerById), falling back to JSON:', error);
-    const data = readJsonFallback('cancers.json', []);
+    const data = readJsonFallback<LegacyRecord[]>('cancers.json', []);
     return (
-      data.find((c: any) => c.id === decodedId) ||
-      data.find((c: any) => slugify(c.id) === wantedSlug || slugify(c.name) === wantedSlug) ||
+      data.find(cancer => cancer.id === decodedId) ||
+      data.find(cancer => slugify(String(cancer.id ?? '')) === wantedSlug || slugify(String(cancer.name ?? '')) === wantedSlug) ||
       null
     );
   }
 }
 
-export async function createCancer(cancer: any) {
+export async function createCancer(cancer: CancerInput) {
   await initDatabase();
   await pool.query(`
     INSERT INTO cancers (
@@ -258,7 +304,7 @@ export async function createCancer(cancer: any) {
   return cancer;
 }
 
-export async function updateCancer(id: string, updates: any) {
+export async function updateCancer(id: string, updates: CancerUpdates) {
   await initDatabase();
   await pool.query(`
     UPDATE cancers SET
@@ -299,11 +345,11 @@ export async function deleteCancer(id: string) {
 }
 
 // Testimonials operations
-export async function getTestimonials() {
+export async function getTestimonials(): Promise<LegacyRecord[]> {
   await initDatabase();
   
   if (!connectionString) {
-    return readJsonFallback('testimonials.json', []);
+    return readJsonFallback<LegacyRecord[]>('testimonials.json', []);
   }
   
   try {
@@ -311,7 +357,7 @@ export async function getTestimonials() {
     return result.rows;
   } catch (error) {
     console.error('DB error (getTestimonials), falling back to JSON:', error);
-    return readJsonFallback('testimonials.json', []);
+    return readJsonFallback<LegacyRecord[]>('testimonials.json', []);
   }
 }
 
@@ -319,8 +365,8 @@ export async function getApprovedTestimonials() {
   await initDatabase();
   
   if (!connectionString) {
-    const data = readJsonFallback('testimonials.json', []);
-    return data.filter((t: any) => t.approved !== false);
+    const data = readJsonFallback<LegacyRecord[]>('testimonials.json', []);
+    return data.filter(testimonial => testimonial.approved !== false);
   }
   
   try {
@@ -328,8 +374,8 @@ export async function getApprovedTestimonials() {
     return result.rows;
   } catch (error) {
     console.error('DB error (getApprovedTestimonials), falling back to JSON:', error);
-    const data = readJsonFallback('testimonials.json', []);
-    return data.filter((t: any) => t.approved !== false);
+    const data = readJsonFallback<LegacyRecord[]>('testimonials.json', []);
+    return data.filter(testimonial => testimonial.approved !== false);
   }
 }
 
@@ -339,7 +385,7 @@ export async function getTestimonialById(id: string) {
   return result.rows[0];
 }
 
-export async function createTestimonial(testimonial: any) {
+export async function createTestimonial(testimonial: TestimonialInput) {
   await initDatabase();
   await pool.query(`
     INSERT INTO testimonials (id, name, image, story, cancerType, date, approved, hero)
@@ -357,7 +403,7 @@ export async function createTestimonial(testimonial: any) {
   return testimonial;
 }
 
-export async function updateTestimonial(id: string, updates: any) {
+export async function updateTestimonial(id: string, updates: TestimonialUpdates) {
   await initDatabase();
   await pool.query(`
     UPDATE testimonials SET
@@ -388,11 +434,11 @@ export async function deleteTestimonial(id: string) {
 }
 
 // Blog operations
-export async function getBlogPosts() {
+export async function getBlogPosts(): Promise<LegacyRecord[]> {
   await initDatabase();
   
   if (!connectionString) {
-    return readJsonFallback('blog.json', []);
+    return readJsonFallback<LegacyRecord[]>('blog.json', []);
   }
   
   try {
@@ -405,7 +451,7 @@ export async function getBlogPosts() {
     }));
   } catch (error) {
     console.error('DB error (getBlogPosts), falling back to JSON:', error);
-    return readJsonFallback('blog.json', []);
+    return readJsonFallback<LegacyRecord[]>('blog.json', []);
   }
 }
 
@@ -413,8 +459,8 @@ export async function getBlogPostBySlug(slug: string) {
   await initDatabase();
   
   if (!connectionString) {
-    const data = readJsonFallback('blog.json', []);
-    return data.find((p: any) => p.slug === slug) || null;
+    const data = readJsonFallback<LegacyRecord[]>('blog.json', []);
+    return data.find(post => post.slug === slug) || null;
   }
   
   try {
@@ -429,12 +475,12 @@ export async function getBlogPostBySlug(slug: string) {
     };
   } catch (error) {
     console.error('DB error (getBlogPostBySlug), falling back to JSON:', error);
-    const data = readJsonFallback('blog.json', []);
-    return data.find((p: any) => p.slug === slug) || null;
+    const data = readJsonFallback<LegacyRecord[]>('blog.json', []);
+    return data.find(post => post.slug === slug) || null;
   }
 }
 
-export async function createBlogPost(post: any) {
+export async function createBlogPost(post: BlogPostInput) {
   await initDatabase();
   await pool.query(`
     INSERT INTO blog_posts (
@@ -449,7 +495,7 @@ export async function createBlogPost(post: any) {
   return post;
 }
 
-export async function updateBlogPost(slug: string, updates: any) {
+export async function updateBlogPost(slug: string, updates: BlogPostUpdates) {
   await initDatabase();
   await pool.query(`
     UPDATE blog_posts SET
@@ -521,7 +567,7 @@ export async function getSubscribers() {
   await initDatabase();
   try {
     const result = await pool.query('SELECT * FROM subscribers ORDER BY createdat DESC');
-    return result.rows.map((r: any) => ({
+    return result.rows.map(r => ({
       id: r.id,
       firstName: r.firstname || r.firstName,
       lastName: r.lastname || r.lastName,
@@ -577,7 +623,7 @@ export async function getEventRegistrations() {
   try {
     const result = await pool.query('SELECT * FROM event_registrations');
     
-    return result.rows.map((r: any) => ({
+    return result.rows.map(r => ({
       id: r.id ? String(r.id) : '',
       name: r.name || '',
       phone: r.phone || '',

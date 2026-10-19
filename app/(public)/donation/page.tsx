@@ -46,10 +46,10 @@ export default function DonationPage() {
             Solidarité Cancers Féminins au Togo
           </span>
           <h1 className="font-serif text-3xl sm:text-5xl font-semibold text-white leading-tight">
-            Soutenez les Actions de l'ONG VISA
+            Soutenez les Actions de l&apos;ONG VISA
           </h1>
           <p className="text-base sm:text-lg text-[#D3E2DF] leading-relaxed max-w-2xl mx-auto">
-            Votre générosité finance le dépistage précoce (VIA-VILI, mammographie), l'information des femmes dans les communautés et la prise en charge des patientes isolées.
+            Votre générosité finance le dépistage précoce (VIA-VILI, mammographie), l&apos;information des femmes dans les communautés et la prise en charge des patientes isolées.
           </p>
         </div>
       </section>
@@ -61,7 +61,7 @@ export default function DonationPage() {
             Transparence & Efficacité
           </span>
           <h2 className="font-serif text-2xl sm:text-3xl font-semibold text-[#2A2521]">
-            L'Impact Concret de Votre Don
+            L&apos;Impact Concret de Votre Don
           </h2>
         </div>
 
@@ -76,14 +76,14 @@ export default function DonationPage() {
           <div className="bg-white rounded-[4px] p-6 border border-[#E2D7C7] border-t-4 border-t-[#1F5A56] shadow-sm">
             <div className="font-serif text-2xl font-bold text-[#1F5A56] mb-2">30 000 FCFA</div>
             <p className="text-[14px] text-[#514A43] leading-relaxed">
-              Permet d'organiser un atelier d'apprentissage de l'autopalpation et de sensibilisation dans un marché ou un dispensaire.
+              Permet d&apos;organiser un atelier d&apos;apprentissage de l&apos;autopalpation et de sensibilisation dans un marché ou un dispensaire.
             </p>
           </div>
 
           <div className="bg-white rounded-[4px] p-6 border border-[#E2D7C7] border-t-4 border-t-[#9E2F55] shadow-sm">
             <div className="font-serif text-2xl font-bold text-[#9E2F55] mb-2">65 000 FCFA</div>
             <p className="text-[14px] text-[#514A43] leading-relaxed">
-              Prend en charge le transport et les examens d'imagerie diagnostique (mammographie / échographie) pour une patiente démunie.
+              Prend en charge le transport et les examens d&apos;imagerie diagnostique (mammographie / échographie) pour une patiente démunie.
             </p>
           </div>
         </div>
@@ -237,14 +237,14 @@ export default function DonationPage() {
               Akpé kaka ! Merci pour votre soutien
             </h2>
             <p className="text-base text-[#514A43] max-w-lg mx-auto">
-              Votre don de <strong>{finalAmount.toLocaleString('fr-FR')} FCFA</strong> permet de poursuivre le dépistage et l'accompagnement des femmes togolaises.
+              Votre don de <strong>{finalAmount.toLocaleString('fr-FR')} FCFA</strong> permet de poursuivre le dépistage et l&apos;accompagnement des femmes togolaises.
             </p>
             <div className="pt-4">
               <Link
                 href="/"
                 className="inline-block bg-[#1F5A56] hover:bg-[#123E3B] text-white px-6 py-2.5 rounded-[4px] text-sm font-semibold transition-colors"
               >
-                Retour à l'accueil
+                Retour à l&apos;accueil
               </Link>
             </div>
           </div>
@@ -254,7 +254,7 @@ export default function DonationPage() {
       {/* Autres Moyens de Soutien */}
       <section className="max-w-[1180px] mx-auto px-4 sm:px-7 pt-10">
         <h2 className="font-serif text-xl sm:text-2xl font-semibold text-[#2A2521] text-center mb-8">
-          Autres Moyens d'Agir avec l'ONG VISA
+          Autres Moyens d&apos;Agir avec l&apos;ONG VISA
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -269,7 +269,7 @@ export default function DonationPage() {
               Participez aux journées de dépistage mobile et aux ateliers de sensibilisation.
             </p>
             <Link href="/contact" className="text-[#9E2F55] font-semibold text-xs hover:underline">
-              Rejoindre l'équipe →
+              Rejoindre l&apos;équipe →
             </Link>
           </div>
 
@@ -293,10 +293,10 @@ export default function DonationPage() {
               <Share2 className="w-6 h-6" />
             </div>
             <h3 className="font-serif text-lg font-semibold text-[#2A2521] mb-2">
-              Diffuser l'Information
+              Diffuser l&apos;Information
             </h3>
             <p className="text-xs sm:text-sm text-[#514A43] mb-4">
-              Partagez les repères d'autopalpation et les fiches médicales autour de vous.
+              Partagez les repères d&apos;autopalpation et les fiches médicales autour de vous.
             </p>
             <Link href="/blog" className="text-[#9E2F55] font-semibold text-xs hover:underline">
               Voir nos événements →

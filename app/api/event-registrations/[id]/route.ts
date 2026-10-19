@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { deleteEventRegistration } from '@/lib/db';
+import { requireAdmin } from '@/lib/refonte-backend';
 
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
   try {
     const { id } = await params; // Résolution de la promesse des params
 

@@ -2,6 +2,7 @@
 
 import React, { use, useEffect, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { ArrowLeft, CheckCircle, Loader2 } from 'lucide-react';
 import { BlogPost } from '@/types/cancer';
@@ -159,9 +160,9 @@ export default function EventDetailPage({ params }: PageProps) {
       }
 
       setIsSubmitted(true);
-    } catch (err: any) {
-      console.error("Erreur lors de l'inscription :", err);
-      setSubmitError(err.message || "Une erreur est survenue lors de la validation.");
+    } catch (error: unknown) {
+      console.error("Erreur lors de l'inscription :", error);
+      setSubmitError(error instanceof Error ? error.message : "Une erreur est survenue lors de la validation.");
     } finally {
       setIsSubmitting(false);
     }
@@ -170,7 +171,7 @@ export default function EventDetailPage({ params }: PageProps) {
   if (loading) {
     return (
       <div className="min-h-screen bg-[#0b1329] text-white flex items-center justify-center">
-        <p className="text-sm font-medium animate-pulse">Chargement de l'événement...</p>
+        <p className="text-sm font-medium animate-pulse">Chargement de l&apos;événement...</p>
       </div>
     );
   }
@@ -249,10 +250,13 @@ export default function EventDetailPage({ params }: PageProps) {
             <div className="lg:col-span-5 flex justify-center">
               {post.image && (
                 <div className="w-full h-[320px] sm:h-[380px] rounded-3xl overflow-hidden shadow-2xl border border-slate-700/50 bg-slate-900">
-                  <img
+                  <Image
                     src={post.image}
                     alt={post.title}
-                    className="w-full h-full object-cover object-center"
+                    fill
+                    unoptimized
+                    sizes="(max-width: 1024px) 100vw, 42vw"
+                    className="object-cover object-center"
                   />
                 </div>
               )}
@@ -280,10 +284,10 @@ export default function EventDetailPage({ params }: PageProps) {
           <div className="lg:col-span-5 bg-white rounded-3xl p-8 sm:p-10 shadow-sm border border-slate-200/80 space-y-6">
             <div>
               <h2 className="text-xl font-black text-slate-900 uppercase tracking-tight">
-                S'INSCRIRE À CET ÉVÉNEMENT
+                S&apos;INSCRIRE À CET ÉVÉNEMENT
               </h2>
               <p className="text-slate-500 text-xs sm:text-sm mt-1">
-                Réservez votre place pour bénéficier d'une prise en charge prioritaire.
+                Réservez votre place pour bénéficier d&apos;une prise en charge prioritaire.
               </p>
             </div>
 

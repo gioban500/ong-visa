@@ -2,7 +2,8 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Search, ArrowRight, Calendar, MapPin, Clock } from 'lucide-react';
+import Image from 'next/image';
+import { Search, ArrowRight, Calendar, MapPin } from 'lucide-react';
 import { BlogPost } from '@/types/cancer';
 
 interface EventPost extends BlogPost {
@@ -103,7 +104,7 @@ export default function BlogEventsPage() {
             Événements & Campagnes de Sensibilisation
           </h1>
           <p className="text-[#D3E2DF] text-sm sm:text-base max-w-2xl mx-auto leading-relaxed">
-            Retrouvez l'ensemble de nos campagnes de dépistage, conférences médicales et tournées foraines partout au Togo.
+            Retrouvez l&apos;ensemble de nos campagnes de dépistage, conférences médicales et tournées foraines partout au Togo.
           </p>
 
           <div className="pt-4 max-w-xl mx-auto">
@@ -149,10 +150,13 @@ export default function BlogEventsPage() {
                   <div>
                     <div className="relative h-52 w-full bg-[#F5EFE6] overflow-hidden">
                       {post.image && (
-                        <img
+                        <Image
                           src={post.image}
                           alt={post.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          fill
+                          unoptimized
+                          sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                          className="object-cover group-hover:scale-105 transition-transform duration-500"
                         />
                       )}
                       <span

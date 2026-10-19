@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Search, ArrowRight } from 'lucide-react';
 import { Cancer } from '@/types/cancer';
 
@@ -112,10 +113,13 @@ export default function CancersPage() {
                   <div>
                     <div className="relative w-full h-52 bg-[#F5EFE6] overflow-hidden">
                       {cancer.image ? (
-                        <img
+                        <Image
                           src={cancer.image}
                           alt={cancer.name}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                          fill
+                          unoptimized
+                          sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                          className="object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
                         />
                       ) : (
                         <div

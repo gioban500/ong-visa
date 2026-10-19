@@ -139,7 +139,7 @@ export default function Newsletter() {
                         </>
                       ) : (
                         <>
-                          <Send className="w-5 h-5" /> S'inscrire
+                          <Send className="w-5 h-5" /> S&apos;inscrire
                         </>
                       )}
                     </button>

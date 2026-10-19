@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { getTestimonials, createTestimonial } from '@/lib/db';
+import { requireAdmin } from '@/lib/refonte-backend';
 
 export async function GET() {
   try {
@@ -13,6 +14,8 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
   try {
     const body = await request.json();
     const testimonial = await createTestimonial({

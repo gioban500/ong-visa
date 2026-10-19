@@ -11,10 +11,10 @@ export default function QuickExitBar() {
         <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-[13px]">
           <span className="inline-flex items-center gap-1.5 bg-white/10 text-white px-2 py-0.5 rounded-full text-[11.5px] font-semibold">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            Ligne d'écoute anonyme 7j/7
+            Ligne d&apos;écoute anonyme 7j/7
           </span>
           <span className="text-[#E2EDE9]">
-            Besoin d'en parler en direct ? Ligne d'écoute ONG VISA :{' '}
+            Besoin d&apos;en parler en direct ? Ligne d&apos;écoute ONG VISA :{' '}
             <a
               href="tel:+22890000000"
               className="text-white font-semibold underline underline-offset-2 hover:text-[#96cfca] transition-colors"

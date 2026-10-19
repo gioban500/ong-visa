@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { getCancers, createCancer, slugify } from '@/lib/db';
+import { requireAdmin } from '@/lib/refonte-backend';
 
 // Bloque tout rafraîchissement automatique
 export const revalidate = false;
@@ -16,6 +17,8 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
   try {
     const body = await request.json();
     const cancer = await createCancer({

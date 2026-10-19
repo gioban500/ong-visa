@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { getBlogPostBySlug, updateBlogPost, deleteBlogPost } from '@/lib/db';
+import { requireAdmin } from '@/lib/refonte-backend';
 
 // Bloque le rafraîchissement automatique par intervalle
 export const revalidate = false;
@@ -20,6 +21,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
 }
 
 export async function PUT(request: Request, { params }: { params: Promise<{ slug: string }> }) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
   try {
     const { slug } = await params;
     const body = await request.json();
@@ -38,6 +41,8 @@ export async function PUT(request: Request, { params }: { params: Promise<{ slug
 }
 
 export async function DELETE(request: Request, { params }: { params: Promise<{ slug: string }> }) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
   try {
     const { slug } = await params;
     await deleteBlogPost(slug);

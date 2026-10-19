@@ -88,10 +88,10 @@ export default function EmotionalHero() {
             maxWidth: '24ch',
           }}
         >
-          Qu'est-ce qui vous amène aujourd'hui ?
+          Qu&apos;est-ce qui vous amène aujourd&apos;hui ?
         </h1>
         <p style={{ fontSize: 17, maxWidth: '68ch', color: 'var(--ink-secondary)', marginBottom: 28, lineHeight: 1.6 }}>
-          Un espace d'écoute et d'information pour tous les cancers féminins. Choisissez votre situation ou explorez les
+          Un espace d&apos;écoute et d&apos;information pour tous les cancers féminins. Choisissez votre situation ou explorez les
           repères médicaux essentiels au Togo :
         </p>
 

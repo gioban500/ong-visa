@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Testimonial } from '@/types/admin';
 
@@ -59,10 +61,13 @@ export default function TestimonialCarousel({ testimonials }: TestimonialCarouse
       {/* Background avec overlay */}
       <div className="absolute inset-0">
         {currentTestimonial.image ? (
-          <img
+          <Image
             src={currentTestimonial.image}
             alt={currentTestimonial.name}
-            className="absolute inset-0 w-full h-full object-cover transition-all duration-1000 ease-in-out"
+            fill
+            unoptimized
+            sizes="100vw"
+            className="object-cover transition-all duration-1000 ease-in-out"
           />
         ) : (
           <div className="absolute inset-0 bg-gradient-to-br from-purple-900 via-pink-800 to-purple-700" />
@@ -85,7 +90,7 @@ export default function TestimonialCarousel({ testimonials }: TestimonialCarouse
           {/* Témoignage */}
           <blockquote className="mb-6 md:mb-8 max-w-3xl lg:max-w-4xl mx-auto">
             <p className="text-base sm:text-lg md:text-2xl lg:text-3xl xl:text-4xl font-bold text-white leading-relaxed mb-4 md:mb-6 drop-shadow-xl line-clamp-4 md:line-clamp-5">
-              "{currentTestimonial.story}"
+              &quot;{currentTestimonial.story}&quot;
             </p>
           </blockquote>
 
@@ -100,18 +105,18 @@ export default function TestimonialCarousel({ testimonials }: TestimonialCarouse
 
           {/* CTA */}
           <div className="flex flex-col sm:flex-row justify-center items-center gap-3 md:gap-4 mt-6 md:mt-8">
-            <a
+            <Link
               href="/cancers"
               className="bg-gradient-to-r from-pink-500 to-purple-600 text-white px-6 md:px-8 py-3 md:py-4 rounded-full font-bold shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 md:hover:-translate-y-1 w-full sm:w-auto text-center text-sm md:text-base"
             >
               En Savoir Plus
-            </a>
-            <a
+            </Link>
+            <Link
               href="/contact"
               className="bg-white/10 backdrop-blur-md text-white px-6 md:px-8 py-3 md:py-4 rounded-full font-bold hover:bg-white/20 transition-all border border-white/30 w-full sm:w-auto text-center text-sm md:text-base"
             >
               Partager Votre Histoire
-            </a>
+            </Link>
           </div>
         </div>
       </div>

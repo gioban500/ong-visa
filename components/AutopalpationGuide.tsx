@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 
 const steps = [
   {
@@ -53,9 +54,9 @@ export default function AutopalpationGuide() {
         {/* En-tête centré */}
         <div style={{ textAlign: 'center', maxWidth: 720, margin: '0 auto 36px' }}>
           <span className="section-kicker">5 minutes · 1 fois par mois</span>
-          <h2 className="section-title">Les gestes d'auto-observation, pas à pas</h2>
+          <h2 className="section-title">Les gestes d&apos;auto-observation, pas à pas</h2>
           <p className="section-intro">
-            Cinq minutes une fois par mois suffisent. Prenez l'habitude de surveiller votre corps pour déceler rapidement
+            Cinq minutes une fois par mois suffisent. Prenez l&apos;habitude de surveiller votre corps pour déceler rapidement
             tout changement inhabituel.
           </p>
         </div>
@@ -85,9 +86,11 @@ export default function AutopalpationGuide() {
               alignItems: 'center',
             }}
           >
-            <img
+            <Image
               src="/images/autopalpation-guide.png"
               alt="Octobre rose : Guide officiel de l'auto-palpation des seins pas à pas"
+              width={1000}
+              height={1200}
               style={{
                 width: '100%',
                 height: 'auto',
