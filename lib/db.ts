@@ -39,9 +39,11 @@ interface BlogPostInput {
   id: string;
   title: string;
   slug: string;
+  description?: string | null;
   excerpt?: string | null;
-  content: string;
+  content?: string | null;
   image?: string | null;
+  images?: string[];
   author?: string | null;
   publishedDate?: string | null;
   readTime?: number | null;
@@ -154,6 +156,7 @@ export async function initDatabase() {
           excerpt TEXT,
           content TEXT NOT NULL,
           image TEXT,
+          images JSONB,
           author VARCHAR(255),
           publishedDate VARCHAR(50),
           readTime INTEGER,
@@ -161,6 +164,13 @@ export async function initDatabase() {
           tags JSONB,
           published BOOLEAN DEFAULT TRUE
         );
+      `);
+
+      await client.query(`
+        ALTER TABLE blog_posts ADD COLUMN IF NOT EXISTS images JSONB;
+        UPDATE blog_posts
+        SET images = jsonb_build_array(image)
+        WHERE images IS NULL AND image IS NOT NULL AND image <> '';
       `);
 
       // Create event registrations table (colonnes en snake_case comme dans Neon)
@@ -315,11 +325,11 @@ export async function updateCancer(id: string, updates: CancerUpdates) {
       description = $6,
       epidemiology = $7,
       riskPopulation = $8,
-      riskFactors = $9,
-      symptoms = $10,
-      screening = $11,
-      testimonials = $12,
-      resources = $13
+      riskFactors = COALESCE($9::jsonb, riskFactors),
+      symptoms = COALESCE($10::jsonb, symptoms),
+      screening = COALESCE($11::jsonb, screening),
+      testimonials = COALESCE($12::jsonb, testimonials),
+      resources = COALESCE($13::jsonb, resources)
     WHERE id = $1
   `, [
     id,
@@ -330,11 +340,11 @@ export async function updateCancer(id: string, updates: CancerUpdates) {
     updates.description,
     updates.epidemiology,
     updates.riskPopulation,
-    JSON.stringify(updates.riskFactors || { modifiable: [], nonModifiable: [] }),
-    JSON.stringify(updates.symptoms || { early: [], advanced: [], warningSign: [] }),
-    JSON.stringify(updates.screening || { primaryPrevention: [], availableTests: [], recommendations: [], resultsInterpretation: '', screeningCenters: [] }),
-    JSON.stringify(updates.testimonials || []),
-    JSON.stringify(updates.resources || [])
+    updates.riskFactors === undefined ? null : JSON.stringify(updates.riskFactors),
+    updates.symptoms === undefined ? null : JSON.stringify(updates.symptoms),
+    updates.screening === undefined ? null : JSON.stringify(updates.screening),
+    updates.testimonials === undefined ? null : JSON.stringify(updates.testimonials),
+    updates.resources === undefined ? null : JSON.stringify(updates.resources)
   ]);
   return getCancerById(id);
 }
@@ -434,6 +444,141 @@ export async function deleteTestimonial(id: string) {
 }
 
 // Blog operations
+function toBlogPostSummary(post: LegacyRecord): LegacyRecord {
+  const images = Array.isArray(post.images) ? post.images : [];
+  const firstImage = typeof post.image === 'string' ? post.image : (typeof images[0] === 'string' ? images[0] : '');
+  const imageCount = Math.max(images.length, firstImage ? 1 : 0);
+  const slug = typeof post.slug === 'string' ? post.slug : '';
+  return {
+    id: post.id,
+    title: post.title,
+    slug,
+    description: post.description || post.excerpt || post.content || '',
+    excerpt: post.excerpt || post.description || post.content || '',
+    image: imageCount > 0 ? `/api/blog/${encodeURIComponent(slug)}/images/0` : '',
+    imageCount,
+    publishedDate: post.publishedDate || post.publisheddate || null,
+    published: post.published === true,
+  };
+}
+
+export async function getBlogPostSummaries(): Promise<LegacyRecord[]> {
+  await initDatabase();
+
+  if (!connectionString) {
+    const data = readJsonFallback<LegacyRecord[]>('blog.json', []);
+    return data.map(toBlogPostSummary);
+  }
+
+  try {
+    const result = await pool.query(`
+      SELECT id, title, slug, excerpt, publishedDate, published,
+        CASE
+          WHEN images IS NOT NULL
+            AND jsonb_typeof(images) = 'array'
+            AND jsonb_array_length(images) > 0
+            THEN jsonb_array_length(images)
+          WHEN image IS NOT NULL AND image <> '' THEN 1
+          ELSE 0
+        END AS image_count
+      FROM blog_posts
+      ORDER BY publishedDate DESC NULLS LAST
+    `);
+    return result.rows.map((row) => ({
+      id: row.id,
+      title: row.title,
+      slug: row.slug,
+      excerpt: row.excerpt || '',
+      description: row.excerpt || '',
+      image: Number(row.image_count) > 0 ? `/api/blog/${encodeURIComponent(row.slug)}/images/0` : '',
+      imageCount: Number(row.image_count) || 0,
+      publishedDate: row.publisheddate || row.publishedDate || null,
+      published: row.published === true,
+    }));
+  } catch (error) {
+    console.error('DB error (getBlogPostSummaries), falling back to JSON:', error);
+    const data = readJsonFallback<LegacyRecord[]>('blog.json', []);
+    return data.map(toBlogPostSummary);
+  }
+}
+
+export async function getBlogPostSummaryBySlug(slug: string): Promise<LegacyRecord | null> {
+  await initDatabase();
+
+  if (!connectionString) {
+    const data = readJsonFallback<LegacyRecord[]>('blog.json', []);
+    const post = data.find((item) => item.slug === slug);
+    return post ? toBlogPostSummary(post) : null;
+  }
+
+  try {
+    const result = await pool.query(`
+      SELECT id, title, slug, excerpt, publishedDate, published,
+        CASE
+          WHEN images IS NOT NULL
+            AND jsonb_typeof(images) = 'array'
+            AND jsonb_array_length(images) > 0
+            THEN jsonb_array_length(images)
+          WHEN image IS NOT NULL AND image <> '' THEN 1
+          ELSE 0
+        END AS image_count
+      FROM blog_posts
+      WHERE slug = $1
+    `, [slug]);
+    const row = result.rows[0];
+    if (!row) return null;
+    return {
+      id: row.id,
+      title: row.title,
+      slug: row.slug,
+      excerpt: row.excerpt || '',
+      description: row.excerpt || '',
+      image: Number(row.image_count) > 0 ? `/api/blog/${encodeURIComponent(row.slug)}/images/0` : '',
+      imageCount: Number(row.image_count) || 0,
+      publishedDate: row.publisheddate || row.publishedDate || null,
+      published: row.published === true,
+    };
+  } catch (error) {
+    console.error('DB error (getBlogPostSummaryBySlug), falling back to JSON:', error);
+    const data = readJsonFallback<LegacyRecord[]>('blog.json', []);
+    const post = data.find((item) => item.slug === slug);
+    return post ? toBlogPostSummary(post) : null;
+  }
+}
+
+export async function getBlogPostImage(slug: string, index: number): Promise<string | null> {
+  await initDatabase();
+
+  if (!connectionString) {
+    const data = readJsonFallback<LegacyRecord[]>('blog.json', []);
+    const post = data.find((item) => item.slug === slug);
+    if (!post || post.published !== true) return null;
+    const images = Array.isArray(post.images) ? post.images : [];
+    const image = images[index] ?? (index === 0 ? post.image : null);
+    return typeof image === 'string' ? image : null;
+  }
+
+  try {
+    const result = await pool.query(`
+      SELECT CASE
+        WHEN images IS NOT NULL
+          AND jsonb_typeof(images) = 'array'
+          AND jsonb_array_length(images) > $2
+          THEN images ->> $2
+        WHEN $2 = 0 THEN image
+        ELSE NULL
+      END AS image
+      FROM blog_posts
+      WHERE slug = $1 AND published = TRUE
+    `, [slug, index]);
+    const image: unknown = result.rows[0]?.image;
+    return typeof image === 'string' && image ? image : null;
+  } catch (error) {
+    console.error('DB error (getBlogPostImage):', error);
+    throw error;
+  }
+}
+
 export async function getBlogPosts(): Promise<LegacyRecord[]> {
   await initDatabase();
   
@@ -445,6 +590,10 @@ export async function getBlogPosts(): Promise<LegacyRecord[]> {
     const result = await pool.query('SELECT * FROM blog_posts');
     return result.rows.map(row => ({
       ...row,
+      description: row.description || row.excerpt || row.content || '',
+      images: Array.isArray(row.images) && row.images.length > 0
+        ? row.images
+        : (row.image ? [row.image] : []),
       publishedDate: row.publisheddate || row.publishedDate,
       readTime: row.readtime || row.readTime,
       tags: row.tags || []
@@ -469,6 +618,10 @@ export async function getBlogPostBySlug(slug: string) {
     if (!row) return null;
     return {
       ...row,
+      description: row.description || row.excerpt || row.content || '',
+      images: Array.isArray(row.images) && row.images.length > 0
+        ? row.images
+        : (row.image ? [row.image] : []),
       publishedDate: row.publisheddate || row.publishedDate,
       readTime: row.readtime || row.readTime,
       tags: row.tags || []
@@ -484,12 +637,13 @@ export async function createBlogPost(post: BlogPostInput) {
   await initDatabase();
   await pool.query(`
     INSERT INTO blog_posts (
-      id, title, slug, excerpt, content, image, 
+      id, title, slug, excerpt, content, image, images,
       author, publishedDate, readTime, category, tags, published
-    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb, $8, $9, $10, $11, $12, $13)
   `, [
-    post.id, post.title, post.slug, post.excerpt, post.content, 
-    post.image, post.author, post.publishedDate, post.readTime, 
+    post.id, post.title, post.slug, post.description || post.excerpt || '', post.description || post.content || '',
+    post.image || post.images?.[0] || '', JSON.stringify(post.images || (post.image ? [post.image] : [])),
+    post.author, post.publishedDate || null, post.readTime,
     post.category, JSON.stringify(post.tags || []), post.published ?? true
   ]);
   return post;
@@ -504,24 +658,26 @@ export async function updateBlogPost(slug: string, updates: BlogPostUpdates) {
       excerpt = $4,
       content = $5,
       image = $6,
-      author = $7,
-      publishedDate = $8,
-      readTime = $9,
-      category = $10,
-      tags = $11,
-      published = $12
+      images = COALESCE($7::jsonb, images),
+      author = $8,
+      publishedDate = $9,
+      readTime = $10,
+      category = $11,
+      tags = $12,
+      published = $13
     WHERE slug = $1
   `, [
     slug,
     updates.title,
     updates.slug,
-    updates.excerpt,
-    updates.content,
-    updates.image,
-    updates.author,
-    updates.publishedDate,
-    updates.readTime,
-    updates.category,
+    updates.description ?? updates.excerpt ?? '',
+    updates.description ?? updates.content ?? '',
+    updates.image ?? updates.images?.[0] ?? '',
+    updates.images === undefined ? null : JSON.stringify(updates.images),
+    updates.author ?? 'ONG VISA',
+    updates.publishedDate ?? null,
+    updates.readTime ?? 1,
+    updates.category ?? 'Événement',
     JSON.stringify(updates.tags || []),
     updates.published
   ]);

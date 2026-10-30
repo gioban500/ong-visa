@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { Plus, Edit, Trash2, Upload, Loader2, RefreshCw, Star } from 'lucide-react';
+import { getClientData, hasFreshClientData, setClientData } from '@/lib/client-data-cache';
 
 interface Testimonial {
   id: string;
@@ -16,8 +17,9 @@ interface Testimonial {
 }
 
 export default function AdminTestimonials() {
-  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
-  const [loading, setLoading] = useState(true);
+  const cacheKey = '/api/testimonials';
+  const [testimonials, setTestimonials] = useState<Testimonial[]>(() => getClientData<Testimonial[]>(cacheKey) || []);
+  const [loading, setLoading] = useState(() => !getClientData<Testimonial[]>(cacheKey));
   const [saving, setSaving] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTestimonial, setEditingTestimonial] = useState<Testimonial | null>(null);
@@ -31,10 +33,15 @@ export default function AdminTestimonials() {
     hero: false,
   });
 
-  const fetchTestimonials = async () => {
-    setLoading(true);
+  const fetchTestimonials = async (force = false) => {
+    if (!force && hasFreshClientData(cacheKey)) {
+      setLoading(false);
+      return;
+    }
+    if (!getClientData<Testimonial[]>(cacheKey)) setLoading(true);
     const res = await fetch('/api/testimonials');
     const data = await res.json();
+    setClientData(cacheKey, data);
     setTestimonials(data);
     setLoading(false);
   };
@@ -73,7 +80,7 @@ export default function AdminTestimonials() {
           body: JSON.stringify(formData),
         });
       }
-      await fetchTestimonials();
+      await fetchTestimonials(true);
       setIsModalOpen(false);
       resetForm();
     } catch {
@@ -104,7 +111,7 @@ export default function AdminTestimonials() {
   const handleDelete = async (id: string) => {
     if (!confirm('Êtes-vous sûr de vouloir supprimer ce témoignage ?')) return;
     await fetch(`/api/testimonials/${id}`, { method: 'DELETE' });
-    await fetchTestimonials();
+    await fetchTestimonials(true);
   };
 
   const toggleApproval = async (t: Testimonial) => {
@@ -113,7 +120,7 @@ export default function AdminTestimonials() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ...t, approved: !t.approved }),
     });
-    await fetchTestimonials();
+    await fetchTestimonials(true);
   };
 
   const toggleHero = async (t: Testimonial) => {
@@ -122,7 +129,7 @@ export default function AdminTestimonials() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ...t, hero: !t.hero }),
     });
-    await fetchTestimonials();
+    await fetchTestimonials(true);
   };
 
   const approved = testimonials.filter(t => t.approved).length;
@@ -138,7 +145,7 @@ export default function AdminTestimonials() {
           </p>
         </div>
         <div className="flex gap-3">
-          <button onClick={fetchTestimonials} className="p-3 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors" title="Actualiser">
+          <button onClick={() => void fetchTestimonials(true)} className="p-3 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors" title="Actualiser">
             <RefreshCw className="w-5 h-5 text-gray-600" />
           </button>
           <button

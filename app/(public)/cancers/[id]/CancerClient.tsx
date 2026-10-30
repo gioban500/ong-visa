@@ -3,32 +3,74 @@
 import React, { use, useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { notFound } from 'next/navigation';
 import { ArrowLeft, CheckCircle2 } from 'lucide-react';
 import { Cancer } from '@/types/cancer';
+import { getClientData, hasFreshClientData, setClientData } from '@/lib/client-data-cache';
 
 interface PageProps {
   params: Promise<{ id: string }>;
 }
 
+function readableValues(value: unknown): string[] {
+  if (typeof value === 'string') {
+    const text = value.trim();
+    if (!text) return [];
+
+    if (text.startsWith('{') || text.startsWith('[')) {
+      try {
+        return readableValues(JSON.parse(text));
+      } catch {
+        return text.split(/\r?\n/).map((item) => item.trim()).filter(Boolean);
+      }
+    }
+
+    return text.split(/\r?\n/).map((item) => item.trim()).filter(Boolean);
+  }
+
+  if (Array.isArray(value)) {
+    return value.flatMap(readableValues);
+  }
+
+  if (typeof value === 'object' && value !== null) {
+    const record = value as Record<string, unknown>;
+    const displayValue = record.label ?? record.title ?? record.text ?? record.description ?? record.value;
+    if (displayValue !== undefined) return readableValues(displayValue);
+    return Object.values(record).flatMap(readableValues);
+  }
+
+  if (typeof value === 'number' || typeof value === 'boolean') return [String(value)];
+  return [];
+}
+
 export default function CancerDetailPage({ params }: PageProps) {
   const { id } = use(params);
-  const [cancer, setCancer] = useState<Cancer | null>(null);
-  const [loading, setLoading] = useState(true);
+  return <CancerDetailContent key={id} id={id} />;
+}
+
+function CancerDetailContent({ id }: { id: string }) {
+  const cleanId = decodeURIComponent(id);
+  const cacheKey = `/api/cancers/${cleanId}`;
+  const [cancer, setCancer] = useState<Cancer | null>(() => getClientData<Cancer>(cacheKey) || null);
+  const [loading, setLoading] = useState(() => !getClientData<Cancer>(cacheKey));
+  const [loadError, setLoadError] = useState('');
 
   useEffect(() => {
+    if (hasFreshClientData(cacheKey)) return;
+
+    let active = true;
     async function fetchCancer() {
       try {
-        const cleanId = decodeURIComponent(id);
         const res = await fetch(`/api/cancers/${cleanId}`);
 
         if (res.ok) {
-          const data = await res.json();
-          setCancer(data);
+          const data: Cancer = await res.json();
+          setClientData(cacheKey, data);
+          if (active) setCancer(data);
         } else {
           const listRes = await fetch('/api/cancers');
           if (listRes.ok) {
             const allCancers: Cancer[] = await listRes.json();
+            setClientData('/api/cancers', allCancers);
             const found = allCancers.find((c) => {
               const slugifiedName = c.name
                 .toLowerCase()
@@ -43,19 +85,24 @@ export default function CancerDetailPage({ params }: PageProps) {
               );
             });
 
-            setCancer(found || null);
+            if (found) setClientData(cacheKey, found);
+            if (active) setCancer(found || null);
           }
         }
       } catch (error) {
         console.error('Erreur lors du chargement du cancer:', error);
-        setCancer(null);
+        if (active) {
+          setLoadError('Impossible de charger cette fiche médicale pour le moment.');
+          setCancer(null);
+        }
       } finally {
-        setLoading(false);
+        if (active) setLoading(false);
       }
     }
 
-    fetchCancer();
-  }, [id]);
+    void fetchCancer();
+    return () => { active = false; };
+  }, [cacheKey, cleanId]);
 
   if (loading) {
     return (
@@ -68,7 +115,23 @@ export default function CancerDetailPage({ params }: PageProps) {
   }
 
   if (!cancer) {
-    notFound();
+    return (
+      <main className="min-h-screen bg-[#FAF6F0] px-4 py-20 text-center text-[#2A2521]">
+        <h1 className="font-serif text-3xl font-semibold">
+          {loadError ? 'Fiche indisponible' : 'Fiche médicale introuvable'}
+        </h1>
+        <p className="mx-auto mt-3 max-w-lg text-[#756B60]">
+          {loadError || 'Cette fiche n’existe pas ou n’est plus disponible.'}
+        </p>
+        <Link
+          href="/cancers"
+          className="mt-7 inline-flex items-center gap-2 rounded-[4px] bg-[#9E2F55] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#7A2143]"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Retour aux fiches cancers
+        </Link>
+      </main>
+    );
   }
 
   const shortDescription =
@@ -78,32 +141,12 @@ export default function CancerDetailPage({ params }: PageProps) {
 
   const fullDescription = cancer.description || shortDescription;
 
-  let symptomsList: string[] = [];
-  const rawSymptoms = cancer.symptoms as unknown;
+  const symptomsList = readableValues(cancer.symptoms);
 
-  if (rawSymptoms) {
-    if (typeof rawSymptoms === 'object' && !Array.isArray(rawSymptoms)) {
-      const typed = rawSymptoms as {
-        early?: string[];
-        advanced?: string[];
-        warningSign?: string[];
-      };
-      symptomsList = [
-        ...(typed.early || []),
-        ...(typed.advanced || []),
-        ...(typed.warningSign || []),
-      ];
-    } else if (Array.isArray(rawSymptoms)) {
-      symptomsList = rawSymptoms as string[];
-    } else if (typeof rawSymptoms === 'string') {
-      symptomsList = rawSymptoms.split('\n').filter((item) => item.trim() !== '');
-    }
-  }
-
-  const primaryPrevention = cancer.screening?.primaryPrevention;
+  const primaryPrevention = (cancer.screening as { primaryPrevention?: unknown } | undefined)?.primaryPrevention;
   const preventionText =
     Array.isArray(primaryPrevention) && primaryPrevention.length > 0
-      ? primaryPrevention.join('\n')
+      ? readableValues(primaryPrevention).join('\n')
       : (cancer as unknown as { prevention?: string }).prevention ||
         'Un dépistage précoce permet d’augmenter considérablement les chances de guérison. N’hésitez pas à consulter un professionnel de santé.';
 
@@ -138,7 +181,7 @@ export default function CancerDetailPage({ params }: PageProps) {
           </div>
           {cancer.image && (
             <div className="lg:col-span-5">
-              <div className="w-full h-64 sm:h-72 rounded-[4px] overflow-hidden shadow-md border border-white/20 bg-[#F5EFE6]">
+              <div className="relative w-full h-64 sm:h-72 rounded-[4px] overflow-hidden shadow-md border border-white/20 bg-[#F5EFE6]">
                 <Image
                   src={cancer.image}
                   alt={cancer.name}

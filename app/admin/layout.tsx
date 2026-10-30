@@ -4,29 +4,66 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { 
-  LayoutDashboard, 
+import {
+  ArrowUpRight,
+  BookOpen,
+  ChevronRight,
+  FileText,
+  HeartHandshake,
+  LayoutDashboard,
   LogOut,
-  Search,
-  Bell,
-  ChevronDown,
-  Menu,
-  X,
   Mail,
   MapPin,
-  BookOpen
+  Menu,
+  MessageCircleHeart,
+  X,
 } from 'lucide-react';
+import { clearAllClientData } from '@/lib/client-data-cache';
+
+const navigationGroups = [
+  {
+    label: 'Vue d’ensemble',
+    items: [{ href: '/admin', icon: LayoutDashboard, label: 'Tableau de bord' }],
+  },
+  {
+    label: 'Au service du public',
+    items: [
+      { href: '/admin/messages', icon: Mail, label: 'Messages & écoute' },
+      { href: '/admin/centers', icon: MapPin, label: 'Centres de dépistage' },
+    ],
+  },
+  {
+    label: 'Contenus du site',
+    items: [
+      { href: '/admin/site-content', icon: BookOpen, label: 'Sections & prévention' },
+      { href: '/admin/cancers', icon: HeartHandshake, label: 'Fiches cancers' },
+      { href: '/admin/blog', icon: FileText, label: 'Articles & actualités' },
+    ],
+  },
+];
+
+const pageTitles: Record<string, string> = Object.fromEntries(
+  navigationGroups.flatMap((group) => group.items.map(({ href, label }) => [href, label])),
+);
 
 export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [adminEmail, setAdminEmail] = useState('');
   const pathname = usePathname();
   const router = useRouter();
-  const [adminEmail, setAdminEmail] = useState('');
   const isLoginPage = pathname === '/admin/login';
+  const pageTitle = pageTitles[pathname] || 'Espace administration';
+  const adminInitials = adminEmail
+    .split('@')[0]
+    .split(/[._-]/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0].toUpperCase())
+    .join('') || 'V';
 
   useEffect(() => {
     if (isLoginPage) return;
@@ -49,141 +86,130 @@ export default function AdminLayout({
     return () => {
       current = false;
     };
-  }, [isLoginPage, pathname, router]);
+  }, [isLoginPage, router]);
 
   if (isLoginPage) return <>{children}</>;
 
   if (!adminEmail) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="animate-spin w-10 h-10 border-4 border-purple-600 border-t-transparent rounded-full" />
+      <div className="admin-loading">
+        <span className="admin-loading-mark"><Image src="/logo.png" alt="" width={38} height={38} /></span>
+        <span className="admin-loading-spinner" aria-label="Chargement de votre espace" />
       </div>
     );
   }
 
-  const navItems = [
-    { href: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
-    { href: '/admin/messages', icon: Mail, label: 'Messages reçus' },
-    { href: '/admin/centers', icon: MapPin, label: 'Centres de dépistage' },
-    { href: '/admin/site-content', icon: BookOpen, label: 'Sections du site' },
-  ];
-
   return (
-    <div className="min-h-screen bg-gray-100 flex">
-      {/* Sidebar */}
-      <aside
-        className={`fixed top-0 left-0 z-40 h-screen w-72 bg-gradient-to-b from-purple-800 to-purple-900 transition-transform ${
-          isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        } lg:translate-x-0 flex flex-col`}
-      >
-        {/* Logo Area */}
-        <div className="p-6 flex items-center gap-3 border-b border-purple-700">
-          <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
-            <Image 
-              src="/logo.png" 
-              alt="VISA Logo" 
-              width={28} 
-              height={28} 
-              className="rounded" 
-            />
-          </div>
-          <div>
-            <h1 className="text-lg font-bold text-white">ONG VISA</h1>
-            <p className="text-xs text-purple-300">Admin Panel</p>
-          </div>
+    <div className="admin-layout-root">
+      {isSidebarOpen && (
+        <button
+          type="button"
+          className="admin-sidebar-backdrop"
+          aria-label="Fermer le panneau de navigation"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
+      <aside className={`admin-sidebar ${isSidebarOpen ? 'is-open' : ''}`}>
+        <div className="admin-brand-row">
+          <Link href="/admin" className="admin-brand" onClick={() => setIsSidebarOpen(false)}>
+            <span className="admin-brand-logo">
+              <Image src="/logo.png" alt="Logo ONG VISA" width={48} height={48} />
+            </span>
+            <span className="admin-brand-copy">
+              <strong>ONG VISA</strong>
+              <span>Administration</span>
+            </span>
+          </Link>
+          <button
+            type="button"
+            className="admin-mobile-close"
+            aria-label="Fermer le menu"
+            onClick={() => setIsSidebarOpen(false)}
+          >
+            <X size={20} />
+          </button>
         </div>
 
-        {/* Navigation */}
-        <nav className="flex-1 p-4 space-y-2 mt-4">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = pathname === item.href;
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`flex items-center gap-3 px-5 py-3 rounded-xl transition-all ${
-                  isActive
-                    ? 'bg-white text-purple-800 font-semibold shadow-lg'
-                    : 'text-purple-100 hover:bg-purple-700/50'
-                }`}
-              >
-                <Icon className="w-5 h-5" />
-                <span className="font-medium">{item.label}</span>
-              </Link>
-            );
-          })}
+        <div className="admin-sidebar-caption">Votre espace de gestion</div>
+        <nav className="admin-navigation" aria-label="Navigation d’administration">
+          {navigationGroups.map((group) => (
+            <div className="admin-nav-group" key={group.label}>
+              <p className="admin-nav-label">{group.label}</p>
+              {group.items.map(({ href, icon: Icon, label }) => {
+                const isActive = pathname === href
+                  || (href !== '/admin' && pathname.startsWith(`${href}/`));
+                return (
+                  <Link
+                    key={href}
+                    href={href}
+                    aria-current={isActive ? 'page' : undefined}
+                    onClick={() => setIsSidebarOpen(false)}
+                    className={`admin-nav-link ${isActive ? 'is-active' : ''}`}
+                  >
+                    <Icon size={18} strokeWidth={1.8} />
+                    <span>{label}</span>
+                    {isActive && <ChevronRight className="admin-nav-chevron" size={15} />}
+                  </Link>
+                );
+              })}
+            </div>
+          ))}
         </nav>
 
-        {/* Logout */}
-        <div className="p-4 border-t border-purple-700">
-          <button 
+        <div className="admin-sidebar-footer">
+          <div className="admin-mission-card">
+            <span className="admin-mission-icon"><HeartHandshake size={18} /></span>
+            <p>Ensemble pour la santé et le bien-être des femmes.</p>
+          </div>
+          <Link href="/" className="admin-site-link">
+            <span>Voir le site public</span>
+            <ArrowUpRight size={16} />
+          </Link>
+          <button
+            type="button"
             onClick={async () => {
               try {
                 await fetch('/api/admin/logout', { method: 'POST' });
               } finally {
+                clearAllClientData();
                 setAdminEmail('');
               }
               router.replace('/admin/login');
             }}
-            className="flex items-center gap-3 px-5 py-3 rounded-xl text-purple-100 hover:bg-purple-700/50 transition-all w-full"
+            className="admin-logout"
           >
-            <LogOut className="w-5 h-5" />
-            <span className="font-medium">Déconnexion</span>
+            <LogOut size={17} />
+            <span>Déconnexion</span>
           </button>
         </div>
       </aside>
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col lg:ml-72">
-        {/* Top Bar */}
-        <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-30">
-          <div className="flex items-center justify-between px-6 py-4">
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                className="lg:hidden text-gray-600 hover:text-purple-800"
-              >
-                {isSidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-              </button>
-              
-              <div className="flex items-center gap-2 text-gray-700">
-                <span className="font-semibold text-gray-800">Admin</span>
-              </div>
-
-              {/* Search Bar */}
-              <div className="ml-10 relative hidden md:block">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Rechercher..."
-                  className="pl-10 pr-4 py-2 bg-gray-100 border border-gray-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 w-80"
-                />
-              </div>
-            </div>
-
-            <div className="flex items-center gap-4">
-              <button className="relative p-2 text-gray-600 hover:text-purple-800 transition-colors">
-                <Bell className="w-5 h-5" />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-pink-500 rounded-full"></span>
-              </button>
-
-              <div className="flex items-center gap-3 border-l border-gray-200 pl-4">
-                <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold shadow-md">
-                  A
-                </div>
-                <div className="hidden md:block">
-                  <p className="text-sm font-semibold text-gray-900">{adminEmail}</p>
-                  <p className="text-xs text-gray-500">Administrateur</p>
-                </div>
-                <ChevronDown className="w-4 h-4 text-gray-400 hidden md:block" />
-              </div>
+      <div className="admin-main">
+        <header className="admin-topbar">
+          <div className="admin-topbar-title">
+            <button
+              type="button"
+              onClick={() => setIsSidebarOpen(true)}
+              className="admin-menu-toggle"
+              aria-label="Ouvrir le menu"
+            >
+              <Menu size={21} />
+            </button>
+            <div>
+              <span className="admin-topbar-eyebrow">ONG VISA · ESPACE ADMIN</span>
+              <h1>{pageTitle}</h1>
             </div>
           </div>
+          <div className="admin-user">
+            <span className="admin-user-avatar">{adminInitials}</span>
+            <span className="admin-user-copy">
+              <strong>{adminEmail}</strong>
+              <span>Administrateur</span>
+            </span>
+          </div>
         </header>
-
-        {/* Content */}
-        <main className="flex-1 p-6 lg:p-8 overflow-y-auto">{children}</main>
+        <main className="admin-content">{children}</main>
       </div>
     </div>
   );

@@ -116,7 +116,7 @@ export default function HeroCarousel({ testimonials }: HeroCarouselProps) {
                 href="/blog"
                 className="w-full sm:w-auto bg-[#008080] hover:bg-[#115e59] text-white px-6 py-3.5 rounded-xl font-bold text-sm sm:text-base transition shadow-lg shadow-teal-700/20 flex items-center justify-center"
               >
-                Planifier un Dépistage
+                Nos actualités
               </Link>
               <Link 
                 href="/donation"

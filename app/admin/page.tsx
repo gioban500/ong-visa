@@ -2,7 +2,16 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { BookOpen, Loader2, Mail, MapPin } from 'lucide-react';
+import {
+  ArrowUpRight,
+  BookOpen,
+  HeartHandshake,
+  Loader2,
+  Mail,
+  MapPin,
+  Sparkles,
+} from 'lucide-react';
+import { getClientData, setClientData } from '@/lib/client-data-cache';
 
 interface Summary {
   messages: number;
@@ -15,7 +24,8 @@ interface Summary {
 }
 
 export default function AdminDashboard() {
-  const [summary, setSummary] = useState<Summary | null>(null);
+  const cacheKey = '/api/admin/summary';
+  const [summary, setSummary] = useState<Summary | null>(() => getClientData<Summary>(cacheKey) || null);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -23,6 +33,7 @@ export default function AdminDashboard() {
       .then(async (response) => {
         const data = await response.json();
         if (!response.ok) throw new Error(data.error || 'Impossible de charger le tableau de bord.');
+        setClientData(cacheKey, data);
         setSummary(data);
       })
       .catch((loadError: unknown) => {
@@ -30,27 +41,86 @@ export default function AdminDashboard() {
       });
   }, []);
 
-  if (error) return <p role="alert" className="rounded bg-red-50 p-4 text-red-700">{error}</p>;
-  if (!summary) return <Loader2 className="mx-auto my-16 h-8 w-8 animate-spin text-purple-700" />;
+  if (error) return <p role="alert" className="admin-feedback-error">{error}</p>;
+  if (!summary) {
+    return (
+      <div className="admin-dashboard-loading" role="status" aria-label="Chargement du tableau de bord">
+        <Loader2 className="h-7 w-7 animate-spin" />
+      </div>
+    );
+  }
 
   const cards = [
-    { label: 'Messages reçus', value: `${summary.messages} · ${summary.newMessages} nouveaux`, href: '/admin/messages', icon: Mail },
-    { label: 'Centres de dépistage', value: `${summary.publishedCenters} publiés sur ${summary.centers}`, href: '/admin/centers', icon: MapPin },
-    { label: 'Sections du site', value: `${summary.publishedTopics} sujets · ${summary.questionResponses} réponses · étapes après résultat`, href: '/admin/site-content', icon: BookOpen },
+    {
+      label: 'Messages reçus',
+      value: summary.messages.toLocaleString('fr-FR'),
+      detail: `${summary.newMessages} nouveau${summary.newMessages === 1 ? '' : 'x'} à consulter`,
+      href: '/admin/messages',
+      icon: Mail,
+      accent: 'clay',
+    },
+    {
+      label: 'Centres de dépistage',
+      value: summary.publishedCenters.toLocaleString('fr-FR'),
+      detail: `sur ${summary.centers} centre${summary.centers === 1 ? '' : 's'} enregistré${summary.centers === 1 ? '' : 's'}`,
+      href: '/admin/centers',
+      icon: MapPin,
+      accent: 'teal',
+    },
+    {
+      label: 'Sujets de prévention',
+      value: summary.publishedTopics.toLocaleString('fr-FR'),
+      detail: `${summary.questionResponses} réponse${summary.questionResponses === 1 ? '' : 's'} aux questions`,
+      href: '/admin/site-content',
+      icon: BookOpen,
+      accent: 'gold',
+    },
   ];
 
   return (
-    <section className="mx-auto max-w-6xl">
-      <h1 className="mb-2 text-3xl font-bold text-gray-900">Administration ONG VISA</h1>
-      <p className="mb-8 text-gray-600">Gestion du contenu et des demandes de la version actuelle du site.</p>
-      <div className="grid gap-5 md:grid-cols-3">
-        {cards.map(({ label, value, href, icon: Icon }) => (
-          <Link key={href} href={href} className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-            <Icon className="mb-4 h-7 w-7 text-purple-700" />
-            <h2 className="font-semibold text-gray-900">{label}</h2>
-            <p className="mt-2 text-sm text-gray-600">{value}</p>
+    <section className="admin-dashboard">
+      <div className="admin-dashboard-welcome">
+        <div>
+          <span className="admin-section-kicker"><Sparkles size={14} /> VOTRE ESPACE VISA</span>
+          <h2>Chaque action compte.</h2>
+          <p>Merci de faire vivre la prévention, l’écoute et l’accompagnement avec l’équipe ONG VISA.</p>
+        </div>
+        <div className="admin-welcome-mark" aria-hidden="true">
+          <HeartHandshake size={54} strokeWidth={1.2} />
+        </div>
+      </div>
+
+      <div className="admin-dashboard-section-heading">
+        <div>
+          <h2>En un coup d’œil</h2>
+          <p>Les informations utiles pour suivre votre espace.</p>
+        </div>
+      </div>
+
+      <div className="admin-summary-grid">
+        {cards.map(({ label, value, detail, href, icon: Icon, accent }) => (
+          <Link key={href} href={href} className={`admin-summary-card accent-${accent}`}>
+            <div className="admin-summary-card-top">
+              <span className="admin-summary-icon"><Icon size={20} strokeWidth={1.8} /></span>
+              <ArrowUpRight size={18} className="admin-summary-arrow" />
+            </div>
+            <span className="admin-summary-label">{label}</span>
+            <strong className="admin-summary-value">{value}</strong>
+            <span className="admin-summary-detail">{detail}</span>
           </Link>
         ))}
+      </div>
+
+      <div className="admin-dashboard-next">
+        <div className="admin-next-icon"><BookOpen size={22} /></div>
+        <div>
+          <span className="admin-next-kicker">À FAIRE VIVRE</span>
+          <h3>Des contenus clairs, une prévention accessible.</h3>
+          <p>Actualisez les sections d’information et les ressources utiles aux visiteurs du site.</p>
+        </div>
+        <Link href="/admin/site-content" className="admin-next-link">
+          Gérer les contenus <ArrowUpRight size={16} />
+        </Link>
       </div>
     </section>
   );

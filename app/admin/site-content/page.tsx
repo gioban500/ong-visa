@@ -2,6 +2,7 @@
 
 import { FormEvent, useCallback, useEffect, useState } from 'react';
 import { Loader2, Pencil, Plus, Trash2 } from 'lucide-react';
+import { getClientData, hasFreshClientData, setClientData } from '@/lib/client-data-cache';
 
 type Collection = 'topics' | 'questionResponses' | 'resultSteps';
 type FieldValue = string | number | boolean;
@@ -41,29 +42,36 @@ function excerptOf(collection: Collection, entry: Entry): string {
 }
 
 export default function AdminSiteContent() {
+  const cacheKey = '/api/admin/site-content';
   const [collection, setCollection] = useState<Collection>('topics');
-  const [content, setContent] = useState<SiteContent>({
+  const [content, setContent] = useState<SiteContent>(() => getClientData<SiteContent>(cacheKey) || {
     topics: [],
     questionResponses: [],
     resultSteps: [],
   });
   const [form, setForm] = useState<Record<string, FieldValue>>(emptyForms.topics);
   const [editing, setEditing] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => !getClientData<SiteContent>(cacheKey));
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
-  const load = useCallback(async () => {
-    setLoading(true);
+  const load = useCallback(async (force = false) => {
+    if (!force && hasFreshClientData(cacheKey)) {
+      setLoading(false);
+      return;
+    }
+    if (!getClientData<SiteContent>(cacheKey)) setLoading(true);
     try {
       const response = await fetch('/api/admin/site-content', { cache: 'no-store' });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Impossible de charger le contenu du site.');
-      setContent({
+      const nextContent = {
         topics: Array.isArray(data.topics) ? data.topics.map(asEntry) : [],
         questionResponses: Array.isArray(data.questionResponses) ? data.questionResponses.map(asEntry) : [],
         resultSteps: Array.isArray(data.resultSteps) ? data.resultSteps.map(asEntry) : [],
-      });
+      };
+      setClientData(cacheKey, nextContent);
+      setContent(nextContent);
       setError('');
     } catch (loadError) {
       setError(loadError instanceof Error ? loadError.message : 'Impossible de charger le contenu du site.');
@@ -114,7 +122,7 @@ export default function AdminSiteContent() {
       if (!response.ok) throw new Error(data.error || 'Impossible d’enregistrer ce contenu.');
       setEditing(false);
       setForm({ ...emptyForms[collection] });
-      await load();
+      await load(true);
     } catch (saveError) {
       setError(saveError instanceof Error ? saveError.message : 'Impossible d’enregistrer ce contenu.');
     } finally {
@@ -131,7 +139,7 @@ export default function AdminSiteContent() {
       );
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Impossible de supprimer ce contenu.');
-      await load();
+      await load(true);
     } catch (removeError) {
       setError(removeError instanceof Error ? removeError.message : 'Impossible de supprimer ce contenu.');
     }

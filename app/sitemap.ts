@@ -30,7 +30,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
     const posts = await getBlogPosts();
     const blogUrls: MetadataRoute.Sitemap = posts.flatMap(post => {
-      if (typeof post.slug !== 'string' || !post.slug) return [];
+      if (typeof post.slug !== 'string' || !post.slug || post.published !== true) return [];
       return [{
         url: `${baseUrl}/blog/${post.slug}`,
         lastModified: typeof post.updatedAt === 'string' ? new Date(post.updatedAt) : new Date(),

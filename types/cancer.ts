@@ -54,12 +54,14 @@ export interface BlogPost {
   id: string;
   title: string;
   slug: string;
-  excerpt: string;
-  content: string;
+  description: string;
+  excerpt?: string;
+  content?: string;
   image: string;
+  images?: string[];
   author: string;
-  publishedDate: string;
-  readTime: number;
+  publishedDate: string | null;
+  readTime?: number;
   category: string;
   tags: string[];
 }

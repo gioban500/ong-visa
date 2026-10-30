@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import BlogClient from './BlogClient';
-import { getBlogPostBySlug } from '@/lib/db';
+import { getBlogPostSummaryBySlug } from '@/lib/db';
 
 // Permet de conserver les exports (types, fonctions) si d'autres fichiers les importaient
 export * from './BlogClient';
@@ -14,12 +14,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
 
   try {
-    const event = await getBlogPostBySlug(slug);
-    if (event) {
-      const title = typeof event.title === 'string' ? event.title : 'Événement';
-      const description = typeof event.excerpt === 'string' ? event.excerpt : 'Sensibilisation et dépistage';
-      const image = typeof event.image === 'string' && /^https?:\/\//i.test(event.image)
-        ? event.image
+    const post = await getBlogPostSummaryBySlug(slug);
+    if (post?.published === true) {
+      const title = typeof post.title === 'string' ? post.title : 'Actualité';
+      const description = typeof post.description === 'string'
+        ? post.description
+        : typeof post.excerpt === 'string'
+          ? post.excerpt
+          : 'Actualités et actions de l’ONG VISA';
+      const postImages = Array.isArray(post.images) ? post.images : [];
+      const firstImage = postImages[0] || post.image;
+      const image = typeof firstImage === 'string' && /^https?:\/\//i.test(firstImage)
+        ? firstImage
         : undefined;
       return {
         title: title,
@@ -36,7 +42,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   return {
-    title: 'Événement & Sensibilisation',
+    title: 'Actualités | ONG VISA',
   };
 }
 

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { Loader2, RefreshCw, Trash2 } from 'lucide-react';
+import { getClientData, hasFreshClientData, setClientData } from '@/lib/client-data-cache';
 
 type MessageStatus = 'new' | 'in_progress' | 'resolved';
 
@@ -24,18 +25,25 @@ const statusLabels: Record<MessageStatus, string> = {
 };
 
 export default function AdminMessages() {
-  const [messages, setMessages] = useState<ContactMessage[]>([]);
-  const [loading, setLoading] = useState(true);
+  const cacheKey = '/api/contact-messages';
+  const [messages, setMessages] = useState<ContactMessage[]>(() => getClientData<ContactMessage[]>(cacheKey) || []);
+  const [loading, setLoading] = useState(() => !getClientData<ContactMessage[]>(cacheKey));
   const [error, setError] = useState('');
 
-  const fetchMessages = useCallback(async () => {
-    setLoading(true);
+  const fetchMessages = useCallback(async (force = false) => {
+    if (!force && hasFreshClientData(cacheKey)) {
+      setLoading(false);
+      return;
+    }
+    if (!getClientData<ContactMessage[]>(cacheKey)) setLoading(true);
     setError('');
     try {
       const response = await fetch('/api/contact-messages', { cache: 'no-store' });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Impossible de charger les messages.');
-      setMessages(Array.isArray(data) ? data : []);
+      const rows = Array.isArray(data) ? data : [];
+      setClientData(cacheKey, rows);
+      setMessages(rows);
     } catch (fetchError) {
       setError(fetchError instanceof Error ? fetchError.message : 'Impossible de charger les messages.');
     } finally {
@@ -59,7 +67,7 @@ export default function AdminMessages() {
       setError(data.error || 'Impossible de modifier le statut.');
       return;
     }
-    await fetchMessages();
+    await fetchMessages(true);
   };
 
   const deleteMessage = async (id: string) => {
@@ -70,7 +78,7 @@ export default function AdminMessages() {
       setError(data.error || 'Impossible de supprimer le message.');
       return;
     }
-    await fetchMessages();
+    await fetchMessages(true);
   };
 
   return (
@@ -80,7 +88,7 @@ export default function AdminMessages() {
           <h1 className="text-3xl font-bold text-gray-900">Messages de contact et d’écoute</h1>
           <p className="mt-2 text-gray-600">{messages.length} demande(s) enregistrée(s)</p>
         </div>
-        <button onClick={() => void fetchMessages()} className="flex items-center gap-2 rounded-lg bg-white px-4 py-2 shadow">
+        <button onClick={() => void fetchMessages(true)} className="flex items-center gap-2 rounded-lg bg-white px-4 py-2 shadow">
           <RefreshCw className="h-4 w-4" /> Actualiser
         </button>
       </header>

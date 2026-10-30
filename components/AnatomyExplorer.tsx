@@ -259,6 +259,7 @@ export default function AnatomyExplorer() {
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
               <Link href={zone.buttonLink} className="btn btn-clay">{zone.buttonText}</Link>
               <Link href="#centres" className="btn btn-outline">Voir les centres d&apos;imagerie</Link>
+              <Link href="/cancers" className="btn btn-clay">En savoir plus</Link>
             </div>
           </div>}
         </div>

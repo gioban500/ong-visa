@@ -2,6 +2,7 @@
 
 import { FormEvent, useCallback, useEffect, useState } from 'react';
 import { Loader2, Pencil, Plus, Trash2, X } from 'lucide-react';
+import { getClientData, hasFreshClientData, setClientData } from '@/lib/client-data-cache';
 
 interface Center {
   id: string;
@@ -25,19 +26,25 @@ const emptyForm: CenterForm = {
 };
 
 export default function AdminCenters() {
-  const [centers, setCenters] = useState<Center[]>([]);
+  const cacheKey = '/api/admin/centers';
+  const [centers, setCenters] = useState<Center[]>(() => getClientData<Center[]>(cacheKey) || []);
   const [form, setForm] = useState<CenterForm>(emptyForm);
   const [editing, setEditing] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => !getClientData<Center[]>(cacheKey));
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
-  const loadCenters = useCallback(async () => {
-    setLoading(true);
+  const loadCenters = useCallback(async (force = false) => {
+    if (!force && hasFreshClientData(cacheKey)) {
+      setLoading(false);
+      return;
+    }
+    if (!getClientData<Center[]>(cacheKey)) setLoading(true);
     try {
       const response = await fetch('/api/admin/centers', { cache: 'no-store' });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Impossible de charger les centres.');
+      setClientData(cacheKey, data);
       setCenters(data);
       setError('');
     } catch (loadError) {
@@ -79,7 +86,7 @@ export default function AdminCenters() {
       if (!response.ok) throw new Error(data.error || 'Impossible d’enregistrer le centre.');
       setForm(emptyForm);
       setEditing(false);
-      await loadCenters();
+      await loadCenters(true);
     } catch (saveError) {
       setError(saveError instanceof Error ? saveError.message : 'Impossible d’enregistrer le centre.');
     } finally {
@@ -95,7 +102,7 @@ export default function AdminCenters() {
       setError(data.error || 'Impossible de supprimer le centre.');
       return;
     }
-    await loadCenters();
+    await loadCenters(true);
   };
 
   return (

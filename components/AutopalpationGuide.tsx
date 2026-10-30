@@ -63,6 +63,7 @@ export default function AutopalpationGuide() {
 
         {/* Corps : 2 colonnes */}
         <div
+          className="apalp-grid"
           style={{
             display: 'grid',
             gridTemplateColumns: 'minmax(0,1fr) minmax(0,1.15fr)',
@@ -71,7 +72,6 @@ export default function AutopalpationGuide() {
             maxWidth: 1060,
             margin: '0 auto',
           }}
-          className="apalp-grid"
         >
           {/* Colonne image */}
           <div
@@ -213,6 +213,7 @@ export default function AutopalpationGuide() {
 
             {/* Contrôles */}
             <div
+              className="apalp-controls"
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -255,7 +256,11 @@ export default function AutopalpationGuide() {
 
       <style>{`
         @media (max-width: 900px) {
-          .apalp-grid { grid-template-columns: 1fr !important; }
+         .apalp-grid { grid-template-columns: minmax(0, 1fr) !important; }
+         .apalp-grid > * { min-width: 0; }
+         .apalp-grid > :last-child { padding: 22px 18px !important; }
+         .apalp-grid > :first-child > div:last-child { flex-wrap: wrap; gap: 8px; }
+         .apalp-controls { flex-wrap: wrap; gap: 10px; }
         }
       `}</style>
     </section>

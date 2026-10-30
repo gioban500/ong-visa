@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import { Plus, Edit, Trash2, Upload, Loader2, RefreshCw, X } from 'lucide-react';
+import { clearClientData, getClientData, hasFreshClientData, setClientData } from '@/lib/client-data-cache';
 
 type CancerRecord = Record<string, unknown> & {
   id: string;
@@ -22,7 +23,6 @@ interface CancerData {
   description: string;
   symptoms: string;
   riskFactors: string;
-  prevention: string;
   treatment: string;
 }
 
@@ -49,7 +49,6 @@ const initialFormState: CancerData = {
   description: '',
   symptoms: '',
   riskFactors: '',
-  prevention: '',
   treatment: '',
 };
 
@@ -80,8 +79,8 @@ const extractRiskFactors = (item: CancerRecord | null | undefined): string => {
 };
 
 export default function AdminCancers() {
-  const [cancersList, setCancersList] = useState<CancerRecord[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [cancersList, setCancersList] = useState<CancerRecord[]>(() => getClientData<CancerRecord[]>('/api/cancers') || []);
+  const [loading, setLoading] = useState(() => !getClientData<CancerRecord[]>('/api/cancers'));
   const [saving, setSaving] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCancer, setEditingCancer] = useState<CancerRecord | null>(null);
@@ -89,12 +88,19 @@ export default function AdminCancers() {
 
   const [formData, setFormData] = useState<CancerData>(initialFormState);
 
-  const loadCancers = useCallback(async () => {
+  const loadCancers = useCallback(async (force = false) => {
+    if (!force && hasFreshClientData('/api/cancers')) {
+      setLoading(false);
+      return;
+    }
+    if (!getClientData<CancerRecord[]>('/api/cancers')) setLoading(true);
     try {
       const res = await fetch('/api/cancers');
       if (!res.ok) throw new Error('Échec du chargement des cancers.');
       const data: unknown = await res.json();
-      setCancersList(Array.isArray(data) ? data.filter(isCancerRecord) : []);
+      const records = Array.isArray(data) ? data.filter(isCancerRecord) : [];
+      setClientData('/api/cancers', records);
+      setCancersList(records);
     } catch (error) {
       console.error('Erreur lors du chargement des cancers:', error);
     } finally {
@@ -103,8 +109,7 @@ export default function AdminCancers() {
   }, []);
 
   const handleRefresh = () => {
-    setLoading(true);
-    loadCancers();
+    void loadCancers(true);
   };
 
   useEffect(() => {
@@ -166,7 +171,8 @@ export default function AdminCancers() {
 
       if (!res.ok) throw new Error('Erreur réseau');
 
-      await loadCancers();
+      if (editingCancer) clearClientData(`/api/cancers/${editingCancer.id}`);
+      await loadCancers(true);
       setIsModalOpen(false);
       resetForm();
     } catch {
@@ -197,7 +203,6 @@ export default function AdminCancers() {
       description: toFormText(cancer.description),
       symptoms: toFormText(cancer.symptoms),
       riskFactors: initialRisk,
-      prevention: toFormText(cancer.prevention),
       treatment: toFormText(cancer.treatment),
     });
 
@@ -223,7 +228,6 @@ export default function AdminCancers() {
             description: toFormText(fullData.description) || f.description,
             symptoms: toFormText(fullData.symptoms) || f.symptoms,
             riskFactors: fetchedRisk,
-            prevention: toFormText(fullData.prevention) || f.prevention,
             treatment: toFormText(fullData.treatment) || f.treatment,
           }));
         }
@@ -236,7 +240,7 @@ export default function AdminCancers() {
   const handleDelete = async (id: string) => {
     if (!confirm('Êtes-vous sûr de vouloir supprimer ce type de cancer ?')) return;
     await fetch(`/api/cancers/${id}`, { method: 'DELETE' });
-    await loadCancers();
+    await loadCancers(true);
   };
 
   return (
@@ -472,28 +476,15 @@ export default function AdminCancers() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1">Prévention & Dépistage</label>
-                    <textarea
-                      value={formData.prevention}
-                      onChange={(e) => setFormData(f => ({ ...f, prevention: e.target.value }))}
-                      rows={3}
-                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:outline-none text-sm"
-                      placeholder="Méthodes de prévention et gestes de dépistage..."
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1">Traitements envisageables</label>
-                    <textarea
-                      value={formData.treatment}
-                      onChange={(e) => setFormData(f => ({ ...f, treatment: e.target.value }))}
-                      rows={3}
-                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:outline-none text-sm"
-                      placeholder="Options thérapeutiques disponibles..."
-                    />
-                  </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">Traitements envisageables</label>
+                  <textarea
+                    value={formData.treatment}
+                    onChange={(e) => setFormData(f => ({ ...f, treatment: e.target.value }))}
+                    rows={3}
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:outline-none text-sm"
+                    placeholder="Options thérapeutiques disponibles..."
+                  />
                 </div>
               </div>
 

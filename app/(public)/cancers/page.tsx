@@ -5,27 +5,32 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Search, ArrowRight } from 'lucide-react';
 import { Cancer } from '@/types/cancer';
+import { getClientData, hasFreshClientData, setClientData } from '@/lib/client-data-cache';
 
 export default function CancersPage() {
-  const [cancers, setCancers] = useState<Cancer[]>([]);
+  const [cancers, setCancers] = useState<Cancer[]>(() => getClientData<Cancer[]>('/api/cancers') || []);
   const [searchQuery, setSearchQuery] = useState('');
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => !getClientData<Cancer[]>('/api/cancers'));
 
   useEffect(() => {
+    if (hasFreshClientData('/api/cancers')) return;
+    let active = true;
     async function fetchCancers() {
       try {
         const res = await fetch('/api/cancers');
         if (res.ok) {
-          const data = await res.json();
-          setCancers(data);
+          const data: Cancer[] = await res.json();
+          setClientData('/api/cancers', data);
+          if (active) setCancers(data);
         }
       } catch (error) {
         console.error('Erreur chargement cancers:', error);
       } finally {
-        setLoading(false);
+        if (active) setLoading(false);
       }
     }
-    fetchCancers();
+    void fetchCancers();
+    return () => { active = false; };
   }, []);
 
   const slugify = (str: string) =>

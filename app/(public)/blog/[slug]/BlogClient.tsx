@@ -1,355 +1,179 @@
 'use client';
 
-import React, { use, useEffect, useState } from 'react';
+import { use, useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
-import { ArrowLeft, CheckCircle, Loader2 } from 'lucide-react';
-import { BlogPost } from '@/types/cancer';
-
-// 1. Imports pour le téléphone avec drapeaux
-import 'react-phone-number-input/style.css';
-import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input';
+import { ArrowLeft, CalendarDays, Image as ImageIcon } from 'lucide-react';
+import { getClientData, hasFreshClientData, setClientData } from '@/lib/client-data-cache';
 
 interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
-interface EventData extends BlogPost {
-  organizer?: string;
-  time?: string;
-  location?: string;
+interface BlogPost {
+  id: string;
+  title: string;
+  slug: string;
+  description?: string;
+  excerpt?: string;
+  content?: string;
+  image?: string;
+  imageCount?: number;
+  publishedDate?: string;
 }
 
-// Fonction de formatage propre de la date (JJ/MM/AAAA)
-const formatDate = (dateString?: string) => {
-  if (!dateString) return 'Date à préciser';
-  
-  const date = new Date(dateString);
+function formatDate(value?: string) {
+  if (!value) return null;
+  const isoDate = /^(\d{4})-(\d{2})-(\d{2})/.exec(value);
+  if (isoDate) return `${isoDate[3]}/${isoDate[2]}/${isoDate[1]}`;
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? value : date.toLocaleDateString('fr-FR');
+}
 
-  // Si ce n'est pas une date ISO valide (ou déjà du texte personnalisé), on la garde telle quelle
-  if (isNaN(date.getTime())) return dateString;
-
-  return date.toLocaleDateString('fr-FR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-  });
-};
-
-const MOCK_POSTS: Record<string, EventData> = {
-  'campagne-depistage-sein': {
-    id: '1',
-    title: 'Campagne Nationale de Dépistage du Cancer du Sein',
-    slug: 'campagne-depistage-sein',
-    excerpt: 'Séance de sensibilisation, consultations gynécologiques et dépistage gratuit au CMS Agoè-Nyivé.',
-    content: `Dans le cadre de la lutte contre les cancers féminins au Togo, l'ONG VISA organise une grande journée de dépistage gratuit du cancer du sein et du col de l'utérus.
-    
-Nos équipes médicales et bénévoles seront sur place pour accueillir les femmes, réaliser les examens cliniques, et fournir des conseils de prévention essentiels.
-    
-L'événement est entièrement gratuit et ouvert à toutes les femmes de Lomé et ses environs.`,
-    image: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=1000&q=80',
-    author: 'ONG VISA',
-    organizer: 'Comité Médical ONG VISA',
-    publishedDate: '15/10/2026',
-    time: '08h00 - 16h00',
-    location: 'CMS Agoè-Nyivé, Lomé, Togo',
-    readTime: 5,
-    category: 'DÉPISTAGE',
-    tags: ['Dépistage', 'Lomé']
-  },
-  'conference-prevention-col-uterus': {
-    id: '2',
-    title: 'CONFÉRENCE SANTÉ & PRÉVENTION',
-    slug: 'conference-prevention-col-uterus',
-    excerpt: 'Échanges avec des professionnels de santé sur les avancées de la prise en charge des cancers féminins au Togo.',
-    content: `Cette conférence annuelle réunit oncologues, gynécologues, chercheurs et associations de patients pour débattre des nouveaux protocoles de traitement et des stratégies d'amélioration de l'accès aux soins de santé en Afrique de l'Ouest.`,
-    image: 'https://images.unsplash.com/photo-1587825140708-dfaf72ae4b04?auto=format&fit=crop&w=1000&q=80',
-    author: 'Dr. Lawson',
-    organizer: 'Comité Scientifique ONG VISA',
-    publishedDate: '28/11/2026',
-    time: '14h00 - 18h00',
-    location: 'Avenue de la Présidence, Lomé, Togo',
-    readTime: 4,
-    category: 'CONFÉRENCE',
-    tags: ['Santé', 'Prévention']
-  }
-};
-
-export default function EventDetailPage({ params }: PageProps) {
+export default function BlogDetailPage({ params }: PageProps) {
   const { slug } = use(params);
-  const [post, setPost] = useState<EventData | null>(null);
-  const [loading, setLoading] = useState(true);
+  return <BlogDetailContent key={slug} slug={slug} />;
+}
 
-  // Formulaire d'inscription & états de soumission
-  const [fullName, setFullName] = useState('');
-  const [phone, setPhone] = useState('');
-  const [isSubmitted, setIsSubmitted] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
+function BlogDetailContent({ slug }: { slug: string }) {
+  const cacheKey = `/api/blog/${encodeURIComponent(slug)}`;
+  const [post, setPost] = useState<BlogPost | null>(() => getClientData<BlogPost>(cacheKey) || null);
+  const [loading, setLoading] = useState(() => !getClientData<BlogPost>(cacheKey));
+  const [loadError, setLoadError] = useState('');
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [imageSize, setImageSize] = useState<{ src: string; width: number; height: number } | null>(null);
 
   useEffect(() => {
+    if (hasFreshClientData(cacheKey)) return;
+
+    let active = true;
     async function fetchPost() {
       try {
-        const res = await fetch(`/api/blog/${slug}`);
-        if (res.ok) {
-          const item = await res.json();
-          setPost({
-            id: String(item.id),
-            title: item.title || '',
-            slug: item.slug || slug,
-            excerpt: item.excerpt || item.shortdescription || item.description || '',
-            content: item.content || item.description || '',
-            image: item.image || '',
-            author: item.author || 'ONG VISA',
-            organizer: item.organizer || item.author || 'Comité Scientifique ONG VISA',
-            publishedDate: formatDate(item.publishedDate || item.published_date || item.created_at || item.date),
-            time: item.time || item.horaire || '09h00 - 17h00',
-            location: item.location || item.lieu || 'Lomé, Togo',
-            readTime: Number(item.readTime || item.read_time) || 5,
-            category: (item.category || 'ÉVÉNEMENT').toUpperCase(),
-            tags: Array.isArray(item.tags) ? item.tags : [],
-          });
-        } else {
-          setPost(MOCK_POSTS[slug] || MOCK_POSTS['conference-prevention-col-uterus']);
+        const response = await fetch(cacheKey, { cache: 'no-store' });
+        if (response.status === 404) {
+          if (active) setPost(null);
+          return;
+        }
+        if (!response.ok) throw new Error('Cette publication ne peut pas être chargée pour le moment.');
+        const item: BlogPost = await response.json();
+        setClientData(cacheKey, item);
+        if (active) {
+          setPost(item);
+          setSelectedImageIndex(0);
+          setImageSize(null);
         }
       } catch (error) {
-        console.error("Erreur lors du chargement de l'événement:", error);
-        setPost(MOCK_POSTS[slug] || MOCK_POSTS['conference-prevention-col-uterus']);
+        console.error('Erreur lors du chargement de la publication :', error);
+        if (active) setLoadError(error instanceof Error ? error.message : 'Erreur lors du chargement.');
       } finally {
-        setLoading(false);
+        if (active) setLoading(false);
       }
     }
-
-    if (slug) {
-      fetchPost();
-    }
-  }, [slug]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!fullName) return;
-
-    // 2. Validation du numéro de téléphone
-    if (!phone || !isValidPhoneNumber(phone)) {
-      setSubmitError("Le numéro de téléphone saisi n'est pas valide pour le pays sélectionné.");
-      return;
-    }
-
-    setIsSubmitting(true);
-    setSubmitError(null);
-
-    try {
-      const res = await fetch('/api/event-registrations', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: fullName,
-          phone: phone,
-          eventId: post?.id || '',
-          eventTitle: post?.title || '',
-        }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || "Erreur lors de l'inscription.");
-      }
-
-      setIsSubmitted(true);
-    } catch (error: unknown) {
-      console.error("Erreur lors de l'inscription :", error);
-      setSubmitError(error instanceof Error ? error.message : "Une erreur est survenue lors de la validation.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+    void fetchPost();
+    return () => { active = false; };
+  }, [cacheKey]);
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-[#0b1329] text-white flex items-center justify-center">
-        <p className="text-sm font-medium animate-pulse">Chargement de l&apos;événement...</p>
-      </div>
-    );
+    return <main className="flex min-h-[60vh] items-center justify-center bg-[#FAF6F0] text-sm text-[#756B60]">Chargement de la publication...</main>;
   }
+  if (!post && !loadError) notFound();
 
-  if (!post) {
-    notFound();
-  }
+  const imageCount = post?.imageCount || (post?.image ? 1 : 0);
+  const selectedImage = imageCount > 0
+    ? `/api/blog/${encodeURIComponent(slug)}/images/${selectedImageIndex}`
+    : '';
+  const description = post?.description || post?.excerpt || post?.content || '';
+  const date = formatDate(post?.publishedDate);
 
   return (
-    <div className="w-full bg-[#f8fafc] min-h-screen pb-20">
-      {/* HEADER HERO SOMBRE */}
-      <section className="bg-[#0b1329] text-white pt-8 pb-16 px-4 sm:px-6 lg:px-12">
-        <div className="max-w-7xl mx-auto space-y-6">
-          
-          {/* Bouton Retour */}
-          <Link
-            href="/blog"
-            className="inline-flex items-center gap-2 text-xs font-semibold text-slate-300 hover:text-white transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Retour à la liste des événements</span>
-          </Link>
+    <main className="min-h-screen bg-[#F4F1EA] px-4 py-8 sm:px-7 sm:py-10">
+      <article className="mx-auto max-w-[860px]">
+        <Link href="/blog" className="mb-6 inline-flex items-center gap-2 text-sm font-semibold text-[#1F5A56] hover:text-[#123E3B]">
+          <ArrowLeft className="h-4 w-4" /> Retour aux actualités
+        </Link>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center pt-2">
-            {/* Colonne Gauche : Détails de l'événement */}
-            <div className="lg:col-span-7 space-y-5">
-              
-              {/* Badges */}
-              <div className="flex flex-wrap items-center gap-3 text-xs">
-                <span className="bg-pink-600 text-white font-extrabold uppercase px-3 py-1 rounded-md tracking-wider">
-                  {post.category}
-                </span>
-                <span className="text-slate-300 font-medium text-xs">
-                  Organisé par : <strong className="text-white font-semibold">{post.organizer}</strong>
-                </span>
-              </div>
-
-              {/* Titre & Sous-titre */}
-              <h1 className="text-3xl sm:text-5xl font-black uppercase tracking-tight leading-tight text-white">
+        {loadError ? (
+          <p role="alert" className="rounded-xl border border-red-200 bg-white p-8 text-center text-sm text-red-800">{loadError}</p>
+        ) : post && (
+          <div>
+            <header className="mb-6">
+              <h1 className="text-2xl font-medium leading-tight text-[#353535] sm:text-4xl">
                 {post.title}
               </h1>
-
-              {post.excerpt && (
-                <p className="text-slate-300 text-base sm:text-lg leading-relaxed max-w-2xl font-normal">
-                  {post.excerpt}
+              {date && (
+                <p className="mt-3 flex items-center gap-3 pl-0.5 text-sm italic text-[#77736D]">
+                  <CalendarDays aria-hidden="true" className="h-4 w-4 text-[#8D8982]" />
+                  <time dateTime={post.publishedDate || undefined}>{date}</time>
                 </p>
               )}
+            </header>
 
-              {/* Encadré Récapitulatif : Date, Horaire, Lieu */}
-              <div className="bg-[#132039] border border-slate-700/60 rounded-2xl p-6 grid grid-cols-1 sm:grid-cols-2 gap-5 text-xs">
-                <div className="space-y-1">
-                  <span className="text-slate-400 font-bold uppercase tracking-wider block text-[10px]">
-                    DATE
+            {selectedImage ? (
+              <div className="relative flex max-w-full justify-center overflow-hidden rounded-xl bg-[#E4DED3] shadow-[0_8px_24px_rgba(42,37,33,0.12)]">
+                <Image
+                  src={selectedImage}
+                  alt={post.title}
+                  width={imageSize?.src === selectedImage ? imageSize.width : 1}
+                  height={imageSize?.src === selectedImage ? imageSize.height : 1}
+                  unoptimized
+                  loading="eager"
+                  onLoad={(event) => {
+                    const { naturalWidth, naturalHeight } = event.currentTarget;
+                    setImageSize({ src: selectedImage, width: naturalWidth, height: naturalHeight });
+                  }}
+                  style={{ width: 'auto', height: 'auto' }}
+                  className="max-h-[560px] max-w-full object-contain"
+                />
+                {imageCount > 1 && (
+                  <span className="absolute right-4 top-4 inline-flex items-center gap-2 rounded-full bg-[#242424]/80 px-4 py-2 text-xs font-semibold text-white shadow-sm">
+                    <ImageIcon aria-hidden="true" className="h-3.5 w-3.5" />
+                    {imageCount} photos
                   </span>
-                  <p className="text-white font-bold text-sm">{post.publishedDate}</p>
-                </div>
-
-                <div className="space-y-1">
-                  <span className="text-slate-400 font-bold uppercase tracking-wider block text-[10px]">
-                    HORAIRE
-                  </span>
-                  <p className="text-white font-bold text-sm">{post.time}</p>
-                </div>
-
-                <div className="sm:col-span-2 space-y-1 pt-3 border-t border-slate-700/50">
-                  <span className="text-slate-400 font-bold uppercase tracking-wider block text-[10px]">
-                    LIEU ET ADRESSE
-                  </span>
-                  <p className="text-white font-bold text-sm">{post.location}</p>
-                </div>
-              </div>
-
-            </div>
-
-            {/* Colonne Droite : Image de l'événement */}
-            <div className="lg:col-span-5 flex justify-center">
-              {post.image && (
-                <div className="w-full h-[320px] sm:h-[380px] rounded-3xl overflow-hidden shadow-2xl border border-slate-700/50 bg-slate-900">
-                  <Image
-                    src={post.image}
-                    alt={post.title}
-                    fill
-                    unoptimized
-                    sizes="(max-width: 1024px) 100vw, 42vw"
-                    className="object-cover object-center"
-                  />
-                </div>
-              )}
-            </div>
-          </div>
-
-        </div>
-      </section>
-
-      {/* SECTION DU BAS : CONTENU ET FORMULAIRE D'INSCRIPTION */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          
-          {/* Carte Gauche : À propos de cet événement */}
-          <div className="lg:col-span-7 bg-white rounded-3xl p-8 sm:p-10 shadow-sm border border-slate-200/80 space-y-6">
-            <h2 className="text-xl sm:text-2xl font-black text-[#0f766e] uppercase tracking-wide">
-              À PROPOS DE CET ÉVÉNEMENT
-            </h2>
-            <div className="text-slate-700 text-sm sm:text-base leading-relaxed space-y-4 whitespace-pre-line">
-              <p>{post.content}</p>
-            </div>
-          </div>
-
-          {/* Carte Droite : Formulaire d'inscription */}
-          <div className="lg:col-span-5 bg-white rounded-3xl p-8 sm:p-10 shadow-sm border border-slate-200/80 space-y-6">
-            <div>
-              <h2 className="text-xl font-black text-slate-900 uppercase tracking-tight">
-                S&apos;INSCRIRE À CET ÉVÉNEMENT
-              </h2>
-              <p className="text-slate-500 text-xs sm:text-sm mt-1">
-                Réservez votre place pour bénéficier d&apos;une prise en charge prioritaire.
-              </p>
-            </div>
-
-            {isSubmitted ? (
-              <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-6 text-center space-y-3">
-                <CheckCircle className="w-10 h-10 text-emerald-600 mx-auto" />
-                <h3 className="text-slate-900 font-bold text-base">Inscription confirmée !</h3>
-                <p className="text-slate-600 text-xs leading-relaxed">
-                  Merci <span className="font-semibold">{fullName}</span>. Vos informations ont été transmises aux organisateurs.
-                </p>
+                )}
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="space-y-5">
-                {submitError && (
-                  <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl">
-                    {submitError}
-                  </div>
-                )}
+              <div className="flex aspect-[16/9] items-center justify-center rounded-xl bg-[#E4DED3] text-[#9E2F55]">
+                <ImageIcon className="h-12 w-12" />
+              </div>
+            )}
 
-                <div className="space-y-2">
-                  <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">
-                    NOM COMPLET
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    placeholder="ex : Akossiwa Mensah"
-                    className="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-slate-900 text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#0f766e] bg-slate-50/50"
-                  />
-                </div>
+            {imageCount > 1 && (
+              <div className="mt-5 flex gap-3 overflow-x-auto pb-2" aria-label="Galerie photos">
+                {Array.from({ length: imageCount }, (_, index) => (
+                  <button
+                    key={index}
+                    type="button"
+                    onClick={() => setSelectedImageIndex(index)}
+                    aria-label={`Afficher la photo ${index + 1} sur ${imageCount}`}
+                    aria-pressed={selectedImageIndex === index}
+                    className={`relative h-[68px] w-[90px] shrink-0 overflow-hidden rounded-md border-2 transition sm:h-[76px] sm:w-[100px] ${
+                      selectedImageIndex === index
+                        ? 'border-[#1F8A52] ring-2 ring-[#1F8A52]/20'
+                        : 'border-transparent opacity-80 hover:opacity-100'
+                    }`}
+                  >
+                    <Image
+                      src={`/api/blog/${encodeURIComponent(slug)}/images/${index}`}
+                      alt=""
+                      fill
+                      unoptimized
+                      sizes="100px"
+                      className="object-cover"
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
 
-                {/* 3. Champ Téléphone Interactif avec drapeaux */}
-                <div className="space-y-2">
-                  <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">
-                    TÉLÉPHONE
-                  </label>
-                  <PhoneInput
-                    international
-                    defaultCountry="TG"
-                    value={phone}
-                    onChange={(val) => setPhone(val || '')}
-                    placeholder="90 00 00 00"
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-slate-900 text-sm focus-within:ring-2 focus-within:ring-[#0f766e] bg-slate-50/50"
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full bg-[#0f766e] hover:bg-[#115e59] text-white font-bold py-4 px-6 rounded-xl transition shadow-md shadow-teal-900/10 text-sm mt-4 disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
-                >
-                  {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
-                  {isSubmitting ? 'Inscription en cours...' : 'Confirmer mon inscription'}
-                </button>
-              </form>
+            {description && (
+              <p className="mt-8 whitespace-pre-line text-[14px] leading-relaxed text-[#353535]">
+                {description}
+              </p>
             )}
           </div>
-
-        </div>
-      </section>
-    </div>
+        )}
+      </article>
+    </main>
   );
 }

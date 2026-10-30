@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
@@ -10,15 +10,20 @@ export default function Header() {
   const pathname = usePathname();
   const isHome = pathname === '/';
 
+  useEffect(() => {
+    const closeMobileMenuOnDesktop = () => {
+      if (window.innerWidth > 1023) setIsMobileOpen(false);
+    };
+    window.addEventListener('resize', closeMobileMenuOnDesktop);
+    return () => window.removeEventListener('resize', closeMobileMenuOnDesktop);
+  }, []);
+
   const navLinks = [
     { href: isHome ? '#hero' : '/', label: 'Accueil' },
-    { href: isHome ? '#cancers-surveilles' : '/cancers', label: 'Cancers surveillés' },
-    { href: isHome ? '#autopalpation' : '/#autopalpation', label: 'Autosurveillance' },
-    { href: isHome ? '#apres-resultat' : '/#apres-resultat', label: 'Après un résultat' },
-    { href: isHome ? '#temoignages' : '/#temoignages', label: 'Témoignages' },
-    { href: isHome ? '#ecoute' : '/contact', label: "Ligne d'écoute" },
-    { href: isHome ? '#compagnon' : '/#compagnon', label: 'Mon suivi' },
-    { href: isHome ? '#centres' : '/#centres', label: 'Où consulter' },
+    { href: isHome ? '#cancers-surveilles' : '/cancers', label: 'Cancers' },
+    { href: '/blog', label: 'Blog' },
+    { href: isHome ? '#ecoute' : '/contact', label: 'Écoute' },
+    { href: isHome ? '#centres' : '/#centres', label: 'Centres' },
   ];
 
   return (
@@ -33,6 +38,7 @@ export default function Header() {
       }}
     >
       <div
+        className="site-header-inner"
         style={{
           maxWidth: 'var(--maxw)',
           margin: '0 auto',
@@ -198,6 +204,7 @@ export default function Header() {
       {/* Tiroir Mobile */}
       {isMobileOpen && (
         <div
+          className="site-mobile-drawer"
           style={{
             borderTop: '1px solid var(--line)',
             background: 'var(--bg)',
@@ -259,6 +266,13 @@ export default function Header() {
         @media (max-width: 1023px) {
           .main-nav-desktop { display: none !important; }
           .nav-mobile-btn { display: flex !important; gap: 8px; align-items: center; }
+        }
+        @media (max-width: 640px) {
+          .site-header-inner { padding-left: 16px !important; padding-right: 16px !important; gap: 10px !important; }
+          .site-mobile-drawer { padding-left: 20px !important; padding-right: 20px !important; }
+        }
+        @media (min-width: 1024px) {
+          .site-mobile-drawer { display: none !important; }
         }
         .nav-link-desktop:hover {
           color: var(--teal-deep) !important;
