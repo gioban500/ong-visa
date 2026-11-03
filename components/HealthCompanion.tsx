@@ -8,6 +8,18 @@ interface JournalEntry {
   text: string;
 }
 
+interface ScreeningResult {
+  title: string;
+  details: string[];
+  source?: { label: string; href: string };
+}
+
+interface CalculatorResults {
+  breast?: ScreeningResult;
+  cervix?: ScreeningResult;
+  familyHistoryWarning?: boolean;
+}
+
 const isJournalEntry = (value: unknown): value is JournalEntry =>
   typeof value === 'object'
   && value !== null
@@ -22,10 +34,8 @@ export default function HealthCompanion() {
   const [patho, setPatho] = useState('sein');
   const [age, setAge] = useState('');
   const [hasFamily, setHasFamily] = useState(false);
-  const [resultItems, setResultItems] = useState<string[]>([
-    'Autopalpation mensuelle conseillée une fois par mois pour bien connaître votre poitrine dès 25 ans.',
-    'Signalez toute modification inhabituelle de vos seins à un professionnel de santé.',
-  ]);
+  const [results, setResults] = useState<CalculatorResults | null>(null);
+  const [calculatorError, setCalculatorError] = useState('');
   const [calculatedAge, setCalculatedAge] = useState<number | null>(null);
 
   // Carnet personnel
@@ -57,43 +67,118 @@ export default function HealthCompanion() {
     return () => window.clearTimeout(timeoutId);
   }, []);
 
+  const resetCalculatorResults = () => {
+    setResults(null);
+    setCalculatorError('');
+    setCalculatedAge(null);
+  };
+
   const handleCompute = () => {
-    const numericAge = parseInt(age, 10);
-    if (!numericAge || numericAge < 15 || numericAge > 99) {
-      setResultItems([
-        'Veuillez indiquer un âge valide (ex. 35) pour afficher vos repères personnalisés.',
-      ]);
+    const numericAge = Number(age);
+    if (age.trim() === '' || !Number.isInteger(numericAge) || numericAge < 0 || numericAge > 120) {
+      setCalculatorError('Veuillez indiquer un âge entier valide, entre 0 et 120 ans.');
+      setResults(null);
       setCalculatedAge(null);
       return;
     }
 
+    setCalculatorError('');
     setCalculatedAge(numericAge);
-    const items: string[] = [];
+    if (hasFamily) {
+      setResults({ familyHistoryWarning: true });
+      return;
+    }
+
+    const nextResults: CalculatorResults = {};
 
     if (patho === 'sein' || patho === 'tous') {
-      items.push('Autopalpation mensuelle régulière pour bien connaître votre poitrine dès 25 ans.');
-      items.push('Palpation annuelle des seins par une sage-femme ou un médecin traitant.');
-      if (numericAge >= 45) {
-        items.push('Mammographie numérique de dépistage recommandée tous les 2 ans.');
-      } else if (hasFamily && numericAge >= 35) {
-        items.push('Antécédents familiaux directs : une première mammographie ou échographie dès 35-40 ans est conseillée.');
+      if (numericAge < 20) {
+        nextResults.breast = {
+          title: 'Habitudes de vie saines & connaissance de son corps',
+          details: [
+            'Le cancer du sein est rare à cet âge. Privilégiez une alimentation équilibrée, l’activité physique et évitez le tabac et l’alcool.',
+            'Prenez simplement l’habitude d’observer votre poitrine de temps en temps, par exemple sous la douche.',
+          ],
+        };
+      } else if (numericAge < 40) {
+        nextResults.breast = {
+          title: 'Examen clinique régulier & auto-surveillance active',
+          details: [
+            'Un examen clinique des seins par un professionnel de santé est recommandé tous les 3 ans.',
+            'Apprenez à repérer une grosseur, une modification de la peau ou un écoulement du mamelon et consultez rapidement si l’un de ces signes apparaît.',
+          ],
+        };
+      } else if (numericAge < 50) {
+        nextResults.breast = {
+          title: 'Examen clinique annuel & suivi individuel',
+          details: [
+            'Faites examiner vos seins chaque année par un médecin ou une sage-femme.',
+            'À partir de 40 ans, une mammographie peut être discutée avec votre professionnel de santé selon votre profil.',
+          ],
+        };
+      } else if (numericAge <= 74) {
+        nextResults.breast = {
+          title: 'Dépistage par mammographie',
+          details: [
+            'Une mammographie tous les 2 ans est recommandée, en complément d’un examen clinique annuel.',
+            'La mammographie peut détecter certaines anomalies qui ne sont pas perceptibles à la palpation.',
+          ],
+          source: {
+            label: 'En savoir plus sur le dépistage organisé',
+            href: 'https://cancers-enparleratous.org/wp-content/uploads/2022/06/depliant_information_depistage_cancer_sein_langues_afrique_ouest_mel_20180214.pdf',
+          },
+        };
+      } else {
+        nextResults.breast = {
+          title: 'Suivi médical sur mesure',
+          details: [
+            'Le dépistage systématique par mammographie s’arrête après 74 ans dans ces repères.',
+            'Poursuivez le suivi clinique annuel. Discutez avec votre médecin de l’intérêt de continuer l’imagerie selon votre situation.',
+          ],
+        };
       }
     }
 
     if (patho === 'uterus' || patho === 'tous') {
-      if (numericAge >= 25 && numericAge <= 65) {
-        items.push('Frottis cervico-utérin ou test HPV selon les recommandations de votre professionnel de santé pour prévenir les lésions du col.');
-      } else if (numericAge < 25) {
-        items.push('Vaccination préventive HPV fortement recommandée pour les adolescentes et jeunes femmes.');
+      if (numericAge < 25) {
+        nextResults.cervix = {
+          title: 'Vaccination & prévention primaire',
+          details: [
+            'Le dépistage par frottis ou test HPV n’est pas recommandé avant 25 ans dans ces repères.',
+            'La vaccination contre le HPV est prioritaire pour les jeunes filles de 9 à 14 ans. Le préservatif réduit le risque de transmission du HPV sans le supprimer complètement.',
+          ],
+        };
+      } else if (numericAge <= 50) {
+        nextResults.cervix = {
+          title: 'Dépistage prioritaire',
+          details: [
+            'Effectuez un frottis ou un test HPV tous les 2 à 3 ans, selon les recommandations de votre professionnel de santé.',
+            'La méthode visuelle VIA/VILI peut également être proposée là où elle est disponible.',
+          ],
+          source: {
+            label: 'Information sur les campagnes de dépistage à Lomé',
+            href: 'https://ekinamag.com/2024/06/17/cancer-du-col-de-luterus-une-campagne-de-depistage-gratuit-en-cours-a-linh/',
+          },
+        };
+      } else if (numericAge <= 65) {
+        nextResults.cervix = {
+          title: 'Suivi et dépistage par test HPV',
+          details: [
+            'Le dépistage continue jusqu’à 65 ans : un test HPV ou un frottis est recommandé tous les 5 ans si vous n’avez pas d’antécédents nécessitant un suivi particulier.',
+          ],
+        };
+      } else {
+        nextResults.cervix = {
+          title: 'Arrêt du dépistage sous conditions',
+          details: [
+            'Le dépistage régulier peut s’arrêter si les examens des 10 dernières années étaient normaux et qu’un professionnel de santé confirme que vous pouvez l’arrêter.',
+            'Après la ménopause, consultez rapidement en cas de saignement, même léger.',
+          ],
+        };
       }
-      items.push('Pour le corps de l’utérus, consultez en cas de saignements inhabituels, notamment après la ménopause.');
     }
 
-    if (hasFamily) {
-      items.push('Surveillance personnalisée recommandée avec votre gynécologue en raison de l\'histoire familiale.');
-    }
-
-    setResultItems(items);
+    setResults(nextResults);
   };
 
   const handleAddJournal = () => {
@@ -147,11 +232,14 @@ export default function HealthCompanion() {
                 <select
                   id="calcPatho"
                   value={patho}
-                  onChange={(e) => setPatho(e.target.value)}
+                  onChange={(e) => {
+                    setPatho(e.target.value);
+                    resetCalculatorResults();
+                  }}
                   className="w-full px-3.5 py-2.5 rounded-[4px] bg-white border border-[#D3E2DF] text-[#2A2521] text-sm focus:outline-none focus:border-[#ffb1c3] focus:ring-2 focus:ring-[#ffb1c3]/40"
                 >
                   <option value="sein" className="text-black">Cancer du Sein</option>
-                  <option value="uterus" className="text-black">Cancer de l&apos;utérus (col et corps)</option>
+                  <option value="uterus" className="text-black">Cancer du col de l&apos;utérus</option>
                   <option value="tous" className="text-black">Cancers du sein et de l&apos;utérus</option>
                 </select>
               </div>
@@ -163,24 +251,39 @@ export default function HealthCompanion() {
                 <input
                   id="calcAge"
                   type="number"
-                  min="15"
-                  max="99"
+                  min="0"
+                  max="120"
+                  step="1"
                   value={age}
-                  onChange={(e) => setAge(e.target.value)}
+                  onChange={(e) => {
+                    setAge(e.target.value);
+                    resetCalculatorResults();
+                  }}
                   placeholder="Ex. 42"
+                  aria-invalid={Boolean(calculatorError)}
+                  aria-describedby={calculatorError ? 'calculator-error' : undefined}
                   className="w-full px-3.5 py-2.5 rounded-[4px] bg-white border border-[#D3E2DF] text-[#2A2521] text-sm placeholder:text-[#756B60] focus:outline-none focus:border-[#ffb1c3] focus:ring-2 focus:ring-[#ffb1c3]/40"
                 />
               </div>
+
+              {calculatorError && (
+                <p id="calculator-error" role="alert" className="text-sm text-rose-200">
+                  {calculatorError}
+                </p>
+              )}
 
               <label className="flex items-start gap-2.5 text-xs text-[#D3E2DF] cursor-pointer pt-1">
                 <input
                   type="checkbox"
                   checked={hasFamily}
-                  onChange={(e) => setHasFamily(e.target.checked)}
+                  onChange={(e) => {
+                    setHasFamily(e.target.checked);
+                    resetCalculatorResults();
+                  }}
                   className="mt-0.5 accent-[#9E2F55] w-4 h-4 rounded cursor-pointer"
                 />
                 <span>
-                  Antécédents familiaux directs (mère, sœur, tante atteinte d&apos;un cancer du sein ou de l&apos;utérus).
+                  Antécédents familiaux de cancer du sein ou du col de l&apos;utérus (mère, sœur ou tante).
                 </span>
               </label>
 
@@ -194,27 +297,94 @@ export default function HealthCompanion() {
             </div>
           </div>
 
-          {/* Résultat Dynamique */}
-          <div className="bg-white/6 border border-white/15 rounded-[4px] p-6 sm:p-7 min-h-[220px] flex flex-col justify-between">
-            <div>
-              <h4 className="font-serif text-lg font-semibold text-white mb-3">
-                {calculatedAge
-                  ? `Vos repères personnalisés pour vos ${calculatedAge} ans :`
-                  : 'Repères personnalisés recommandés :'}
-              </h4>
-              <ul className="space-y-2.5 text-sm text-[#E2EDE9] pl-5 list-disc">
-                {resultItems.map((item, idx) => (
-                  <li key={idx} className="leading-relaxed">
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <p className="text-[12px] text-[#A3C4BE] pt-4 border-t border-white/10 mt-4 m-0">
-              * Données fournies à titre indicatif selon les directives de l&apos;OMS et de la Société de Gynécologie du Togo.
-            </p>
+          {/* Résultats par pathologie */}
+          <div aria-live="polite" className="min-w-0">
+            {!results ? (
+              <div className="bg-white/6 border border-white/15 rounded-[4px] p-6 sm:p-7 min-h-[220px]">
+                <h4 className="font-serif text-lg font-semibold text-white mb-3">
+                  Repères de dépistage
+                </h4>
+                <p className="text-sm text-[#E2EDE9]">
+                  Saisissez votre âge et cliquez sur « Obtenir mes repères » pour afficher les recommandations correspondant à votre situation.
+                </p>
+              </div>
+            ) : results.familyHistoryWarning ? (
+              <div role="alert" className="bg-rose-950/40 border border-rose-200/50 rounded-[4px] p-6 sm:p-7">
+                <h4 className="font-serif text-lg font-semibold text-white mb-3">
+                  Risque familial à prendre en compte
+                </h4>
+                <p className="text-sm leading-relaxed text-[#FFF1F3]">
+                  Attention : Risque Élevé. Vos examens doivent être avancés. Consultez un gynécologue pour établir un calendrier personnalisé dès maintenant.
+                </p>
+              </div>
+            ) : (
+              <>
+                <h4 className="font-serif text-lg font-semibold text-white mb-3">
+                  Vos repères à {calculatedAge} ans
+                </h4>
+                <div className={`grid grid-cols-1 ${results.breast && results.cervix ? 'md:grid-cols-2' : ''} gap-4`}>
+                  {results.breast && (
+                    <article className="bg-white/6 border border-white/15 rounded-[4px] p-5 sm:p-6">
+                      <h5 className="font-serif text-base font-semibold text-white mb-3">
+                        Cancer du sein
+                      </h5>
+                      <p className="text-sm font-semibold text-[#FFB1C3] mb-3">
+                        {results.breast.title}
+                      </p>
+                      <ul className="space-y-2.5 text-sm text-[#E2EDE9] pl-5 list-disc">
+                        {results.breast.details.map((detail) => (
+                          <li key={detail} className="leading-relaxed">{detail}</li>
+                        ))}
+                      </ul>
+                      {results.breast.source && (
+                        <a
+                          href={results.breast.source.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="mt-4 inline-block text-sm font-medium text-[#BFE4DD] underline underline-offset-2"
+                        >
+                          {results.breast.source.label}
+                        </a>
+                      )}
+                    </article>
+                  )}
+                  {results.cervix && (
+                    <article className="bg-white/6 border border-white/15 rounded-[4px] p-5 sm:p-6">
+                      <h5 className="font-serif text-base font-semibold text-white mb-3">
+                        Cancer du col de l&apos;utérus
+                      </h5>
+                      <p className="text-sm font-semibold text-[#FFB1C3] mb-3">
+                        {results.cervix.title}
+                      </p>
+                      <ul className="space-y-2.5 text-sm text-[#E2EDE9] pl-5 list-disc">
+                        {results.cervix.details.map((detail) => (
+                          <li key={detail} className="leading-relaxed">{detail}</li>
+                        ))}
+                      </ul>
+                      {results.cervix.source && (
+                        <a
+                          href={results.cervix.source.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="mt-4 inline-block text-sm font-medium text-[#BFE4DD] underline underline-offset-2"
+                        >
+                          {results.cervix.source.label}
+                        </a>
+                      )}
+                    </article>
+                  )}
+                </div>
+              </>
+            )}
           </div>
         </div>
+
+        <p role="note" className="mb-8 rounded-[4px] border border-rose-200/40 bg-rose-950/30 p-4 text-sm leading-relaxed text-white">
+          Peu importe les repères affichés par ce calculateur, l&apos;apparition d&apos;une boule au sein ou d&apos;un saignement anormal après la ménopause exige une consultation immédiate.
+        </p>
+        <p className="mb-8 text-xs leading-relaxed text-[#A3C4BE]">
+        Ces repères généraux ne remplacent pas un avis médical. Les intervalles peuvent varier selon vos antécédents, votre situation et les recommandations locales en vigueur ; confirmez votre suivi avec un professionnel de santé.
+        </p>
 
         {/* Carnet de symptômes hors-ligne */}
         <div className="bg-white/5 border border-white/15 rounded-[4px] p-6 sm:p-7">

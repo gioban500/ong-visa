@@ -76,7 +76,7 @@ export default function ConfidentialListening() {
                 Ligne d&apos;écoute ONG VISA
               </h3>
               <p className="text-[#D3E2DF] text-[14.5px] leading-relaxed mb-6 max-w-[42ch]">
-                Anonyme, gratuite et ouverte à toute personne concernée ou à ses proches. Nos écoutantes et sages-femmes vous répondent en français, éwé ou mina.
+                Anonyme et ouverte à toute personne concernée ou à ses proches. Nos écoutantes et sages-femmes vous répondent en français, éwé ou mina.
               </p>
 
               <a
