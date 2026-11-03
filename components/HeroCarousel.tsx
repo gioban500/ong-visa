@@ -22,7 +22,7 @@ export default function HeroCarousel({ testimonials }: HeroCarouselProps) {
     const defaultSlide = {
       id: 'hero-main',
       title: "VISA ONG : Votre Partenaire pour la Santé et l'Espoir au Togo",
-      text: "Dédiés à la sensibilisation, la prévention et au dépistage précoce des cancers féminins.",
+      text: "Dédiés à la sensibilisation et à la prévention des cancers du sein et de l'utérus.",
       image: "https://firebasestorage.googleapis.com/v0/b/newafrique-b466a.appspot.com/o/292horjq9s7?alt=media&token=5ebc90cd-98ae-4ff4-a4fd-9bf540ad527a",
       isDefault: true,
     };

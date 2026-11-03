@@ -14,10 +14,10 @@ export default function Footer() {
           {/* Colonne 1 : ONG VISA */}
           <div>
             <h4 className="font-serif text-white text-base font-semibold mb-3.5 tracking-tight">
-              ONG VISA · Cancers Féminins
+              ONG VISA · Sein & Utérus
             </h4>
             <p className="text-[13px] text-[#B5CCC8] leading-relaxed mb-4">
-              Organisation humanitaire dédiée à la sensibilisation, au dépistage précoce et à l&apos;accompagnement solidaire face aux cancers gynécologiques au Togo et en Afrique de l&apos;Ouest.
+              Organisation humanitaire dédiée à la sensibilisation, au dépistage et à l&apos;accompagnement solidaire face aux cancers du sein et de l&apos;utérus au Togo.
             </p>
             <div className="flex gap-2.5">
               <a

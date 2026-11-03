@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 
-type TopicKey = 'all' | 'sein' | 'col' | 'ovaires' | 'endometre';
+type TopicKey = 'all' | 'sein' | 'uterus';
 
 interface SummaryCard {
   id: string;
@@ -21,40 +21,22 @@ const cards: SummaryCard[] = [
     accent: 'clay',
     tag: 'Sein',
     title: 'Mammographie & Autopalpation',
-    desc: "Repérer une bosse, un changement de peau ou du mamelon. Examen recommandé dès 25 ans (autopalpation) et dès 45-50 ans (mammographie régulière).",
+    desc: "Détecté tôt, le cancer du sein se guérit dans la grande majorité des cas. Dès 25 ans, faites examiner vos seins chaque année par un médecin ou une sage-femme, et restez attentive à tout changement visuel ou palpatoire. À partir de 50 ans, la mammographie régulière devient essentielle pour repérer les anomalies invisibles à l'œil nu.",
   },
   {
-    id: 'col',
-    cat: 'col',
+    id: 'uterus',
+    cat: 'uterus',
     accent: 'teal',
-    tag: "Col de l'Utérus",
-    title: 'Frottis & Test HPV / VIA-VILI',
-    desc: 'Dépistage préventif essentiel de 25 à 65 ans pour éliminer les lésions précancéreuses bien avant toute évolution maligne.',
-  },
-  {
-    id: 'ovaires',
-    cat: 'ovaires',
-    accent: 'clay',
-    tag: 'Ovaires & Pelvis',
-    title: 'Écoute des signaux & Échographie',
-    desc: 'Ballonnements persistants (> 3 semaines), pesanteur pelvienne inexpliquée, satiété précoce à signaler lors du contrôle gynécologique.',
-  },
-  {
-    id: 'endometre',
-    cat: 'endometre',
-    accent: 'teal',
-    tag: 'Endomètre',
-    title: 'Surveillance des saignements',
-    desc: "Tout saignement inhabituel après la ménopause ou en dehors des cycles menstruels doit motiver une échographie pelvienne rapide.",
+    tag: 'Utérus',
+    title: 'Dépistage du col & vigilance du corps utérin',
+    desc: "Le cancer du col de l'utérus se prévient efficacement grâce à un dépistage régulier par frottis ou test HPV. Pour le cancer du corps de l'utérus (endomètre), la vigilance est la clé : tout saignement gynécologique inhabituel, en dehors des règles ou survenant après la ménopause, impose une consultation médicale immédiate.",
   },
 ];
 
 const topics = [
   { key: 'all', label: "Vue d'ensemble" },
   { key: 'sein', label: 'Cancer du Sein' },
-  { key: 'col', label: "Col de l'Utérus & HPV" },
-  { key: 'ovaires', label: 'Ovaires & Pelvis' },
-  { key: 'endometre', label: 'Endomètre & Corps utérin' },
+  { key: 'uterus', label: "Cancers de l'Utérus" },
 ];
 
 export default function EmotionalHero() {
@@ -74,7 +56,7 @@ export default function EmotionalHero() {
       <div className="wrap">
         {/* Pré-titre */}
         <p style={{ fontSize: 12.5, fontWeight: 600, color: 'var(--ink-soft)', marginBottom: 10, letterSpacing: '0.3px' }}>
-          ONG VISA · Dépistage, sensibilisation &amp; accompagnement face aux cancers
+          ONG VISA · Cancers du sein et de l&apos;utérus
         </p>
 
         {/* H1 */}
@@ -91,7 +73,7 @@ export default function EmotionalHero() {
           Qu&apos;est-ce qui vous amène aujourd&apos;hui ?
         </h1>
         <p style={{ fontSize: 17, maxWidth: '68ch', color: 'var(--ink-secondary)', marginBottom: 28, lineHeight: 1.6 }}>
-          Un espace d&apos;écoute et d&apos;information pour tous les cancers féminins. Choisissez votre situation ou explorez les
+          Un espace d&apos;écoute et d&apos;information consacré aux cancers du sein et de l&apos;utérus. Choisissez votre sujet ou explorez les
           repères médicaux essentiels au Togo :
         </p>
 

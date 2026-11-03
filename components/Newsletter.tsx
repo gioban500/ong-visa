@@ -57,7 +57,7 @@ export default function Newsletter() {
                 <p className="text-white/90 leading-relaxed">
                   Inscrivez-vous à notre liste de diffusion pour recevoir nos
                   actualités, nos campagnes de sensibilisation et nos conseils de
-                  prévention sur les cancers féminins.
+                  prévention sur les cancers du sein et de l&apos;utérus.
                 </p>
               </div>
 

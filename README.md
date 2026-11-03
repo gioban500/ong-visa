@@ -1,6 +1,6 @@
 # ONG VISA — site de sensibilisation et de dépistage
 
-Site Next.js de l’ONG VISA consacré à l’information sur les cancers féminins, au dépistage et à l’accompagnement au Togo.
+Site Next.js de l’ONG VISA consacré à l’information sur les cancers du sein et de l’utérus, au dépistage et à l’accompagnement au Togo.
 
 ## Fonctionnalités du site
 

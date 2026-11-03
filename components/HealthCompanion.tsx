@@ -24,8 +24,7 @@ export default function HealthCompanion() {
   const [hasFamily, setHasFamily] = useState(false);
   const [resultItems, setResultItems] = useState<string[]>([
     'Autopalpation mensuelle conseillée une fois par mois pour bien connaître votre poitrine dès 25 ans.',
-    'Frottis cervico-utérin ou test HPV tous les 3 à 5 ans entre 25 et 65 ans.',
-    'Examen clinique annuel des seins et du pelvis lors de la consultation sage-femme ou médecin.',
+    'Signalez toute modification inhabituelle de vos seins à un professionnel de santé.',
   ]);
   const [calculatedAge, setCalculatedAge] = useState<number | null>(null);
 
@@ -81,16 +80,13 @@ export default function HealthCompanion() {
       }
     }
 
-    if (patho === 'col' || patho === 'tous') {
+    if (patho === 'uterus' || patho === 'tous') {
       if (numericAge >= 25 && numericAge <= 65) {
-        items.push('Frottis cervico-utérin ou test HPV tous les 3 à 5 ans pour prévenir les lésions du col.');
+        items.push('Frottis cervico-utérin ou test HPV selon les recommandations de votre professionnel de santé pour prévenir les lésions du col.');
       } else if (numericAge < 25) {
         items.push('Vaccination préventive HPV fortement recommandée pour les adolescentes et jeunes femmes.');
       }
-    }
-
-    if (patho === 'ovaires' || patho === 'tous') {
-      items.push('Consultation gynécologique en cas de pesanteur pelvienne ou ballonnements durant plus de 3 semaines.');
+      items.push('Pour le corps de l’utérus, consultez en cas de saignements inhabituels, notamment après la ménopause.');
     }
 
     if (hasFamily) {
@@ -131,7 +127,7 @@ export default function HealthCompanion() {
           <span style={{ fontSize: 12.5, textTransform: 'uppercase', letterSpacing: '0.8px', fontWeight: 700, color: '#F8B4C6', marginBottom: 6, display: 'block' }}>Autonomie &amp; Sérénité</span>
           <h2 style={{ fontSize: 32, letterSpacing: '-0.3px', marginBottom: 12, color: '#fff' }}>Calculateur &amp; Carnet de suivi</h2>
           <p style={{ fontSize: 16, color: '#D3E2DF', lineHeight: 1.6 }}>
-            Sélectionnez le type de dépistage pour afficher les recommandations de santé publique OMS et togolaise, puis consignez vos observations.
+            Choisissez entre le cancer du sein et les cancers de l&apos;utérus pour afficher des repères de prévention, puis consignez vos observations.
           </p>
         </div>
 
@@ -155,9 +151,8 @@ export default function HealthCompanion() {
                   className="w-full px-3.5 py-2.5 rounded-[4px] bg-white border border-[#D3E2DF] text-[#2A2521] text-sm focus:outline-none focus:border-[#ffb1c3] focus:ring-2 focus:ring-[#ffb1c3]/40"
                 >
                   <option value="sein" className="text-black">Cancer du Sein</option>
-                  <option value="col" className="text-black">Col de l&apos;Utérus & HPV</option>
-                  <option value="ovaires" className="text-black">Ovaires & Pelvis</option>
-                  <option value="tous" className="text-black">Tous les dépistages féminins</option>
+                  <option value="uterus" className="text-black">Cancer de l&apos;utérus (col et corps)</option>
+                  <option value="tous" className="text-black">Cancers du sein et de l&apos;utérus</option>
                 </select>
               </div>
 
@@ -185,7 +180,7 @@ export default function HealthCompanion() {
                   className="mt-0.5 accent-[#9E2F55] w-4 h-4 rounded cursor-pointer"
                 />
                 <span>
-                  Antécédents familiaux directs (mère, sœur, tante atteinte d&apos;un cancer féminin).
+                  Antécédents familiaux directs (mère, sœur, tante atteinte d&apos;un cancer du sein ou de l&apos;utérus).
                 </span>
               </label>
 

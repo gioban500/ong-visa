@@ -10,8 +10,8 @@ import StickyActionBar from '@/components/StickyActionBar';
 import FloatingButtons from '@/components/FloatingButtons';
 
 export const metadata = {
-  title: 'ONG VISA — Cancers Féminins : Prévention, Dépistage & Soutien au Togo',
-  description: "Plateforme d'information, de prévention et d'écoute sur le cancer du sein, le col de l'utérus et les autres pathologies oncologiques féminines par l'ONG VISA à Lomé.",
+  title: 'ONG VISA — Cancers du sein et de l’utérus : Prévention & Soutien au Togo',
+  description: "Plateforme d'information, de prévention et d'écoute sur les cancers du sein et de l'utérus par l'ONG VISA à Lomé.",
 };
 
 export default function HomePage() {

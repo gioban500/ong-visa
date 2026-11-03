@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { ArrowLeft, CheckCircle2 } from 'lucide-react';
 import { Cancer } from '@/types/cancer';
 import { getClientData, hasFreshClientData, setClientData } from '@/lib/client-data-cache';
+import { isFocusCancer } from '@/lib/focus-cancers';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -114,14 +115,16 @@ function CancerDetailContent({ id }: { id: string }) {
     );
   }
 
-  if (!cancer) {
+  if (!cancer || !isFocusCancer(cancer.name)) {
     return (
       <main className="min-h-screen bg-[#FAF6F0] px-4 py-20 text-center text-[#2A2521]">
         <h1 className="font-serif text-3xl font-semibold">
-          {loadError ? 'Fiche indisponible' : 'Fiche médicale introuvable'}
+          {loadError ? 'Fiche indisponible' : cancer ? 'Fiche hors périmètre' : 'Fiche médicale introuvable'}
         </h1>
         <p className="mx-auto mt-3 max-w-lg text-[#756B60]">
-          {loadError || 'Cette fiche n’existe pas ou n’est plus disponible.'}
+          {loadError || (cancer
+            ? 'Les contenus publiés portent uniquement sur les cancers du sein et de l’utérus.'
+            : 'Cette fiche n’existe pas ou n’est plus disponible.')}
         </p>
         <Link
           href="/cancers"

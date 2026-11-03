@@ -47,11 +47,10 @@ export default function AbnormalResultSteps() {
           >
             <span className="section-kicker">Anticiper sereinement</span>
             <h2 style={{ fontSize: 26, marginBottom: 12, color: 'var(--ink)', fontFamily: 'var(--font-fraunces), Fraunces, serif', fontWeight: 500 }}>
-              Résultat atypique ou anormal : et après ?
+              Résultat bizarre ou anormal : et après ?
             </h2>
             <p style={{ fontSize: 15, color: 'var(--ink-secondary)', lineHeight: 1.6, marginBottom: 20 }}>
-              Comprendre le déroulement des examens de contrôle permet d&apos;aborder la suite plus sereinement, quel que soit le
-              type de dépistage effectué.
+              Comprendre ce qu&apos;il faut faire après l&apos;examen permet de rester calme et d&apos;attendre la suite sans trop s&apos;inquiéter, peu importe le test que vous avez fait.
             </p>
 
             {/* Bannière rassurante */}
@@ -74,16 +73,15 @@ export default function AbnormalResultSteps() {
                   fontWeight: 600,
                 }}
               >
-                8 anomalies sur 10 sont bénignes
+                8 alertes sur 10 ne sont pas graves
               </strong>
               <p style={{ fontSize: 13, margin: 0, color: 'var(--ink-secondary)', lineHeight: 1.5 }}>
-                La grande majorité des images nécessitant un contrôle complémentaire s&apos;avèrent être de simples kystes
-                liquides ou des modifications bénignes sans danger.
+                La très grande majorité des femmes qui doivent refaire un petit contrôle n&apos;ont rien de grave. Ce sont très souvent de simples petites poches d&apos;eau ou des changements normaux dans le corps qui ne présentent aucun danger.
               </p>
             </div>
 
             <Link href="#ecoute" className="btn btn-clay" style={{ width: '100%', justifyContent: 'center' }}>
-              Échanger avec notre équipe d&apos;écoute
+              Discuter avec notre équipe d&apos;écoute
             </Link>
           </div>
 

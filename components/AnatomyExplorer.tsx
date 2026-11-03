@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { isFocusCancer } from '@/lib/focus-cancers';
 
 interface ZoneDetail {
   id: string;
@@ -38,8 +39,11 @@ export default function AnatomyExplorer() {
         const data = await response.json();
         if (!response.ok) throw new Error(data.error || 'Impossible de charger les sujets.');
         const loadedTopics = Array.isArray(data.topics) ? data.topics as ZoneDetail[] : [];
-        setTopics(loadedTopics);
-        setActiveId(loadedTopics[0]?.id || '');
+        const focusTopics = loadedTopics.filter((topic) =>
+          isFocusCancer(`${topic.category} ${topic.title} ${topic.slug}`),
+        );
+        setTopics(focusTopics);
+        setActiveId(focusTopics[0]?.id || '');
       })
       .catch((loadError: unknown) => {
         setError(loadError instanceof Error ? loadError.message : 'Impossible de charger les sujets.');
@@ -57,8 +61,7 @@ export default function AnatomyExplorer() {
           <span className="section-kicker">Pédagogie médicale simplifiée</span>
           <h2 className="section-title">Mieux comprendre chaque zone sans jargon</h2>
           <p className="section-intro">
-            Cliquez sur un organe ou une catégorie pour afficher les signes d&apos;alerte spécifiques et les examens de contrôle
-            associés.
+            Sélectionnez le sein ou l&apos;utérus pour afficher les signes d&apos;alerte et les examens de contrôle associés.
           </p>
         </div>
 
@@ -258,7 +261,7 @@ export default function AnatomyExplorer() {
 
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
               <Link href={zone.buttonLink} className="btn btn-clay">{zone.buttonText}</Link>
-              <Link href="#centres" className="btn btn-outline">Voir les centres d&apos;imagerie</Link>
+              <Link href="#centres" className="btn btn-outline">Voir les centres disponibles</Link>
               <Link href="/cancers" className="btn btn-clay">En savoir plus</Link>
             </div>
           </div>}

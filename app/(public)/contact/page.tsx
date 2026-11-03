@@ -98,7 +98,7 @@ export default function ContactPage() {
             Contactez <span className="text-[#e11d48]">VISA ONG</span>
           </h1>
           <p className="text-slate-600 text-sm sm:text-base max-w-xl mx-auto">
-            Dédiés à la sensibilisation, la prévention et au dépistage précoce des cancers féminins au Togo.
+            Dédiés à la sensibilisation, à la prévention et au dépistage des cancers du sein et de l&apos;utérus au Togo.
           </p>
         </div>
       </section>

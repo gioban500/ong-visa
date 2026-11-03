@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { Search, ArrowRight } from 'lucide-react';
 import { Cancer } from '@/types/cancer';
 import { getClientData, hasFreshClientData, setClientData } from '@/lib/client-data-cache';
+import { isFocusCancer } from '@/lib/focus-cancers';
 
 export default function CancersPage() {
   const [cancers, setCancers] = useState<Cancer[]>(() => getClientData<Cancer[]>('/api/cancers') || []);
@@ -51,7 +52,7 @@ export default function CancersPage() {
     );
   };
 
-  const filteredCancers = cancers.filter((cancer) => {
+  const filteredCancers = cancers.filter((cancer) => isFocusCancer(cancer.name)).filter((cancer) => {
     const desc = getShortDescription(cancer);
     return (
       cancer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -81,7 +82,7 @@ export default function CancersPage() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Rechercher une pathologie (sein, col, ovaires...)"
+                placeholder="Rechercher un cancer du sein ou de l'utérus"
                 className="w-full pl-12 pr-4 py-3.5 rounded-full bg-white text-[#2A2521] placeholder-[#756B60] focus:outline-none focus:ring-2 focus:ring-[#9E2F55] border border-[#E2D7C7] shadow-sm text-sm font-medium transition-all"
               />
             </div>

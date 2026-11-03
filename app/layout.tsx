@@ -19,20 +19,23 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://ong-visa.vercel.app
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "ONG VISA - Sensibilisation et Prévention du Cancer",
+    default: "ONG VISA - Cancers du sein et de l'utérus",
     template: "%s | ONG VISA",
   },
   description:
-    "Plateforme dédiée à l'information, la sensibilisation et la prévention du cancer féminin au Togo. Découvrez les différents types de cancer, les options de dépistage et nos campagnes sur le terrain.",
+    "Plateforme de sensibilisation, de prévention et d'information sur les cancers du sein et de l'utérus au Togo.",
   keywords: [
-    "cancer",
+    "cancer du sein",
+    "cancer de l'utérus",
+    "cancer du col de l'utérus",
+    "cancer de l'endomètre",
     "prévention",
     "dépistage",
     "sensibilisation",
     "ONG VISA",
     "santé féminine",
     "cancer du sein Togo",
-    "col de l'utérus",
+    "cancer de l'utérus Togo",
     "Lomé",
   ],
   authors: [{ name: "ONG VISA" }],
@@ -45,24 +48,24 @@ export const metadata: Metadata = {
     type: "website",
     locale: "fr_FR",
     url: siteUrl,
-    title: "ONG VISA - Sensibilisation & Dépistage du Cancer Féminin",
+    title: "ONG VISA - Cancers du sein et de l'utérus",
     description:
-      "Sensibilisation, prévention et dépistage précoce des cancers du sein, du col de l'utérus et de l'ovaire au Togo.",
+      "Sensibilisation, prévention et dépistage des cancers du sein et de l'utérus au Togo.",
     siteName: "ONG VISA",
     images: [
       {
         url: "/images/og-default.jpg",
         width: 1200,
         height: 630,
-        alt: "ONG VISA - Lutte contre le cancer féminin",
+        alt: "ONG VISA - Sensibilisation aux cancers du sein et de l'utérus",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "ONG VISA - Santé Féminine & Dépistage",
+    title: "ONG VISA - Cancers du sein et de l'utérus",
     description:
-      "Sensibilisation, prévention et dépistage précoce des cancers féminins au Togo.",
+      "Sensibilisation, prévention et dépistage des cancers du sein et de l'utérus au Togo.",
     images: ["/images/og-default.jpg"],
   },
   robots: {

@@ -73,7 +73,7 @@ export default function Header() {
           >
             <Image
               src="/logo.png"
-              alt="Logo officiel ONG VISA - Cancers Féminins"
+              alt="Logo officiel ONG VISA - Cancers du sein et de l'utérus"
               width={44}
               height={44}
               style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: '50%' }}
@@ -100,7 +100,7 @@ export default function Header() {
                 textTransform: 'uppercase',
               }}
             >
-              Cancers Féminins
+              Sein &amp; Utérus
             </span>
           </div>
         </Link>
