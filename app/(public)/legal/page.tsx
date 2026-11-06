@@ -27,7 +27,7 @@ export default function LegalPage() {
                   <strong>ONG VISA</strong><br />
                   Organisation Non Gouvernementale<br />
                   Siège social : Togo<br />
-                  Email : contact@ongvisa.org<br />
+                  Email : Ongvisa21@gmail.com<br />
                   Téléphone : +228 90 62 96 93
                 </p>
               </div>
@@ -144,7 +144,7 @@ export default function LegalPage() {
               </p>
               <div className="bg-pink-50 rounded-lg p-6 border-2 border-pink-200">
                 <p className="text-gray-800 font-medium">
-                  Email: contact@ongvisa.org<br />
+                  Email: Ongvisa21@gmail.com<br />
                   Téléphone: +228 90 62 96 93<br />
                   Adresse: Togo
                 </p>

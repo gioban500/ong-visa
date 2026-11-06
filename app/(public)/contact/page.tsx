@@ -141,7 +141,7 @@ export default function ContactPage() {
                   <h3 className="font-semibold text-slate-900 text-xs uppercase tracking-wide">
                     Téléphone
                   </h3>
-                  <p className="text-slate-600 font-medium mt-0.5">+228 90 62 96 93</p>
+                  <a href="tel:+22890629693" className="text-slate-600 font-medium mt-0.5 inline-block">+228 90 62 96 93</a>
                 </div>
               </div>
 
@@ -153,7 +153,7 @@ export default function ContactPage() {
                   <h3 className="font-semibold text-slate-900 text-xs uppercase tracking-wide">
                     Email
                   </h3>
-                  <p className="text-slate-600 font-medium mt-0.5">contact@ongvisa.org</p>
+                  <a href="mailto:ongvisa21@gmail.com" className="text-slate-600 font-medium mt-0.5 inline-block">Ongvisa21@gmail.com</a>
                 </div>
               </div>
 
@@ -265,7 +265,7 @@ export default function ContactPage() {
                     value={formData.phone}
                     onChange={(val) => setFormData({ ...formData, phone: val || '' })}
                     className="w-full px-3.5 py-2 rounded-lg border border-slate-200 text-slate-900 text-sm focus-within:ring-2 focus-within:ring-[#0f766e]/20 focus-within:border-[#0f766e] bg-white"
-                    placeholder="90 00 00 00"
+                    placeholder="90 62 96 93"
                   />
                 </div>
               </div>

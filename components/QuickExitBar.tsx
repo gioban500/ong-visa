@@ -16,10 +16,10 @@ export default function QuickExitBar() {
           <span className="text-[#E2EDE9]">
             Besoin d&apos;en parler en direct ? Ligne d&apos;écoute ONG VISA :{' '}
             <a
-              href="tel:+22890000000"
+              href="tel:+22890629693"
               className="text-white font-semibold underline underline-offset-2 hover:text-[#96cfca] transition-colors"
             >
-              +228 90 00 00 00
+              +228 90 62 96 93
             </a>{' '}
             <span className="text-white/75 hidden md:inline">(anonyme, tous les jours 8h-20h)</span>
           </span>

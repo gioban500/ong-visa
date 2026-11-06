@@ -102,15 +102,15 @@ export default function Footer() {
             </h4>
             <ul className="space-y-2 text-[13.5px]">
               <li>
-                Ligne d&apos;écoute : <strong className="text-white font-semibold">+228 90 00 00 00</strong>
+                Ligne d&apos;écoute : <a href="tel:+22890629693" className="text-white font-semibold underline">+228 90 62 96 93</a>
               </li>
               <li>
                 WhatsApp : <span className="text-white">+228 90 62 96 93</span>
               </li>
               <li>
                 Courriel :{' '}
-                <a href="mailto:contact@ongvisa.org" className="hover:text-white transition-colors underline">
-                  contact@ongvisa.org
+                <a href="mailto:ongvisa21@gmail.com" className="hover:text-white transition-colors underline">
+                  Ongvisa21@gmail.com
                 </a>
               </li>
               <li>Siège : Lomé, République Togolaise</li>
