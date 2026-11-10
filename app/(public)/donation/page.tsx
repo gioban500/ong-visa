@@ -2,15 +2,30 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Heart, CreditCard, Check, Users, Share2 } from 'lucide-react';
+import { Heart, Smartphone, Check, Copy, Users, Share2 } from 'lucide-react';
 
 const presetAmounts = [5000, 10000, 25000, 50000, 100000, 250000];
+const mobileMoneyOperators = {
+  tmoney: {
+    name: 'T-Money / Mixx by Yas',
+    recipient: '90629693',
+    buildPaymentCode: (recipient: string, amount: number) => `*145*1*${recipient}*${amount}#`,
+  },
+  flooz: {
+    name: 'Flooz',
+    recipient: '97424742',
+    buildPaymentCode: (recipient: string, amount: number) =>
+      `*155*1*1*${recipient}*${recipient}*${amount}*1#`,
+  },
+} as const;
 
 export default function DonationPage() {
   const [amount, setAmount] = useState<number | string>(10000);
   const [customAmount, setCustomAmount] = useState('');
-  const [frequency, setFrequency] = useState<'once' | 'monthly'>('once');
-  const [submitted, setSubmitted] = useState(false);
+  const [operator, setOperator] = useState<keyof typeof mobileMoneyOperators>('tmoney');
+  const [paymentCode, setPaymentCode] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+  const [copyError, setCopyError] = useState('');
 
   const handleAmountSelect = (value: number) => {
     setAmount(value);
@@ -22,9 +37,22 @@ export default function DonationPage() {
     setAmount('custom');
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setSubmitted(true);
+    setPaymentCode(mobileMoneyOperators[operator].buildPaymentCode(mobileMoneyOperators[operator].recipient, finalAmount));
+    setCopied(false);
+    setCopyError('');
+  };
+
+  const handleCopyCode = async () => {
+    try {
+      await navigator.clipboard.writeText(paymentCode ?? '');
+      setCopied(true);
+      setCopyError('');
+    } catch {
+      setCopied(false);
+      setCopyError('La copie automatique a échoué. Sélectionnez le code pour le copier manuellement.');
+    }
   };
 
   const finalAmount: number =
@@ -91,44 +119,13 @@ export default function DonationPage() {
 
       {/* Formulaire de Don */}
       <section className="max-w-[760px] mx-auto px-4 sm:px-7 py-6">
-        {!submitted ? (
+        {!paymentCode ? (
           <div className="bg-white rounded-[4px] p-6 sm:p-9 border border-[#E2D7C7] shadow-sm">
             <h2 className="font-serif text-2xl font-semibold text-[#2A2521] mb-6 text-center">
               Choisissez Votre Contribution
             </h2>
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Fréquence */}
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-[#756B60] mb-2">
-                  Fréquence du don
-                </label>
-                <div className="grid grid-cols-2 gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setFrequency('once')}
-                    className={`py-2.5 px-4 rounded-[4px] text-sm font-semibold transition-all border ${
-                      frequency === 'once'
-                        ? 'border-[#9E2F55] bg-[#F9EBF0] text-[#9E2F55]'
-                        : 'border-[#E2D7C7] bg-white text-[#514A43] hover:bg-[#F5EFE6]'
-                    }`}
-                  >
-                    Don Unique
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setFrequency('monthly')}
-                    className={`py-2.5 px-4 rounded-[4px] text-sm font-semibold transition-all border ${
-                      frequency === 'monthly'
-                        ? 'border-[#9E2F55] bg-[#F9EBF0] text-[#9E2F55]'
-                        : 'border-[#E2D7C7] bg-white text-[#514A43] hover:bg-[#F5EFE6]'
-                    }`}
-                  >
-                    Don Mensuel
-                  </button>
-                </div>
-              </div>
-
               {/* Montants prédéfinis */}
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-[#756B60] mb-2">
@@ -170,80 +167,118 @@ export default function DonationPage() {
                 </div>
               </div>
 
-              {/* Résumé du don */}
-              <div className="bg-[#F5EFE6] rounded-[4px] p-4.5 border border-[#E2D7C7] flex items-center justify-between">
-                <div>
-                  <span className="text-xs text-[#756B60] block">Type sélectionné :</span>
-                  <span className="font-semibold text-sm text-[#2A2521]">
-                    {frequency === 'once' ? 'Don ponctuel' : 'Don mensuel régulier'}
-                  </span>
-                </div>
-                <div className="text-right">
-                  <span className="text-xs text-[#756B60] block">Total :</span>
-                  <span className="font-serif text-2xl font-bold text-[#9E2F55]">
-                    {finalAmount.toLocaleString('fr-FR')} FCFA
-                  </span>
-                </div>
-              </div>
-
-              {/* Coordonnées */}
-              <div className="space-y-3 pt-2">
-                <h3 className="font-serif text-base font-semibold text-[#2A2521]">
-                  Vos Coordonnées
-                </h3>
+              {/* Opérateur Mobile Money */}
+              <fieldset>
+                <legend className="block text-xs font-bold uppercase tracking-wider text-[#756B60] mb-2">
+                  Votre opérateur Mobile Money
+                </legend>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <input
-                    type="text"
-                    placeholder="Prénom"
-                    required
-                    className="px-3.5 py-2.5 rounded-[4px] border border-[#CFC1AD] bg-white text-sm focus:outline-none focus:border-[#9E2F55]"
-                  />
-                  <input
-                    type="text"
-                    placeholder="Nom"
-                    required
-                    className="px-3.5 py-2.5 rounded-[4px] border border-[#CFC1AD] bg-white text-sm focus:outline-none focus:border-[#9E2F55]"
-                  />
+                  {(Object.entries(mobileMoneyOperators) as [keyof typeof mobileMoneyOperators, (typeof mobileMoneyOperators)[keyof typeof mobileMoneyOperators]][]).map(
+                    ([key, item]) => (
+                      <button
+                        key={key}
+                        type="button"
+                        aria-pressed={operator === key}
+                        onClick={() => {
+                          setOperator(key);
+                          setPaymentCode(null);
+                        }}
+                        className={`py-3 px-4 rounded-[4px] border text-sm font-semibold transition-all ${
+                          operator === key
+                            ? 'border-[#1F5A56] bg-[#EBF3F1] text-[#1F5A56]'
+                            : 'border-[#E2D7C7] bg-white text-[#514A43] hover:bg-[#F5EFE6]'
+                        }`}
+                      >
+                        {item.name}
+                      </button>
+                    ),
+                  )}
                 </div>
-                <input
-                  type="email"
-                  placeholder="Adresse email pour le reçu"
-                  required
-                  className="w-full px-3.5 py-2.5 rounded-[4px] border border-[#CFC1AD] bg-white text-sm focus:outline-none focus:border-[#9E2F55]"
-                />
+              </fieldset>
+
+              {/* Résumé du don */}
+              <div className="bg-[#F5EFE6] rounded-[4px] p-4 border border-[#E2D7C7] flex items-center justify-between gap-4">
+                <span className="text-sm font-semibold text-[#2A2521]">Votre don ponctuel</span>
+                <span className="font-serif text-2xl font-bold text-[#9E2F55] text-right">
+                  {finalAmount.toLocaleString('fr-FR')} FCFA
+                </span>
               </div>
 
               {/* Bouton de soumission */}
               <button
                 type="submit"
-                disabled={finalAmount <= 0}
+                disabled={finalAmount < 500 || !Number.isInteger(finalAmount)}
                 className="w-full bg-[#9E2F55] hover:bg-[#7A2143] text-white py-3.5 rounded-[4px] font-semibold text-base transition-colors shadow-sm flex items-center justify-center gap-2.5 disabled:opacity-50"
               >
-                <CreditCard className="w-5 h-5" />
-                <span>Procéder au versement solidaire</span>
+                <Smartphone className="w-5 h-5" />
+                <span>Afficher mon code de paiement</span>
               </button>
 
               <p className="text-center text-xs text-[#756B60]">
-                Règlement sécurisé par Mobile Money (T-Money, Flooz) ou Carte bancaire.
+                Choisissez votre opérateur et votre montant. Vous confirmerez le paiement dans le menu Mobile Money.
               </p>
             </form>
           </div>
         ) : (
-          <div className="bg-white rounded-[4px] p-8 sm:p-12 border border-[#E2D7C7] shadow-sm text-center space-y-4">
-            <div className="w-16 h-16 bg-[#EBF3F1] rounded-full flex items-center justify-center mx-auto text-[#1F5A56]">
-              <Check className="w-8 h-8" />
+          <div className="bg-white rounded-[4px] p-6 sm:p-10 border border-[#E2D7C7] shadow-sm space-y-5">
+            <div className="w-14 h-14 bg-[#EBF3F1] rounded-full flex items-center justify-center mx-auto text-[#1F5A56]">
+              <Smartphone className="w-7 h-7" />
             </div>
-            <h2 className="font-serif text-2xl sm:text-3xl font-semibold text-[#2A2521]">
-              Akpé kaka ! Merci pour votre soutien
+            <h2 className="font-serif text-2xl sm:text-3xl font-semibold text-[#2A2521] text-center">
+              Votre code de paiement est prêt
             </h2>
-            <p className="text-base text-[#514A43] max-w-lg mx-auto">
-              Votre don de <strong>{finalAmount.toLocaleString('fr-FR')} FCFA</strong> permet de poursuivre le dépistage et l&apos;accompagnement des femmes togolaises.
+            <p className="text-sm text-[#514A43] text-center">
+              Don de <strong>{finalAmount.toLocaleString('fr-FR')} FCFA</strong> avec{' '}
+              <strong>{mobileMoneyOperators[operator].name}</strong>
             </p>
-            <div className="pt-4">
-              <Link
-                href="/"
-                className="inline-block bg-[#1F5A56] hover:bg-[#123E3B] text-white px-6 py-2.5 rounded-[4px] text-sm font-semibold transition-colors"
+            <div className="rounded-[4px] border border-[#E2D7C7] bg-[#F5EFE6] p-5 text-center">
+              <span className="block text-xs font-bold uppercase tracking-wider text-[#756B60] mb-2">
+                Code USSD prérempli : numéro de l&apos;ONG + montant
+              </span>
+              <code className="block break-all font-mono text-2xl sm:text-3xl font-bold tracking-wide text-[#1F5A56]">
+                {paymentCode}
+              </code>
+              <p className="mt-3 text-sm text-[#514A43]">
+                Destinataire : <strong>+228 {mobileMoneyOperators[operator].recipient}</strong>
+                <span className="mx-2 text-[#CFC1AD]">·</span>
+                Montant : <strong>{finalAmount.toLocaleString('fr-FR')} FCFA</strong>
+              </p>
+            </div>
+            <p className="text-sm text-[#514A43] leading-relaxed">
+              Composez ce code dans l&apos;application Téléphone. Vérifiez le numéro de l&apos;ONG et le montant affichés par l&apos;opérateur,
+              puis confirmez le transfert avec votre code PIN Mobile Money.
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={handleCopyCode}
+                className="inline-flex items-center justify-center gap-2 bg-[#1F5A56] hover:bg-[#123E3B] text-white px-5 py-3 rounded-[4px] text-sm font-semibold transition-colors"
               >
+                {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                {copied ? 'Code copié' : 'Copier le code complet'}
+              </button>
+              <a
+                href={`tel:${paymentCode.replace('#', '%23')}`}
+                className="inline-flex items-center justify-center gap-2 border border-[#1F5A56] text-[#1F5A56] hover:bg-[#EBF3F1] px-5 py-3 rounded-[4px] text-sm font-semibold transition-colors"
+              >
+                <Smartphone className="w-4 h-4" />
+                Ouvrir l&apos;application Téléphone
+              </a>
+            </div>
+            {copyError && <p role="alert" className="text-sm text-[#9E2F55] text-center">{copyError}</p>}
+            <p className="text-xs text-[#756B60] text-center">
+              Aucun paiement n&apos;est effectué par ce site. Le transfert ne sera envoyé qu&apos;après votre confirmation auprès de l&apos;opérateur.
+            </p>
+            <div className="text-center pt-2">
+              <button
+                type="button"
+                onClick={() => setPaymentCode(null)}
+                className="text-sm font-semibold text-[#1F5A56] hover:underline"
+              >
+                Modifier mon choix
+              </button>
+              <span className="mx-3 text-[#CFC1AD]">|</span>
+              <Link href="/" className="text-sm font-semibold text-[#1F5A56] hover:underline">
                 Retour à l&apos;accueil
               </Link>
             </div>

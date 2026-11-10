@@ -20,16 +20,16 @@ const cards: SummaryCard[] = [
     cat: 'sein',
     accent: 'clay',
     tag: 'Sein',
-    title: 'Mammographie & Autopalpation',
-    desc: "Détecté tôt, le cancer du sein se guérit dans la grande majorité des cas. Dès 25 ans, faites examiner vos seins chaque année par un médecin ou une sage-femme, et restez attentive à tout changement visuel ou palpatoire. À partir de 50 ans, la mammographie régulière devient essentielle pour repérer les anomalies invisibles à l'œil nu.",
+    title: 'Échographie mammaire & auto palpation',
+    desc: "Détecté tôt, le cancer du sein se guérit dans la grande majorité des cas . Faites examiner vos seins chaque année par un médecin ou une Sage femme chaque 2 ou 3 ans , et rester attentive à tout Changement visuel ou palpatoire. À partir de 35 ans , la mammographie devient essentielle pour repérer les anomalies.",
   },
   {
     id: 'uterus',
     cat: 'uterus',
     accent: 'teal',
     tag: 'Utérus',
-    title: 'Dépistage du col & vigilance du corps utérin',
-    desc: "Le cancer du col de l'utérus se prévient efficacement grâce à un dépistage régulier par frottis ou test HPV. Pour le cancer du corps de l'utérus (endomètre), la vigilance est la clé : tout saignement gynécologique inhabituel, en dehors des règles ou survenant après la ménopause, impose une consultation médicale immédiate.",
+    title: 'Dépistage du col',
+    desc: "Le cancer du col de l’utérus se prévient effectivement grâce à un dépistage chaque 3 ans par frottis ou test HPV . Tout saignement inhabituel en dehors des règles ou survenant après la ménopause, impose une consultation médicale immédiate.",
   },
 ];
 
