@@ -157,12 +157,15 @@ export default function LocalCenters() {
               femmes isolées vers les centres d&apos;imagerie.
             </p>
           </div>
-          <div style={{ display: 'flex', gap: 10 }}>
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
             <Link href="/donation" className="btn btn-white">
               Faire un don solidaire
             </Link>
             <Link href="/contact" className="btn btn-outline" style={{ color: '#fff', borderColor: 'rgba(255,255,255,0.6)' }}>
               Devenir bénévole
+            </Link>
+            <Link href="/parrainage" className="btn btn-outline" style={{ color: '#fff', borderColor: 'rgba(255,255,255,0.6)' }}>
+              Devenir un parrain
             </Link>
           </div>
         </div>
