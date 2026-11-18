@@ -9,8 +9,11 @@ const connectionString = process.env.POSTGRES_URL || process.env.DATABASE_URL;
 const pool = new Pool({ connectionString });
 
 const SESSION_COOKIE = 'visa_admin_session';
+const SPONSOR_SESSION_COOKIE = 'visa_sponsor_session';
 const SESSION_DURATION_SECONDS = 60 * 60 * 8;
+const SPONSOR_SESSION_DURATION_SECONDS = 60 * 60 * 24 * 2;
 const SESSION_ISSUER = 'ong-visa';
+const SPONSOR_SESSION_ISSUER = 'ong-visa-sponsor';
 let schemaCheck: Promise<void> | undefined;
 let lastRateLimitCleanup = 0;
 
@@ -129,7 +132,11 @@ export async function ensureRefonteSchema(): Promise<void> {
              to_regclass('public.refonte_medical_contents') AS contents,
              to_regclass('public.refonte_topics') AS topics,
              to_regclass('public.refonte_question_responses') AS questionResponses,
-             to_regclass('public.refonte_abnormal_result_steps') AS resultSteps
+             to_regclass('public.refonte_abnormal_result_steps') AS resultSteps,
+             to_regclass('public.refonte_sponsorable_people') AS sponsorablePeople,
+             to_regclass('public.refonte_sponsors') AS sponsors,
+             to_regclass('public.refonte_sponsorships') AS sponsorships,
+             to_regclass('public.refonte_sponsorship_payments') AS sponsorshipPayments
     `).then(({ rows }) => {
       const tables = rows[0];
       if (!tables || Object.values(tables).some((table) => table === null)) {
@@ -237,6 +244,316 @@ export async function bootstrapFirstAdmin(email: string, password: string): Prom
     return true;
   } catch (error) {
     await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+
+export interface SponsorablePerson {
+  id: string;
+  name: string;
+  description: string;
+  totalCost: number;
+  amountCollected: number;
+  active: boolean;
+}
+
+export async function getSponsorSession(): Promise<{ id: string; email: string } | null> {
+  let sponsor: { id: string; email: string };
+  try {
+    const token = (await cookies()).get(SPONSOR_SESSION_COOKIE)?.value;
+    if (!token) return null;
+    const payload = jwt.verify(token, getSessionSecret(), { issuer: SPONSOR_SESSION_ISSUER });
+    if (typeof payload === 'string' || !payload.sub || !payload.email) return null;
+    sponsor = { id: payload.sub, email: payload.email };
+  } catch {
+    return null;
+  }
+  await ensureRefonteSchema();
+  const result = await pool.query(
+    'SELECT 1 FROM refonte_sponsors WHERE id = $1 AND active = TRUE',
+    [sponsor.id],
+  );
+  return result.rowCount ? sponsor : null;
+}
+
+export async function requireSponsor(): Promise<NextResponse | null> {
+  try {
+    if (await getSponsorSession()) return null;
+    return NextResponse.json({ error: 'Connexion au compte parrain requise.' }, { status: 401 });
+  } catch (error) {
+    console.error('Sponsor authorization check failed:', error);
+    return NextResponse.json({ error: 'Service de parrainage temporairement indisponible.' }, { status: 503 });
+  }
+}
+
+function sponsorSessionResponse(sponsor: { id: string; email: string }): NextResponse {
+  const token = jwt.sign(
+    { email: sponsor.email },
+    getSessionSecret(),
+    { subject: sponsor.id, issuer: SPONSOR_SESSION_ISSUER, expiresIn: SPONSOR_SESSION_DURATION_SECONDS },
+  );
+  const response = NextResponse.json({ sponsor: { email: sponsor.email } });
+  response.cookies.set(SPONSOR_SESSION_COOKIE, token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
+    path: '/',
+    maxAge: SPONSOR_SESSION_DURATION_SECONDS,
+  });
+  return response;
+}
+
+export async function registerSponsor(email: string, password: string): Promise<NextResponse> {
+  await ensureRefonteSchema();
+  const normalizedEmail = email.trim().toLowerCase();
+  const passwordHash = await bcrypt.hash(password, 12);
+  const result = await pool.query(
+    `INSERT INTO refonte_sponsors (id, email, password_hash)
+     VALUES ($1, $2, $3)
+     ON CONFLICT (email) DO NOTHING
+     RETURNING id, email`,
+    [randomUUID(), normalizedEmail, passwordHash],
+  );
+  const sponsor = result.rows[0] as { id: string; email: string } | undefined;
+  if (!sponsor) {
+    return NextResponse.json({ error: 'Un compte existe déjà pour cette adresse e-mail.' }, { status: 409 });
+  }
+  return sponsorSessionResponse(sponsor);
+}
+
+export async function loginSponsor(email: string, password: string): Promise<NextResponse> {
+  await ensureRefonteSchema();
+  const result = await pool.query(
+    'SELECT id, email, password_hash FROM refonte_sponsors WHERE email = $1 AND active = TRUE',
+    [email.trim().toLowerCase()],
+  );
+  const sponsor = result.rows[0] as { id: string; email: string; password_hash: string } | undefined;
+  if (!sponsor || !(await bcrypt.compare(password, sponsor.password_hash))) {
+    return NextResponse.json({ error: 'Adresse e-mail ou mot de passe incorrect.' }, { status: 401 });
+  }
+  return sponsorSessionResponse(sponsor);
+}
+
+export async function logoutSponsor(): Promise<NextResponse> {
+  const response = NextResponse.json({ success: true });
+  response.cookies.set(SPONSOR_SESSION_COOKIE, '', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
+    path: '/',
+    maxAge: 0,
+  });
+  return response;
+}
+
+export async function listSponsorablePeople(includeInactive = false): Promise<SponsorablePerson[]> {
+  await ensureRefonteSchema();
+  const result = await pool.query(
+    `SELECT person.id, person.name, person.description, person.total_cost AS "totalCost",
+            COALESCE(SUM(payment.amount), 0) AS "amountCollected", person.active
+     FROM refonte_sponsorable_people person
+     LEFT JOIN refonte_sponsorships sponsorship ON sponsorship.person_id = person.id
+     LEFT JOIN refonte_sponsorship_payments payment ON payment.sponsorship_id = sponsorship.id
+     ${includeInactive ? '' : 'WHERE person.active = TRUE'}
+     GROUP BY person.id
+     ORDER BY person.created_at DESC`,
+  );
+  return result.rows.map((row) => ({
+    ...row,
+    totalCost: Number(row.totalCost),
+    amountCollected: Number(row.amountCollected),
+  }));
+}
+
+export async function getSponsorablePerson(id: string): Promise<SponsorablePerson | null> {
+  await ensureRefonteSchema();
+  const result = await pool.query(
+    `SELECT person.id, person.name, person.description, person.total_cost AS "totalCost",
+            COALESCE(SUM(payment.amount), 0) AS "amountCollected", person.active
+     FROM refonte_sponsorable_people person
+     LEFT JOIN refonte_sponsorships sponsorship ON sponsorship.person_id = person.id
+     LEFT JOIN refonte_sponsorship_payments payment ON payment.sponsorship_id = sponsorship.id
+     WHERE person.id = $1 AND person.active = TRUE
+     GROUP BY person.id`,
+    [id],
+  );
+  const row = result.rows[0];
+  return row ? { ...row, totalCost: Number(row.totalCost), amountCollected: Number(row.amountCollected) } : null;
+}
+
+export async function saveSponsorablePerson(input: {
+  id?: string;
+  name: string;
+  description: string;
+  totalCost: number;
+  active: boolean;
+}): Promise<SponsorablePerson> {
+  await ensureRefonteSchema();
+  const id = input.id || randomUUID();
+  const result = await pool.query(
+    `INSERT INTO refonte_sponsorable_people (id, name, description, total_cost, active)
+     VALUES ($1, $2, $3, $4, $5)
+     ON CONFLICT (id) DO UPDATE SET
+       name = EXCLUDED.name, description = EXCLUDED.description,
+       total_cost = EXCLUDED.total_cost, active = EXCLUDED.active, updated_at = NOW()
+     RETURNING id, name, description, total_cost AS "totalCost", active`,
+    [id, input.name.trim(), input.description.trim(), input.totalCost, input.active],
+  );
+  return { ...result.rows[0], totalCost: Number(result.rows[0].totalCost), amountCollected: 0 };
+}
+
+export async function listSponsorSponsorships(sponsorId: string) {
+  await ensureRefonteSchema();
+  const result = await pool.query(
+    `SELECT sponsorship.id, sponsorship.started_at AS "startedAt",
+            person.id AS "personId", person.name, person.description,
+            person.total_cost AS "totalCost", person.active,
+            COALESCE(person_totals.amount_collected, 0) AS "amountCollected",
+            COALESCE(sponsor_totals.amount_given, 0) AS "amountGiven"
+     FROM refonte_sponsorships sponsorship
+     JOIN refonte_sponsorable_people person ON person.id = sponsorship.person_id
+     LEFT JOIN LATERAL (
+       SELECT SUM(payment.amount) AS amount_collected
+       FROM refonte_sponsorships all_sponsorships
+       JOIN refonte_sponsorship_payments payment ON payment.sponsorship_id = all_sponsorships.id
+       WHERE all_sponsorships.person_id = person.id
+     ) person_totals ON TRUE
+     LEFT JOIN LATERAL (
+       SELECT SUM(payment.amount) AS amount_given
+       FROM refonte_sponsorship_payments payment
+       WHERE payment.sponsorship_id = sponsorship.id
+     ) sponsor_totals ON TRUE
+     WHERE sponsorship.sponsor_id = $1
+     ORDER BY sponsorship.started_at DESC`,
+    [sponsorId],
+  );
+  return result.rows.map((row) => ({
+    ...row,
+    totalCost: Number(row.totalCost),
+    amountCollected: Number(row.amountCollected),
+    amountGiven: Number(row.amountGiven),
+  }));
+}
+
+export async function createSponsorship(sponsorId: string, personId: string) {
+  await ensureRefonteSchema();
+  const result = await pool.query(
+    `INSERT INTO refonte_sponsorships (id, sponsor_id, person_id)
+     SELECT $1, $2, person.id
+     FROM refonte_sponsorable_people person
+     WHERE person.id = $3 AND person.active = TRUE
+     ON CONFLICT (sponsor_id, person_id) DO NOTHING
+     RETURNING id, started_at AS "startedAt"`,
+    [randomUUID(), sponsorId, personId],
+  );
+  if (result.rows[0]) return { created: true, sponsorship: result.rows[0] };
+
+  const existing = await pool.query(
+    `SELECT sponsorship.id, sponsorship.started_at AS "startedAt"
+     FROM refonte_sponsorships sponsorship
+     JOIN refonte_sponsorable_people person ON person.id = sponsorship.person_id
+     WHERE sponsorship.sponsor_id = $1 AND sponsorship.person_id = $2 AND person.active = TRUE`,
+    [sponsorId, personId],
+  );
+  return existing.rows[0]
+    ? { created: false, sponsorship: existing.rows[0] }
+    : null;
+}
+
+export async function listAdminSponsorshipData() {
+  await ensureRefonteSchema();
+  const [people, sponsors, sponsorships, payments] = await Promise.all([
+    listSponsorablePeople(true),
+    pool.query(
+      `SELECT id, email, created_at AS "createdAt"
+       FROM refonte_sponsors ORDER BY created_at DESC`,
+    ),
+    pool.query(
+      `SELECT sponsorship.id, sponsorship.started_at AS "startedAt",
+              sponsor.id AS "sponsorId", sponsor.email,
+              person.id AS "personId", person.name,
+              COALESCE(SUM(payment.amount), 0) AS "amountGiven"
+       FROM refonte_sponsorships sponsorship
+       JOIN refonte_sponsors sponsor ON sponsor.id = sponsorship.sponsor_id
+       JOIN refonte_sponsorable_people person ON person.id = sponsorship.person_id
+       LEFT JOIN refonte_sponsorship_payments payment ON payment.sponsorship_id = sponsorship.id
+       GROUP BY sponsorship.id, sponsor.id, person.id
+       ORDER BY sponsorship.started_at DESC`,
+    ),
+    pool.query(
+      `SELECT payment.id, payment.sponsorship_id AS "sponsorshipId",
+              payment.amount, payment.recorded_at AS "recordedAt",
+              sponsor.email, person.name
+       FROM refonte_sponsorship_payments payment
+       JOIN refonte_sponsorships sponsorship ON sponsorship.id = payment.sponsorship_id
+       JOIN refonte_sponsors sponsor ON sponsor.id = sponsorship.sponsor_id
+       JOIN refonte_sponsorable_people person ON person.id = sponsorship.person_id
+       ORDER BY payment.recorded_at DESC`,
+    ),
+  ]);
+  return {
+    people,
+    sponsors: sponsors.rows,
+    sponsorships: sponsorships.rows.map((row) => ({ ...row, amountGiven: Number(row.amountGiven) })),
+    payments: payments.rows.map((row) => ({ ...row, amount: Number(row.amount) })),
+  };
+}
+
+export class SponsorshipPaymentLimitError extends Error {
+  constructor() {
+    super('Versement supérieur au montant restant à couvrir.');
+    this.name = 'SponsorshipPaymentLimitError';
+  }
+}
+
+export async function recordSponsorshipPayment(sponsorshipId: string, amount: number, adminId: string) {
+  await ensureRefonteSchema();
+  const client = await pool.connect();
+  let transactionStarted = false;
+  try {
+    await client.query('BEGIN');
+    transactionStarted = true;
+    const sponsorship = await client.query(
+      `SELECT person.id AS "personId", person.total_cost AS "totalCost"
+       FROM refonte_sponsorships sponsorship
+       JOIN refonte_sponsorable_people person ON person.id = sponsorship.person_id
+       WHERE sponsorship.id = $1
+       FOR UPDATE OF person`,
+      [sponsorshipId],
+    );
+    const person = sponsorship.rows[0] as { personId: string; totalCost: string } | undefined;
+    if (!person) {
+      await client.query('ROLLBACK');
+      transactionStarted = false;
+      return null;
+    }
+
+    const collected = await client.query(
+      `SELECT COALESCE(SUM(payment.amount), 0) AS amount
+       FROM refonte_sponsorships sponsorship
+       JOIN refonte_sponsorship_payments payment ON payment.sponsorship_id = sponsorship.id
+       WHERE sponsorship.person_id = $1`,
+      [person.personId],
+    );
+    if (Number(collected.rows[0].amount) + amount > Number(person.totalCost)) {
+      await client.query('ROLLBACK');
+      transactionStarted = false;
+      throw new SponsorshipPaymentLimitError();
+    }
+
+    const result = await client.query(
+      `INSERT INTO refonte_sponsorship_payments (id, sponsorship_id, amount, recorded_by_admin_id)
+       VALUES ($1, $2, $3, $4)
+       RETURNING id, sponsorship_id AS "sponsorshipId", amount, recorded_at AS "recordedAt"`,
+      [randomUUID(), sponsorshipId, amount, adminId],
+    );
+    await client.query('COMMIT');
+    transactionStarted = false;
+    return { ...result.rows[0], amount: Number(result.rows[0].amount) };
+  } catch (error) {
+    if (transactionStarted) await client.query('ROLLBACK');
     throw error;
   } finally {
     client.release();

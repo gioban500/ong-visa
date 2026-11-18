@@ -15,7 +15,6 @@ import {
   Mail,
   MapPin,
   Menu,
-  MessageCircleHeart,
   X,
 } from 'lucide-react';
 import { clearAllClientData } from '@/lib/client-data-cache';
@@ -30,6 +29,7 @@ const navigationGroups = [
     items: [
       { href: '/admin/messages', icon: Mail, label: 'Messages & écoute' },
       { href: '/admin/centers', icon: MapPin, label: 'Centres de dépistage' },
+      { href: '/admin/sponsorship', icon: HeartHandshake, label: 'Parrainage' },
     ],
   },
   {

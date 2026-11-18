@@ -22,6 +22,7 @@ export default function Header() {
     { href: isHome ? '#hero' : '/', label: 'Accueil' },
     { href: isHome ? '#cancers-surveilles' : '/cancers', label: 'Cancers' },
     { href: '/blog', label: 'Blog' },
+    { href: '/parrainage', label: 'Parrainage' },
     { href: isHome ? '#ecoute' : '/contact', label: 'Écoute' },
     { href: isHome ? '#centres' : '/#centres', label: 'Centres' },
   ];

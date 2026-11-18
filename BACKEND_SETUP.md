@@ -12,6 +12,7 @@ Dans le SQL Editor du projet Neon utilisé par le site, exécuter dans l'ordre :
 4. `db/migrations/004_manage_abnormal_results_section.sql` pour créer les étapes numérotées et supprimer la FAQ ajoutée par erreur sous le guide d’auto-observation.
 5. `db/migrations/005_remove_fixed_result_settings.sql` pour supprimer les réglages de la carte fixe de gauche ; seules les étapes déroulantes à droite restent administrables.
 6. `db/migrations/006_security_rate_limits.sql` pour créer le stockage des compteurs de limitation des requêtes.
+7. `db/migrations/007_sponsorship.sql` pour créer les comptes parrains, les personnes parrainables, les liens de parrainage et les versements.
 
 La seconde migration est réexécutable : elle ignore les enregistrements déjà importés. Elle conserve les anciennes données, laisse les demandes au statut « nouveau », et importe les centres ainsi que les fiches médicales comme non publiés, sans date de vérification médicale ou de centre. Elle ne crée ni ne modifie de compte administrateur.
 
@@ -26,6 +27,7 @@ Définir ces variables dans l’environnement local (`.env.local`) et dans l’e
 Ne pas préfixer ces variables par `NEXT_PUBLIC_`. Ne pas publier leur valeur ni la committer.
 
 La migration 006 doit être appliquée avant le déploiement du code qui active le rate limiting. Les compteurs enregistrent un HMAC de l’adresse IP, jamais l’adresse brute, signé avec `ADMIN_SESSION_SECRET`. Si l’application est déployée derrière un proxy autre que Vercel, configurer ce proxy pour écraser l’en-tête `x-real-ip` avec l’adresse du client ; ne pas faire confiance à un `x-real-ip` fourni librement par les clients.
+La migration 007 doit être appliquée avant le déploiement du module de parrainage.
 
 **Avant de configurer `POSTGRES_URL`, réinitialiser dans Neon tout mot de passe de base de données qui a été partagé dans une conversation ou un autre canal non confidentiel. Ne jamais réutiliser l’ancienne chaîne de connexion.**
 
@@ -49,6 +51,10 @@ Renseigner localement le jeton de configuration dans `$env:ADMIN_SETUP_TOKEN` av
 - `refonte_question_responses` : cartes de questions et de réponses affichées sur l’accueil.
 - `refonte_abnormal_result_steps` : titres, textes, ordre et visibilité des lignes déroulantes numérotées à droite de la section « Résultat atypique ou anormal : et après ? ».
 - `refonte_admins` : comptes et empreintes bcrypt des mots de passe.
+- `refonte_sponsorable_people`, `refonte_sponsors`, `refonte_sponsorships` et `refonte_sponsorship_payments` : dossiers publics de parrainage, comptes parrains, liens et versements enregistrés par l’administration.
+
+Le parcours public est accessible depuis `/parrainage`. La liste et la jauge (total collecté par tous les parrains) sont publiques ; la création d’un compte est demandée au moment de parrainer. Chaque parrain ne voit, dans son espace personnel, que ses propres liens et montants enregistrés. La jauge affiche le total global collecté, en FCFA. Aucun paiement n’est encaissé en ligne : l’administration enregistre les versements effectivement reçus.
+La session d’un parrain expire après 48 heures ; il doit ensuite se reconnecter. Les sessions administrateur conservent leur durée distincte de 8 heures.
 
 Les sujets, les cartes de réponses et les étapes déroulantes après un résultat sont modifiables dans « Sections du site ». Dans la section « Résultat atypique ou anormal : et après ? », la carte de gauche (titre, texte, encadré et bouton) reste fixe dans le code ; seules les lignes numérotées de l’accordéon à droite peuvent être ajoutées, modifiées, réordonnées, masquées ou supprimées.
 
@@ -56,10 +62,11 @@ Les sujets, les cartes de réponses et les étapes déroulantes après un résul
 
 - Connexion administrateur : 10 tentatives par adresse IP sur 15 minutes.
 - Initialisation du compte administrateur : 5 tentatives sur une heure.
+- Création de compte parrain : 5 tentatives par adresse IP sur une heure ; connexion parrain : 10 tentatives sur 15 minutes.
 - Envoi de messages : 5 demandes sur 10 minutes.
 - Inscriptions événementielles : 10 demandes sur 15 minutes.
 - Les corps JSON de ces endpoints ont des tailles maximales et les champs d’inscription sont validés.
 - Les en-têtes anti-framing, anti-MIME-sniffing, de référent et de permissions sont ajoutés par Next.js ; HSTS est envoyé en production.
 - Le rate limiting dépend de la table Neon `refonte_rate_limits` et échoue de façon fermée si son stockage est indisponible.
 
-Le calculateur et le carnet restent côté navigateur. Les dons et inscriptions événementielles ne sont pas inclus dans ce nouveau périmètre.
+Le module de parrainage ne réalise aucun paiement en ligne : l’équipe enregistre les versements reçus hors plateforme. La page de don générale et les inscriptions événementielles restent indépendantes de ce module.

@@ -63,32 +63,32 @@ export default function Footer() {
             </h4>
             <ul className="space-y-2 text-[13.5px]">
               <li>
-                <Link href="/#hero" className="hover:text-white transition-colors">
+                <Link href="/#hero" className="text-[#D6E4E1] hover:text-white transition-colors">
                   Accueil & Vue d&apos;ensemble
                 </Link>
               </li>
               <li>
-                <Link href="/#cancers-surveilles" className="hover:text-white transition-colors">
+                <Link href="/#cancers-surveilles" className="text-[#D6E4E1] hover:text-white transition-colors">
                   Cancers surveillés
                 </Link>
               </li>
               <li>
-                <Link href="/#autopalpation" className="hover:text-white transition-colors">
+                <Link href="/#autopalpation" className="text-[#D6E4E1] hover:text-white transition-colors">
                   Guide d&apos;autopalpation
                 </Link>
               </li>
               <li>
-                <Link href="/#apres-resultat" className="hover:text-white transition-colors">
+                <Link href="/#apres-resultat" className="text-[#D6E4E1] hover:text-white transition-colors">
                   Après un résultat anormal
                 </Link>
               </li>
               <li>
-                <Link href="/#temoignages" className="hover:text-white transition-colors">
+                <Link href="/#temoignages" className="text-[#D6E4E1] hover:text-white transition-colors">
                   Témoignages sororaux
                 </Link>
               </li>
               <li>
-                <Link href="/#compagnon" className="hover:text-white transition-colors">
+                <Link href="/#compagnon" className="text-[#D6E4E1] hover:text-white transition-colors">
                   Mon carnet de suivi
                 </Link>
               </li>
@@ -109,7 +109,7 @@ export default function Footer() {
               </li>
               <li>
                 Courriel :{' '}
-                <a href="mailto:ongvisa21@gmail.com" className="hover:text-white transition-colors underline">
+                <a href="mailto:ongvisa21@gmail.com" className="text-[#D6E4E1] hover:text-white transition-colors underline">
                   Ongvisa21@gmail.com
                 </a>
               </li>
@@ -125,22 +125,22 @@ export default function Footer() {
             </h4>
             <ul className="space-y-2 text-[13.5px]">
               <li>
-                <Link href="/privacy" className="hover:text-white transition-colors">
+                <Link href="/privacy" className="text-[#D6E4E1] hover:text-white transition-colors">
                   Politique de confidentialité
                 </Link>
               </li>
               <li>
-                <Link href="/legal" className="hover:text-white transition-colors">
+                <Link href="/legal" className="text-[#D6E4E1] hover:text-white transition-colors">
                   Mentions légales
                 </Link>
               </li>
               <li>
-                <Link href="/cancers" className="hover:text-white transition-colors">
+                <Link href="/cancers" className="text-[#D6E4E1] hover:text-white transition-colors">
                   Fiches pathologiques complètes
                 </Link>
               </li>
               <li>
-                <Link href="/donation" className="text-[#ff7ba1] font-semibold hover:text-white transition-colors">
+                <Link href="/donation" className="text-[#FF9FBA] font-semibold hover:text-white transition-colors">
                   Faire un don solidaire →
                 </Link>
               </li>
